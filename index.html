@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <!-- settings -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>App | Cárdoso Caldo De Cana</title>
+
+    <!-- fontes -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="./src/styles/reset.css">
+    <link rel="stylesheet" href="./src/styles/styles.css">
+</head>
+
+<body>
+    <main>
+        <!-- cabeçalho com os menus -->
+        <header class="menu-header">
+
+            <div class="Menu left">
+                <nav id="sidebar" class="sidebar">
+                    <button id="btnAbrirSidebar">☰</button>
+                    <button class="fechar" id="btnFecharSidebar">✖</button>
+                    <a href="#">Cardápio</a>
+                </nav>
+            </div>
+
+            <div class="menu-right">
+                <input type="text" placeholder="Procurar..." id="searchInput">
+                <button class="search-btn" onclick="buscar()">🔍︎</button>
+                <button>Entrar</button>
+            </div>
+        </header>
+        <!-- cabeçalho 2 logo,nome,funcionamento-->
+        <section class="horarios">
+
+            <div class="logo">
+                <img src="img/logocardoso.jpg" alt="Logo" width="80px">
+            </div>
+            <div class="Nome">
+                <span>Cardoso Caldo De Cana</span>
+            </div>
+            <div class="funcionamento">
+                <span>De quarta á domingo</span>
+            </div>
+        </section>
+
+        <!-- Principal -->
+        <section>
+            <h1 style="color: rgb(12, 12, 12);">Bem-vindo ao App Delivery</h1>
+            <p>Explore nosso cardápio e faça seu pedido online!</p>
+        </section>
+
+        <section>
+            <h2 style="color: green;">Promoções do Dia</h2>
+            <p>Confira nossas ofertas especiais!</p>
+        </section>
+
+        <!-- Seção -->
+        <section class="menu-lanche-section ">
+            <h3>Cardápio</h3>
+
+            <button onclick="abrirCategoria ('lanches')"> ☰Lanche</button>
+            <ul>
+                <li>Misto Qente R$14,00 <small>Pão,queijo,presunto e maionese.</small></li>
+                <li>X Burguer(1 Carne) R$18,00 <small>Pão,carne,queijo,presunto e maionese.</small></li>
+                <li>X Frango R$25,00 <small>Pão,frango,queijo,tomate,alface,milho,ervilha e maionese.</small>
+                </li>
+                <li>X Calabresa R$25,00 <small>Pão,calabresa,carne,presunto,queijo,tomate,alface,milho,ervilha
+                        e maionese.</small></li>
+                <li>X Coração R$29,00 <small>Pão,coração,carne,presunto,queijo,tomate,alface,milho,ervilha e
+                        maionese.</small></li>
+                <li>X Camarão R$33,00 <small>Pão,camarão,queijo,tomate,alface,milho,ervilha e maionese.</small>
+                </li>
+                <li>X Salada R$22,00 <small>Pão,carne,queijo,presunto,tomate,alface,milho,ervilha e
+                        maionese.</small></li>
+                <li>X Burguer(2 Carnes)R$21,00 <small>Pão,carne,queijo,presunto e maionese.</small></li>
+                <li>X Bacon R$27,00 <small>Pão,bacon,carne,presunto,queijo,tomate,alface,milho,ervilha e
+                        maionese.</small></li>
+                <li>X Egg R$24,00 <small>Pão,ovo,carne,presunto,queijo,tomate,alface,milho,ervilha e
+                        maionese.</small></li>
+                <li>X Acebolado R$24,00 <small>Pão,cebola,carne,presunto,queijo,tomate,alface,milho,ervilha e
+                        maionese.</small></li>
+                <li>X Da Casa R$46,00
+                    <small>Pão,maionese,carene,frango,calabresa,ovo,coração,bacon,presunto,queijo,saladas e
+                        grãos.</small>
+                </li>
+                <li>X Doce R$20,00 <small>Pão,chocolate,morango e bombom.</small></li>
+            </ul>
+
+            <div class="adicionais">
+                <h3>Adicionais</h3>
+                <lu>
+                    <li>Partido R$3,00</li>
+                    <li>Gostinho R$4,00</li>
+                    <li>+ Carne R$4,00</li>
+                    <li>+Frango R$4,00</li>
+                    <li>Calabresa R$5,00</li>
+                    <li>Gãos R$2,00</li>
+                    <li>Salada R$2,00</li>
+                    <li>Queijo R$2,00</li>
+                    <li>Ovo R$2,00</li>
+                    <li>Coração R$4,00</li>
+                </lu>
+            </div>
+        </section>
+
+        <section class="especiais da casa">
+             <button onclick="abrirCategoria ('hamburguer')"> ☰Especiais Da Casa</button>
+             <lu>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+             </lu>
+        </section>
+
+        <section class="Menu-porções">
+            <button onclick="abrirCategoria('porções')">☰Porções</button>
+            <ul>
+                <li>Batata Frita(500g)R$22,00</li>
+                <li>Fritas com Bacon e cheddar(500g)R$32,00</li>
+                <li>Aipim(500g)R$20,00</li>
+                <li>Calabresa(400g)R$23,00</li>
+                <li>Carne(500g)R$34,00</li>
+                <li>Camarão Empanado(400g)R$54,00</li>
+                <li>Casquinha de Sirí(UND)R$10,00</li>
+                <li>Cebola Empanada R$18,00</li>
+                <li>Coração + Pãozinho(400g)R$33,00</li>
+                <li>Coxinha da Aza + Fritas R$35,00<small>(6 unidades + 250g batatas)</small></li>
+                <li>Frango Xadrez + Pãozinho(400g)R$31,00</li>
+                <li>Filezinho de Frango + fritas R$35,00<small>(450g + 250g batatas)</small></li>
+                <li>Isca de Peixe(400g)R$34,00</li>
+                <li>Polenta Frita(500g)R$18,00</li>
+                <li>Porção de Frios R$18,00</li>
+                <li>Porção de Pãozinhos R$7,00</li>
+                <li>Ovo de Codorna(24 UND)R$15,00</li>
+            </ul>
+        </section>
+
+        <section class="Menu-pizza-tradicinais">
+            <button onclick="abrirCategoria('Pizzas Trad')">☰Pizzas Tradicionais</button>
+            <ul>
+                <li>Quatro Queijos <small>Molho de tomate,mussarela,parmesão,provolone,requeijão e orégano.</small></li>
+                <li>Bacon <small>Molho de tomate,mussarela,milho,bacon fatiado,requeijão e orégano.</small></li>
+                <li>Calabresa <small>Molho de tomate,mussarela,calabresa,cebola e orégano.</small></li>
+                <li>Brócolis <small>Molho de tomate,mussarela,brócolis,tomate picado,requeijão e orégano.</small></li>
+                <li>Frango com Catupiry <small>Molho de tomate,mussarela,frango,catupiry e orégano.</small></li>
+                <li>Mista <small>Molho de tomate,mussarela,presunto,milho,ervilha,tomates picados,frango,ovo e
+                        orégano.</small></li>
+                <li>Pasqualina <small>Molho de tomate,mussarela,bacon crocante,parmesão,provolone,requeijão e
+                        orégano.</small></li>
+                <li>Portuguesa <small>Molho de tomate,mussarela,presunto,tomates picados,pimentão,cebola,ovo,azeitona
+                        preta e orégano.</small></li>
+                <li>Marguerita <small>Molho de tomate,mussarela,tomate em rodelas e manjericão.</small></li>
+                <li>Lombo Defumado <small>Molho de tomate,mussarela,lombo defumado,bacon fatiado,requeijão e
+                        orégano.</small></li>
+                <li>Alho e Óleo <small>Molho de tomate,mussarela,alho crocante e orégano.</small></li>
+                <li>Tomate Seco <small>Molho de tomate,mussarela,tomate seco e rúcula.</small></li>
+                <li>Peperoni <small>Molho de tomate,mussarela,peperoni,parmesão e orégano.</small></li>
+                <li>Baiana <small>Molho de tomate,mussarela,calabresa ralada,cebola,azeitona preta e molho de
+                        pimenta.</small></li>
+                <li>Agridoce <small>Molho de tomate,mussarela,lombo defumado,abacaxi e geleia de pimenta.</small></li>
+            </ul>
+            <div class="preços pizza tr">
+                <h3>Preço Pizzas Treadicionais </h3>
+                <span>P (R$45,00) M (R$55,00) G (R$65,00)</span>
+            </div>
+
+            <div class="bordapizza">
+                <h3>Borda Recheada</h3>
+                <p>Catupiry,cheddar,Doce de Leite,Creme de Avelã,Chocolate Branco,Chocolate Preto.</p>
+                <span>P (R$8,00) M(R$10,00) G(R$12,00)</span>
+            </div>
+
+        </section>
+
+        <section class="Pizzas Especiais">
+            <button onclick="abrirCategoria('Pizzas Especiais')">☰Pizzas Especiais</button>
+            <ul>
+                <li>Frango Especial <small>Molho de tomate,mussarela,frango,bacon crocante,tomates
+                        picados,requeijão,azeitona preta e orégano.</small></li>
+                <li>Brócolis Especial <small>Molho de tomate,mussarela,brócolis,alho torrado,requeijão,azeitona preta e
+                        orégano.</small></li>
+                <li>Calabresa Especial <small>Molho de tomate,mussarela,calabresa,tomates picados,azeitona preta,cebola
+                        e orégano.</small></li>
+                <li>Palmito <small>Molho de tomate,mussarela,palmito,azeitona preta e requeijão.</small></li>
+                <li>Strogonoff de Carne <small>Molho de tomate,mussarela,strogonoff de carne e batata palha.</small>
+                </li>
+                <li>Americana <small>Molho de tomate,mussarela,alcatra,batata frita,requeijão e orégano.</small></li>
+                <li>Alcatra com Doritos <small>Molho de tomate,mussarela,alcatra,cheddar e doritos.</small></li>
+                <li>Coração Acebolado <small>Molho de tomate,mussarela,coração,cebola,requeijão e orégano.</small></li>
+                <li>Camarão ao Molho <small>Molho de tomate,mussarela,camarão e molho especial da casa.</small></li>
+                <li>Camarão Especial <small>Molho de tomate,mussarela,camarão,requeijão,tempero verde e alho
+                        poró.</small></li>
+            </ul>
+            <div class="preço pizzas especial">
+                <h3>Preço Pizzas Especiais</h3>
+                <span>P (R$53,00) M (R$64,00) G (R$78,00)</span>
+            </div>
+            <div class="bordapizza">
+                <h3>Borda Recheada</h3>
+                <p>Catupiry,cheddar,Doce de Leite,Creme de Avelã,Chocolate Branco,Chocolate Preto.</p>
+                <span>P (R$8,00) M(R$10,00) G(R$12,00)</span>
+            </div>
+        </section>
+
+        <section class="Pizzas Doces">
+            <button onclick="abrirCategoria('Pizzas Doces')">☰Pizzas Doces</button>
+            <ul>
+                <li>Chocolate Preto com Morango <small>Creme de leite,mussarela,chocolate forneável preto,lascas de
+                        morango e raspas de chocolate.</small></li>
+                <li>Chocolate Branco com Morango <small>Creme de leite,mussarela,chocolate forneável branco,lascas de
+                        morango e raspas de chocolate.</small></li>
+                <li>Charge <small>Creme de leite,mussarela,raspas de chocolate,doce de leite e amendoim.</small></li>
+                <li>Confete <small>Creme de leite,mussarela,raspas de chocolate,chocolate forneável branco e
+                        confete.</small></li>
+                <li>Brigadeiro Especial <small>Creme de leite,mussarela,raspas de chocolate preto meio amargo,creme
+                        avelã e granulado.</small></li>
+                <li>Prestígio <small>Creme de leite,mussarela,chocolate forneável preto,coco ralado fresco e raspas de
+                        chocolate meio amargo.</small></li>
+                <li>Paçoquita <small>Creme de leite,mussarela,banana em lâminas e chocolate forneável preto.</small>
+                </li>
+                <li>Banana com Chocolate <small>Creme de leite,mussarela,banana em lâminas e chocolate forneável
+                        preto.</small></li>
+                <li>Banana com Canela <small>Creme de leite,mussarela,banana em lâminas e canela.</small></li>
+                <li>Abacaxi <small>Creme de leite,mussarela,raspas de chocolate forneável branco e abacaxi.</small></li>
+                <li>Banana Nevada <small>Creme de leite,mussarela,chocolate forneável branco,banana e canela.</small>
+                </li>
+            </ul>
+            <div class="preço pizzas Doces">
+                <h3>Preço Pizzas Doces</h3>
+                <span>P (R$45,00) M (R$55,00) G (R$65,00)</span>
+            </div>
+            <div class="bordapizza">
+                <h3>Borda Recheada</h3>
+                <p>Catupiry,cheddar,Doce de Leite,Creme de Avelã,Chocolate Branco,Chocolate Preto.</p>
+                <span>P (R$8,00) M(R$10,00) G(R$12,00)</span>
+            </div>
+        </section>
+
+    </main>
+
+
+
+    <script src="./src/scripts/actions.js"></script>
+    <script src="./src/scripts/search.js"></script>
+
+    <!-- Rodapé -->
+    <footer>
+        <p>&copy; 2023 App Delivery. Todos os direitos reservados.</p>
+    </footer>
+</body>
+
+</html>
