@@ -13,7 +13,9 @@
 
     <!-- Styles -->
     <link rel="stylesheet" href="./src/styles/reset.css">
-    <link rel="stylesheet" href="./src/styles/styles.css">
+
+    <!--script-->
+    <script src="script.js"></script>
 </head>
 
 <body>
@@ -64,7 +66,7 @@
         <section class="menu-lanche-section ">
             <h3>Cardápio</h3>
 
-            <button onclick="abrirCategoria ('lanches')"> ☰Lanche</button>
+            <button onclick="btnAbrirSidebar ('lanches')"> ☰Lanche</button>
             <ul>
                 <li>Misto Qente R$14,00 <small>Pão,queijo,presunto e maionese.</small></li>
                 <li>X Burguer(1 Carne) R$18,00 <small>Pão,carne,queijo,presunto e maionese.</small></li>
@@ -110,17 +112,33 @@
         </section>
 
         <section class="especiais da casa">
-             <button onclick="abrirCategoria ('hamburguer')"> ☰Especiais Da Casa</button>
-             <lu>
-                <li></li>
-                <li></li>
-                <li></li>
-                <li></li>
-             </lu>
+            <button onclick="btnAbrirSidebar ('hamburguer')"> ☰Especiais Da Casa</button>
+            <lu>
+                <li>Hamburguer Tradicional(30,00)<small>Pão,carne,queijo,cheddar,salada,maionese e fritas.</small></li>
+                <li>Hamburguer Bacon(R$33,00)<small>Pão,carne,bacon,queijo,cheddar,salada,maionese e fritas.</small>
+                </li>
+                <li>Hamburguer da Casa(R$37,00)<small>Pão,2 carnes,bacon,cebola
+                        caramelizada,queijo,chedaar,salada,maionese e fritas.</small></li>
+                <li>Hamburguer Kids(R$19,00)<small>Pão,carne,queijo,cheddar,salada,molho especial,acompanha batata
+                        divertida.</small></li>
+            </lu>
+        </section>
+
+        <section class="tabuas">
+            <button onclick="btnAbrirSidebar('tabuas')">☰Tábuas</button>
+            <small>Aipim,carne,calabresa,coração,frango,batata,cebola a milanesa,polenta,azeitona,pepino e ovo de
+                codorna.</small>
+            <p>P (R$76,00) M (R$100,00) G (R$115,00)</p>
+        </section>
+
+        <section class="torre de batata">
+            <button onclick="btnAbrirSidebar('torre de batata')">☰Torre de Batata</button>
+            <small>Batata,bacon,calabresa,coração,queijo,requeijão e orégano.</small>
+            <p>P (R$60,00) G (R$80,00)</p>
         </section>
 
         <section class="Menu-porções">
-            <button onclick="abrirCategoria('porções')">☰Porções</button>
+            <button onclick="btnAbrirSidebar('porções')">☰Porções</button>
             <ul>
                 <li>Batata Frita(500g)R$22,00</li>
                 <li>Fritas com Bacon e cheddar(500g)R$32,00</li>
@@ -143,7 +161,7 @@
         </section>
 
         <section class="Menu-pizza-tradicinais">
-            <button onclick="abrirCategoria('Pizzas Trad')">☰Pizzas Tradicionais</button>
+            <button onclick="btnAbrirSidebar('Pizzas Trad')">☰Pizzas Tradicionais</button>
             <ul>
                 <li>Quatro Queijos <small>Molho de tomate,mussarela,parmesão,provolone,requeijão e orégano.</small></li>
                 <li>Bacon <small>Molho de tomate,mussarela,milho,bacon fatiado,requeijão e orégano.</small></li>
@@ -180,7 +198,7 @@
         </section>
 
         <section class="Pizzas Especiais">
-            <button onclick="abrirCategoria('Pizzas Especiais')">☰Pizzas Especiais</button>
+            <button onclick="btnAbrirSidebar('Pizzas Especiais')">☰Pizzas Especiais</button>
             <ul>
                 <li>Frango Especial <small>Molho de tomate,mussarela,frango,bacon crocante,tomates
                         picados,requeijão,azeitona preta e orégano.</small></li>
@@ -210,7 +228,7 @@
         </section>
 
         <section class="Pizzas Doces">
-            <button onclick="abrirCategoria('Pizzas Doces')">☰Pizzas Doces</button>
+            <button onclick="btnAbrirSidebar('Pizzas Doces')">☰Pizzas Doces</button>
             <ul>
                 <li>Chocolate Preto com Morango <small>Creme de leite,mussarela,chocolate forneável preto,lascas de
                         morango e raspas de chocolate.</small></li>
@@ -243,12 +261,64 @@
             </div>
         </section>
 
+        <section class="cervejas">
+            <button onclick="btnAbrirSidebar('cervejas')">☰Cervejas</button>
+            <ul>
+                <h3>Cervejas 600ml</h3>
+                <li>Antartica R$12,00</li>
+                <li>Brahma R$12,00</li>
+                <li>Original R$15,00</li>
+                <h3>Cerveja Litão</h3>
+                <li>Antártica R$14,00</li>
+                <li>Brahma R$14,00</li>
+                <h3>Cerveja Long Neck</h3>
+                <li>Corona R$12,00</li>
+                <li>Budweizer R$10,00</li>
+                <li>Haineken R$12,00</li>
+                <h3>Cerveja Lata</h3>
+                <li>Antártica R$6,00</li>
+                <li>Brahma sem Álcool R$7,00</li>
+                <li>Brahma Malzebier R$7,00</li>
+            </ul>
+        </section>
+
+        <section class="bebidas">
+            <button onclick="btnAbrirSidebar('bebidas')">☰Bebidas</button>
+            <lu>
+                <h3>Refrigerantes</h3>
+                <li>Refri Caçulinha R$3,00</li>
+                <li>Refri Lata R$6,00</li>
+                <li>Refri 600ml R$8,00</li>
+                <li>Refri 2Litros R$13,00</li>
+                <li>Refri Coca-Cola 2lt R$14,00</li>
+                <h3>Água</h3>
+                <li>H2O R$8,00</li>
+                <li>Água C/Gás R$4,00</li>
+                <li>Água S/Gás R$4,00</li>
+                <h3>Energético</h3>
+                <li>Red Bull R$12,00</li>
+                <li>Bally R$6,00</li>
+                <h3>Suco</h3>
+                <li>Suco de Laranja R$8,00</li>
+                <li>Suco de Maracujá R$7,00</li>
+                <li>Suco de Abacaxi R$8,00</li>
+                <li>Caldo de Cana R$7,00</li>
+            </lu>
+        </section>
+        <section class="caipirinhas">
+            <button onclick="btnAbrirSidebar('caipirinhas')">☰Caipirinhas</button>
+            <ul>
+                <li>Cipirinha de Limão R$16,00</li>
+                <li>Cipirinha de Morango R$18,00 </li>
+                <li>Cipirinha de Vinho R$16,00</li>
+                <li>Cipirinha de Abacaxi R$16,00</li>
+                <li>Cipirinha de Maracujá R$18,00</li>
+                <li>Nevada R$19,00</li>
+                <li>Pinã Colada R$18,00</li>
+            </ul>
+        </section>
+
     </main>
-
-
-
-    <script src="./src/scripts/actions.js"></script>
-    <script src="./src/scripts/search.js"></script>
 
     <!-- Rodapé -->
     <footer>
