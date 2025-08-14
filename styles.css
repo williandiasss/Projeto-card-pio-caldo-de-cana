@@ -1,0 +1,157 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,100..700;1,100..700&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Roboto Mono", monospace;
+}
+
+body {
+  background-image: url(img/logocardoso0.jpg);
+  background-repeat: repeat;
+  background-size: contain;
+  /* ou use cover dependendo do efeito que quer */
+  background-position: center;
+
+}
+
+
+
+header {
+  background-color: #1b1b1bab;
+  color: #fff;
+  padding: 15px;
+  text-align: center;
+}
+
+.Container-button {
+  margin: 50px 0;
+  display: flex;
+  justify-content: center;
+  text-align: center;
+  gap: 20px;
+  display: flex;
+  /* Alinha os botões horizontalmente */
+  overflow-x: auto;
+  /* Adiciona rolagem horizontal se faltar espaço */
+  gap: 10px;
+  padding: 10px;
+  background-color: #1b1b1bab;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+  /* Impede que os botões quebrem de linha */
+  border-bottom: 1px solid rgba(54, 54, 54, 0.226);
+  scrollbar-width: thin;
+  /* Deixa a barra de rolagem mais fina (em navegadores compatíveis) */
+   width: 100vw; /* Garante que ocupe a largura visível */
+}
+
+button {
+  background-color: rgb(18, 197, 18);
+  border: none;
+  border-radius: 5px;
+  color: black;
+  padding: 12px 16px;
+  font-weight: bold;
+  flex: 0 0 auto;  /* Impede de encolher ou expandir */
+  /*força cada botão a usar apenas o espaço necessário, sem forçar ou encolher.*/
+  cursor: pointer;
+  white-space: nowrap;  /* Impede quebra de texto */
+  transition: 0.3s;
+  /* Suaviza transições como mudança de cor ao passar o mouse */
+}
+
+button:hover {
+  opacity: 0.6;
+}
+
+button:active {
+  opacity: 0.9;
+}
+
+button:focus {
+  outline: 2px solid #ffff;
+}
+
+.categoria-img {
+  width: 50%;
+  max-width: 600px;
+  height: auto;
+  display: block;
+  margin: 20px auto;
+  border-radius: 10px;
+}
+
+.logo {
+  width: 90%;
+  max-width: 600px;
+  height: auto;
+  display: block;
+  margin: 20px auto;
+  border-radius: 10px;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+  color: #fff;
+  width: 100%;
+  max-width: 600px;
+  margin: auto;
+  padding: 0 10px;
+}
+
+li {
+  padding: 15px;
+  border-bottom: 2px solid #eee;
+}
+
+p {
+  color: #fff;
+  width: 100%;
+  max-width: 600px;
+  margin: auto;
+  padding: 0 10px;
+}
+
+h3 {
+  color: #fff;
+  width: 100%;
+  max-width: 600px;
+  margin: auto;
+  padding: 0 10px;
+}
+
+/* Responsividade: Centralizar os botões em telas maiores */
+@media (min-width: 768px) {   /* Ajustes para tablets e acima */
+  .Container-button {
+    justify-content: center;
+    overflow-x: visible;
+    flex-wrap: wrap; 
+    /* Se quiser quebrar em mais de uma linha em telas grandes */
+  }
+}
+@media (max-width: 360px) {    /* Ajustes para celulares muito pequenos */
+  .Container-button {
+    gap: 5px;
+    padding: 6px;
+}
+
+  button {
+    padding: 8px 10px;
+    font-size: 14px;
+  }
+
+  .logo,
+  .categoria-img {
+    width: 90%;
+  }
+
+  li {
+    padding: 10px;
+  }
+  body {
+    max-width: 360px;
+  }
+}
