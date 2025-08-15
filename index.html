@@ -5,7 +5,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="styles.css">
-
     <title>Cardápio</title>
 </head>
 
@@ -13,55 +12,55 @@
     <header>
         <h1>Cardápio Cardoso Caldo De Cana</h1>
     </header>
-   <!-- <img src="img/logocardoso0.jpg" alt="img-logo" class="logo">-->
+     <img src="img/logocardoso0.jpg" alt="img-logo" class="logo">
 
     <main>
         <nav class="Container-button">
-            <button class="menu-btn" id="btn-lanches" onclick="btnAbrirSidebar('lanches')">Lanche</button>
-            <button class="menu-btn" id="btn-hamburguer" onclick="btnAbrirSidebar('hamburguer')">Especiais Da
+            <button class="menu-btn" id="btn-lanches" onclick="openCategory('lanches')">Lanche</button>
+            <button class="menu-btn" id="btn-hamburguer" onclick="openCategory('hamburguer')">Especiais Da
                 Casa</button>
-            <button class="menu-btn" id="btn-tabuas" onclick="btnAbrirSidebar('tabuas')">Tábuas</button>
-            <button class="menu-btn" id="btn-torre" onclick="btnAbrirSidebar('torre de batata')">Torre de
+            <button class="menu-btn" id="btn-tabuas" onclick="openCategory('tabuas')">Tábuas</button>
+            <button class="menu-btn" id="btn-torre" onclick="openCategory('torre-batata')">Torre de
                 Batata</button>
-            <button class="menu-btn" id="btn-porcoes" onclick="btnAbrirSidebar('porções')">Porções</button>
-            <button class="menu-btn" id="btn-pizzas-trad" onclick="btnAbrirSidebar('Pizzas Trad')">Pizzas
+            <button class="menu-btn" id="btn-porcoes" onclick="openCategory('porções')">Porções</button>
+            <button class="menu-btn" id="btn-pizzas-trad" onclick="openCategory('pizzas-trad')">Pizzas
                 Tradicionais</button>
-            <button class="menu-btn" id="btn-pizzas-especiais" onclick="btnAbrirSidebar('Pizzas Especiais')">Pizzas
+            <button class="menu-btn" id="btn-pizzas-especiais" onclick="openCategory('pizzas-especiais')">Pizzas
                 Especiais</button>
-            <button class="menu-btn" id="btn-pizzas-doces" onclick="btnAbrirSidebar('Pizzas Doces')">Pizzas
+            <button class="menu-btn" id="btn-pizzas-doces" onclick="openCategory('pizzas-doces')">Pizzas
                 Doces</button>
-            <button class="menu-btn" id="btn-cervejas" onclick="btnAbrirSidebar('cervejas')">Cervejas</button>
-            <button class="menu-btn" id="btn-bebidas" onclick="btnAbrirSidebar('bebidas')">Bebidas</button>
-            <button class="menu-btn" id="btn-caipirinhas" onclick="btnAbrirSidebar('caipirinhas')">Caipirinhas</button>
+            <button class="menu-btn" id="btn-cervejas" onclick="openCategory('cervejas')">Cervejas</button>
+            <button class="menu-btn" id="btn-bebidas" onclick="openCategory('bebidas')">Bebidas</button>
+            <button class="menu-btn" id="btn-caipirinhas" onclick="openCategory('caipirinhas')">Caipirinhas</button>
         </nav>
 
-        <section class="snacks-menu">
+        <section class="categoria lanches">
             <img src="img/x salada.jpg" alt="x-salada" class="categoria-img">
             <ul>
-                <li>Misto Qente<small>Pão,queijo,presunto e maionese.</small>R$14,00</li>
-                <li>X Burguer(1 Carne)<small>Pão,carne,queijo,presunto e maionese.</small>R$18,00 </li>
-                <li>X Frango <small>Pão,frango,queijo,tomate,alface,milho,ervilha e maionese.</small>R$25,00
+                <li>Misto Quente <small>Pão,queijo,presunto e maionese.</small>R$14,00</li>
+                <li>X Burguer(1 Carne) <small>Pão,carne,queijo,presunto e maionese.</small>R$18,00 </li>
+                <li>X Frango <small> Pão,frango,queijo,tomate,alface,milho,ervilha e maionese.</small>R$25,00
                 </li>
-                <li>X Calabresa<small>Pão,calabresa,carne,presunto,queijo,tomate,alface,milho,ervilha
+                <li>X Calabresa<small> Pão,calabresa,carne,presunto,queijo,tomate,alface,milho,ervilha
                         e maionese.</small>R$25,00</li>
-                <li>X Coração<small>Pão,coração,carne,presunto,queijo,tomate,alface,milho,ervilha e
+                <li>X Coração<small> Pão,coração,carne,presunto,queijo,tomate,alface,milho,ervilha e
                         maionese.</small>R$29,00 </li>
-                <li>X Camarão<small>Pão,camarão,queijo,tomate,alface,milho,ervilha e maionese.</small>R$33,00
+                <li>X Camarão<small> Pão,camarão,queijo,tomate,alface,milho,ervilha e maionese.</small>R$33,00
                 </li>
-                <li>X Salada<small>Pão,carne,queijo,presunto,tomate,alface,milho,ervilha e
+                <li>X Salada<small> Pão,carne,queijo,presunto,tomate,alface,milho,ervilha e
                         maionese.</small>R$22,00 </li>
-                <li>X Burguer(2 Carnes)<small>Pão,carne,queijo,presunto e maionese.</small>R$21,00 </li>
-                <li>X Bacon<small>Pão,bacon,carne,presunto,queijo,tomate,alface,milho,ervilha e
+                <li>X Burguer(2 Carnes)<small> Pão,carne,queijo,presunto e maionese.</small>R$21,00 </li>
+                <li>X Bacon<small> Pão,bacon,carne,presunto,queijo,tomate,alface,milho,ervilha e
                         maionese.</small>R$27,00 </li>
-                <li>X Egg <small>Pão,ovo,carne,presunto,queijo,tomate,alface,milho,ervilha e
+                <li>X Egg <small> Pão,ovo,carne,presunto,queijo,tomate,alface,milho,ervilha e
                         maionese.</small>R$24,00</li>
-                <li>X Acebolado<small>Pão,cebola,carne,presunto,queijo,tomate,alface,milho,ervilha e
+                <li>X Acebolado<small> Pão,cebola,carne,presunto,queijo,tomate,alface,milho,ervilha e
                         maionese.</small>R$24,00</li>
                 <li>X Da Casa
-                    <small>Pão,maionese,carene,frango,calabresa,ovo,coração,bacon,presunto,queijo,saladas e
+                    <small> Pão,maionese,carene,frango,calabresa,ovo,coração,bacon,presunto,queijo,saladas e
                         grãos.</small>R$46,00
                 </li>
-                <li>X Doce<small>Pão,chocolate,morango e bombom.</small>R$20,00 </li>
+                <li>X Doce<small> Pão,chocolate,morango e bombom.</small>R$20,00 </li>
 
                 <h3>Adicionais</h3>
                 <li>Partido R$3,00</li>
@@ -77,7 +76,7 @@
                 </lu>
         </section>
 
-        <section class="hamburguer-especiais">
+        <section class="categoria hamburguer">
             <img src="img/hamburgue especial.jpg" alt="hamburguer-especiais" class="categoria-img">
             <ul>
                 <li>Hamburguer Tradicional<small>Pão,carne,queijo,cheddar,salada,maionese e fritas.</small>R$30,00</li>
@@ -90,20 +89,20 @@
             </ul>
         </section>
 
-        <section class="tabuas">
+        <section class="categoria tabuas">
             <img src="img/tábua.jpg" alt="tabua" class="categoria-img">
             <p>Aipim,carne,calabresa,coração,frango,batata,cebola a milanesa,polenta,azeitona,pepino e ovo de
                 codorna.</p>
             <p>P (R$76,00) M (R$100,00) G (R$115,00)</p>
         </section>
 
-        <section class="torre-batata">
+        <section class="categoria torre-batata">
             <img src="img/torre de batata.jpg" alt="torre-batata" class="categoria-img">
             <p>Batata,bacon,calabresa,coração,queijo,requeijão e orégano.</p>
             <p>P (R$60,00) G (R$80,00)</p>
         </section>
 
-        <section class="menu-porções">
+        <section class="categoria porções">
             <img src="img/porções.jpg" alt="porções" class="categoria-img">
             <ul>
                 <li>Batata Frita(500g)R$22,00</li>
@@ -126,7 +125,7 @@
             </ul>
         </section>
 
-        <section class="pizza-tradicinais">
+        <section class="categoria pizzas-trad">
             <img src="img/pizzas tradicionais.jpg" alt="pizza-tradicinais" class="categoria-img">
             <ul>
                 <li>Quatro Queijos <small>Molho de tomate,mussarela,parmesão,provolone,requeijão e orégano.</small></li>
@@ -157,7 +156,7 @@
             </ul>
         </section>
 
-        <section class="pizzas-especiais">
+        <section class="categoria pizzas-especiais">
             <img src="img/pizzas especiais.jpg" alt="pizzas-especiais" class="categoria-img">
             <ul>
                 <li>Frango Especial <small>Molho de tomate,mussarela,frango,bacon crocante,tomates
@@ -183,7 +182,7 @@
             </ul>
         </section>
 
-        <section class="pizzas-doces">
+        <section class="categoria pizzas-doces">
             <img src="img/pizzas doces.jpg" alt="pizzas-doces" class="categoria-img">
             <ul>
                 <li>Chocolate Preto com Morango <small>Creme de leite,mussarela,chocolate forneável preto,lascas de
@@ -213,7 +212,7 @@
             </ul>
         </section>
 
-        <section class="cervejas">
+        <section class="categoria cervejas">
             <img src="img/cervejas .jpg" alt="cervejas" class="categoria-img">
             <ul>
                 <h3>Cervejas 600ml</h3>
@@ -234,7 +233,7 @@
             </ul>
         </section>
 
-        <section class="bebidas">
+        <section class="categoria bebidas">
             <img src="img/bebidas.jpg" alt="bebidas" class="categoria-img">
             <ul>
                 <h3>Refrigerantes</h3>
@@ -258,14 +257,14 @@
             </ul>
         </section>
 
-        <section class="caipirinhas">
+        <section class="categoria caipirinhas">
             <img src="img/caipirinhas.jpg" alt="caipirinhas" class="categoria-img">
             <ul>
-                <li>Cipirinha de Limão R$16,00</li>
-                <li>Cipirinha de Morango R$18,00 </li>
-                <li>Cipirinha de Vinho R$16,00</li>
-                <li>Cipirinha de Abacaxi R$16,00</li>
-                <li>Cipirinha de Maracujá R$18,00</li>
+                <li>Caipirinha de Limão R$16,00</li>
+                <li>Caipirinha de Morango R$18,00 </li>
+                <li>Caipirinha de Vinho R$16,00</li>
+                <li>Caipirinha de Abacaxi R$16,00</li>
+                <li>Caipirinha de Maracujá R$18,00</li>
                 <li>Nevada R$19,00</li>
                 <li>Pinã Colada R$18,00</li>
             </ul>
@@ -277,6 +276,8 @@
     <footer>
         <p>&copy; 2023 App Delivery. Todos os direitos reservados.</p>
     </footer>
+    <script src="script.js"></script>
+
 </body>
 
 </html>
