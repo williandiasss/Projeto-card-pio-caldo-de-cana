@@ -60,7 +60,7 @@ header {
 }
 
 button {
-  background-color: rgb(18, 197, 18);
+  background-color: rgb(132, 248, 86);
   border: none;
   border-radius: 5px;
   color: black;
@@ -160,7 +160,8 @@ h3 {
   color: #fff;
   width: 100%;
   max-width: 600px;
-  font-size: 1.5rem; /* 24px */
+  font-size: 1.5rem;
+  /* 24px */
   margin: auto;
   padding: 0 10px;
   border-bottom: 2px solid #eee;
