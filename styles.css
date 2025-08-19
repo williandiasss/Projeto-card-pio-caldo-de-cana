@@ -12,12 +12,11 @@
   font-family: "Roboto Mono", monospace;
 }
 
-body {
-  background-image: url(img/logocardoso0.jpg);
-  background-repeat: repeat;
-  background-size: contain;
-  /* ou use cover dependendo do efeito que quer */
-  background-position: center;
+body { 
+ background: black;
+  background-repeat: no-repeat; /* evita duplicar */
+  background-size: 100%; /* faz a imagem ocupar toda a tela */
+  background-position: center; /* centraliza a imagem */
   font-size: 1rem;
   /* 16px */
 
@@ -92,20 +91,22 @@ button:focus {
 }
 
 .categoria-img {
-  width: 50%;
+  width: 100%;
   max-width: 600px;
+  min-width: 200px;
   height: auto;
   display: block;
-  margin: 20px auto;
+  margin: 10px auto;
   border-radius: 10px;
 }
 
 .logo {
-  width: 20vh;
+  width: 100%;
+  min-width: 200px;
   max-width: 600px;
   height: auto;
   display: flex;
-  margin: 20px auto;
+  margin: 10px auto;
   border-radius: 10px;
 }
 
