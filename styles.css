@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,100..700;1,100..700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Roboto+Mono:ital,wght@0,100..700;1,100..700&display=swap');
 
 :root {
   font-size: 16px;
@@ -9,15 +9,16 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: "Roboto Mono", monospace;
+  /* inclui padding dentro do tamanho */
+  font-family: "Montserrat", sans-serif;
 }
 
-body { 
- background: black;
-  background-repeat: no-repeat; /* evita duplicar */
-  background-size: 100%; /* faz a imagem ocupar toda a tela */
-  background-position: center; /* centraliza a imagem */
-  font-size: 1rem;
+body {
+  background: black;
+  /* background-repeat: no-repeat; /* evita duplicar */
+  /* background-size: 100%; /* faz a imagem ocupar toda a tela */
+  /* background-position: center; /* centraliza a imagem */
+  /* font-size: 1rem;
   /* 16px */
 
 }
@@ -37,7 +38,6 @@ header {
 
 .Container-button {
   margin: 50px 0;
-  display: flex;
   justify-content: flex-start;
   /* deixa os botões alinhados à esquerda */
   text-align: center;
@@ -120,20 +120,90 @@ button:focus {
 
 ul {
   list-style: none;
-  padding: 0;
+  padding: 5px 10px;
   color: #fff;
   width: 100%;
   max-width: 655px;
   margin: auto;
-  padding: 0 10px;
   text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
   /*melhorar a legibilidade do texto, principalmente quando o fundo é escuro, texturizado ou com variação de cor*/
   background-color: rgba(0, 0, 0, 0.6);
   /* preto com 60% de opacidade */
-  padding: 5px;
   border-radius: 10px;
   animation: fadeIn 0.5s ease;
 
+}
+
+/* inputs dos cárdapios*/
+input {
+  width: 120px;
+  /* largura fixa padrão */
+  max-width: 120px;
+  /* evita ficar muito grande em telas largas */
+  height: 35px;
+  /* altura uniforme */
+  padding: 6px 10px;
+  /* espaço interno */
+  font-size: 1rem;
+  /* tamanho do texto 1rem = 16px*/
+  text-align: center;
+  /* centraliza o valor digitado */
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  background-color: #fff;
+  color: #000;
+  font-weight: bold;
+  cursor: pointer;
+  display: block;
+}
+
+
+input :hover {
+  opacity: 0.9;
+}
+
+/* só os li que tem inputs */
+li.com-input {
+  display: flex;
+  flex-direction: column;
+  /* texto em cima, inputs embaixo */
+  align-items: flex-start;
+  font-size: 16px;
+  /* diminui o texto dentro */
+}
+
+li.com-input small {
+  display: block;
+  margin-top: 5px;
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+.tamanhos {
+  margin-top: 10px;
+  gap: 10px;
+  flex-wrap: wrap;
+  display: flex;
+  justify-content: center;
+  /* centraliza os inputs horizontalmente */
+  align-items: center;
+  /* alinha verticalmente com o texto */
+}
+
+.tamanhos input {
+  width: 120px;
+  text-align: center;
+
+}
+
+.input-align {
+  gap: 10px;
+  display: flex;
+  justify-content: center;
+  /* centraliza os inputs horizontalmente */
+  align-items: center;
+  /* alinha verticalmente com o texto */
+  border-bottom: 2px solid #eee;
 }
 
 li {
@@ -178,6 +248,31 @@ footer {
   margin-top: 2rem;
 }
 
+#carrinho-flutuante {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: rgb(132, 248, 86);
+  color: black;
+  padding: 12px 18px;
+  border-radius: 50px;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  font-size: 16px;
+  font-weight: bold;
+  z-index: 1000;
+  transition: background 0.3s;
+}
+
+#carrinho-flutuante:hover {
+  background: #0bda37;
+}
+
+#carrinho-flutuante:active {
+  opacity: 0.8;
+}
+
+
 /* Responsividade: Centralizar os botões em telas maiores */
 @media (min-width: 768px) {
 
@@ -194,6 +289,12 @@ footer {
     /* 16px */
   }
 
+  input {
+    width: 50px;
+    /* menor que no desktop */
+    font-size: 1rem;
+  }
+
   h1 {
     font-size: 2.5rem;
     /* 40px */
@@ -202,6 +303,11 @@ footer {
   h3 {
     font-size: 1.75rem;
     /* 28px */
+  }
+
+  input-align {
+    width: 50px;
+    font-size: 1rem;
   }
 }
 
@@ -220,6 +326,20 @@ footer {
     /* 14px */
   }
 
+  input {
+    width: 75px;
+    font-size: 0.8rem;
+    padding: 3px 5px;
+  }
+
+  .input-align {
+    width: 40px;
+    font-size: 0.8rem;
+    padding: 2px 4px;
+    flex-wrap: wrap;
+    border-bottom: 2px solid #eee;
+  }
+
   h1 {
     font-size: 1.5rem;
     /* 24px */
@@ -232,16 +352,67 @@ footer {
 
   .logo,
   .categoria-img {
-    width: 90%;
+    width: 92%;
   }
 
   li {
-    padding: 10px;
+    padding: 12px;
+    font-size: 0.9rem;
   }
 
   body {
-    max-width: 360px;
+    width: 100%;
     font-size: 0.875rem;
     /* 14px */
+    padding: 0 5px;
+  }
+}
+
+@media (min-width: 391px) and (max-width: 480px) {
+  body {
+    font-size: 0.95rem;
+    padding: 0 10px;
+  }
+
+  .Container-button {
+    gap: 8px;
+    padding: 8px;
+  }
+
+  button {
+    font-size: 0.95rem;
+    padding: 10px 14px;
+  }
+
+  input {
+    width: 95px;
+    font-size: 0.9rem;
+    padding: 4px 6px;
+  }
+
+  .input-align {
+    width: 95px;
+    flex-wrap: wrap;
+    border-bottom: 2px solid #eee;
+  }
+
+
+  h1 {
+    font-size: 1.8rem;
+  }
+
+  h3 {
+    font-size: 1.4rem;
+  }
+
+  li,
+  p {
+    font-size: 0.95rem;
+    padding: 13px;
+  }
+
+  .logo,
+  .categoria-img {
+    width: 95%;
   }
 }
