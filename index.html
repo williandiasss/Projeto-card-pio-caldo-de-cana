@@ -32,60 +32,109 @@
             <button class="menu-btn" id="btn-cervejas" onclick="openCategory('cervejas')">Cervejas</button>
             <button class="menu-btn" id="btn-bebidas" onclick="openCategory('bebidas')">Bebidas</button>
             <button class="menu-btn" id="btn-caipirinhas" onclick="openCategory('caipirinhas')">Caipirinhas</button>
+            <button class="menu-btn" id="btn-acai" onclick="openCategory('acai')">Açai</button>
         </nav>
 
         <section class="categoria lanches">
             <img src="img/x salada.jpg" alt="x-salada" class="categoria-img">
             <ul>
-                <li>Misto Quente <small>Pão,queijo,presunto e maionese.</small>R$14,00</li>
-                <li>X Burguer(1 Carne) <small>Pão,carne,queijo,presunto e maionese.</small>R$18,00 </li>
-                <li>X Frango <small> Pão,frango,queijo,tomate,alface,milho,ervilha e maionese.</small>R$25,00
+                <li class="com-input" data-price="14">Misto Quente<small>Pão,queijo,presunto e maionese.</small><input
+                        type="number" min="0" value="0" data-name="Misto Quente" data-price="14"></li>
+                <li class="com-input" data-price="18">X Burguer(1 Carne)<small>Pão,carne,queijo,presunto e
+                        maionese.</small><input type="number" min="0" value="0" data-name="X Burguer(1 Carne)"
+                        data-price="18"></li>
+                <li class="com-input" data-price="25">X Frango<small>Pão,frango,queijo,tomate,alface,milho,ervilha e
+                        maionese.</small>
+                    <input type="number" min="0" value="0" data-name="X Frango" data-price="25">
                 </li>
-                <li>X Calabresa<small> Pão,calabresa,carne,presunto,queijo,tomate,alface,milho,ervilha
-                        e maionese.</small>R$25,00</li>
-                <li>X Coração<small> Pão,coração,carne,presunto,queijo,tomate,alface,milho,ervilha e
-                        maionese.</small>R$29,00 </li>
-                <li>X Camarão<small> Pão,camarão,queijo,tomate,alface,milho,ervilha e maionese.</small>R$33,00
+                <li class="com-input" data-price="25">X
+                    Calabresa<small>Pão,calabresa,carne,presunto,queijo,tomate,alface,milho,ervilha
+                        e maionese.</small><input type="number" min="0" value="0" data-name="X Calabresa"
+                        data-price="25"></li>
+                <li class="com-input" data-price="29">X
+                    Coração<small>Pão,coração,carne,presunto,queijo,tomate,alface,milho,ervilha e
+                        maionese.</small><input type="number" min="0" value="0" data-name="X Coração" data-price="29">
                 </li>
-                <li>X Salada<small> Pão,carne,queijo,presunto,tomate,alface,milho,ervilha e
-                        maionese.</small>R$22,00 </li>
-                <li>X Burguer(2 Carnes)<small> Pão,carne,queijo,presunto e maionese.</small>R$21,00 </li>
-                <li>X Bacon<small> Pão,bacon,carne,presunto,queijo,tomate,alface,milho,ervilha e
-                        maionese.</small>R$27,00 </li>
-                <li>X Egg <small> Pão,ovo,carne,presunto,queijo,tomate,alface,milho,ervilha e
-                        maionese.</small>R$24,00</li>
-                <li>X Acebolado<small> Pão,cebola,carne,presunto,queijo,tomate,alface,milho,ervilha e
-                        maionese.</small>R$24,00</li>
-                <li>X Da Casa
-                    <small> Pão,maionese,carne,frango,calabresa,ovo,coração,bacon,presunto,queijo,saladas e
-                        grãos.</small>R$46,00
+                <li class="com-input" data-price="33">X Camarão<small>Pão,camarão,queijo,tomate,alface,milho,ervilha e
+                        maionese.</small>
+                    <input type="number" min="0" value="0" data-name="X Camarão" data-price="33">
                 </li>
-                <li>X Doce<small> Pão,chocolate,morango e bombom.</small>R$20,00 </li>
+                <li class="com-input" data-price="22">X
+                    Salada<small>Pão,carne,queijo,presunto,tomate,alface,milho,ervilha e
+                        maionese.</small><input type="number" min="0" value="0" data-name="X Salada" data-price="22">
+                </li>
+                <li class="com-input" data-price="21">X Burguer(2 Carnes)<small>Pão,carne,queijo,presunto e
+                        maionese.</small><input type="number" min="0" value="0" data-name="X Burguer(2 Carnes)"
+                        data-price="21"></li>
+                <li class="com-input" data-price="27">X
+                    Bacon<small>Pão,bacon,carne,presunto,queijo,tomate,alface,milho,ervilha e
+                        maionese.</small><input type="number" min="0" value="0" data-name="X Bacon" data-price="27">
+                </li>
+                <li class="com-input" data-price="24">X
+                    Egg<small>Pão,ovo,carne,presunto,queijo,tomate,alface,milho,ervilha e
+                        maionese.</small><input type="number" min="0" value="0" data-name="X Egg" data-price="24"></li>
+                <li class="com-input" data-price="24">X
+                    Acebolado<small>Pão,cebola,carne,presunto,queijo,tomate,alface,milho,ervilha e
+                        maionese.</small><input type="number" min="0" value="0" data-name="x Acebolado" data-price="24">
+                </li>
+                <li class="com-input" data-price="46">X Da
+                    Casa<small>Pão,maionese,carne,frango,calabresa,ovo,coração,bacon,presunto,queijo,saladas e
+                        grãos.</small>
+                    <input type="number" min="0" value="0" data-name="X Da Casa" data-price="46">
+                </li>
+                <li class="com-input" data-price="20">X Doce<small>Pão,chocolate,morango e bombom.</small><input
+                        type="number" min="0" value="0" data-name="Doce" data-price="20"></li>
 
                 <h3>Adicionais</h3>
-                <li>Partido R$3,00</li>
-                <li>Gostinho R$4,00</li>
-                <li>+ Carne R$4,00</li>
-                <li>+Frango R$4,00</li>
-                <li>Calabresa R$5,00</li>
-                <li>Grãos R$2,00</li>
-                <li>Salada R$2,00</li>
-                <li>Queijo R$2,00</li>
-                <li>Ovo R$2,00</li>
-                <li>Coração R$4,00</li>
+                <li class="com-input" data-price="3">Partido<input type="number" min="0" value="0" data-name="Partido"
+                        data-price="3">
+                </li>
+                <li class="com-input" data-price="4">Gostinho<input type="number" min="0" value="0" data-name="Gostinho"
+                        data-price="4">
+                </li>
+                <li class="com-input" data-price="4">+ Carne<input type="number" min="0" value="0" data-name="+ Carne"
+                        data-price="4">
+                </li>
+                <li class="com-input" data-price="4">+ Frango<input type="number" min="0" value="0" data-name="+ Frango"
+                        data-price="4">
+                </li>
+                <li class="com-input" data-price="5">Calabresa<input type="number" min="0" value="0"
+                        data-name="Calabresa" data-price="5">
+                </li>
+                <li class="com-input" data-price="2">Grãos<input type="number" min="0" value="0" data-name="Grãos"
+                        data-price="2"></li>
+                <li class="com-input" data-price="2">Salada<input type="number" min="0" value="0" data-name="Salada"
+                        data-price="2"></li>
+                <li class="com-input" data-price="2">Queijo<input type="number" min="0" value="0" data-name="Queijo"
+                        data-price="2"></li>
+                <li class="com-input" data-price="2">Ovo<input type="number" min="0" value="0" data-name="Ovo"
+                        data-price="2"></li>
+                <li class="com-input" data-price="4">Coração<input type="number" min="0" value="0" data-name="Coração"
+                        data-price="4">
+                </li>
                 </lu>
         </section>
 
         <section class="categoria hamburguer">
             <img src="img/hamburgue especial.jpg" alt="hamburguer-especiais" class="categoria-img">
             <ul>
-                <li>Hamburguer Tradicional<small>Pão,carne,queijo,cheddar,salada,maionese e fritas.</small>R$30,00</li>
-                <li>Hamburguer Bacon<small>Pão,carne,bacon,queijo,cheddar,salada,maionese e fritas.</small>R$33,00
+                <li class="com-input" data-price="30">Hamburguer
+                    Tradicional<small>Pão,carne,queijo,cheddar,salada,maionese e
+                        fritas.</small><input type="number" min="0" value="0" data-name="Hamburguer Tradicional"
+                        data-price="30"></li>
+                <li class="com-input" data-price="33">Hamburguer
+                    Bacon<small>Pão,carne,bacon,queijo,cheddar,salada,maionese e
+                        fritas.</small><input type="number" min="0" value="0" data-name="Hamburguer Bacon"
+                        data-price="33">
                 </li>
-                <li>Hamburguer da Casa<small>Pão,2 carnes,bacon,cebola
-                        caramelizada,queijo,chedaar,salada,maionese e fritas.</small>R$37,00</li>
-                <li>Hamburguer Kids<small>Pão,carne,queijo,cheddar,salada,molho especial,acompanha batata
-                        divertida.</small>R$19,00</li>
+                <li class="com-input" data-price="37">Hamburguer da Casa<small>Pão,2 carnes,bacon,cebola
+                        caramelizada,queijo,chedaar,salada,maionese e fritas.</small><input type="number" min="0"
+                        value="0" data-name="Hamburguer da Casa" data-price="37"></li>
+                <li class="com-input" data-price="19">Hamburguer Kids<small>Pão,carne,queijo,cheddar,salada,molho
+                        especial,acompanha
+                        batata
+                        divertida.</small><input type="number" min="0" value="0" data-name="Hamburguer Kids"
+                        data-price="19"></li>
             </ul>
         </section>
 
@@ -94,121 +143,420 @@
             <p>Aipim,carne,calabresa,coração,frango,batata,cebola a milanesa,polenta,azeitona,pepino e ovo de
                 codorna.</p>
             <p>P (R$76,00) M (R$100,00) G (R$115,00)</p>
+            <div class="tamanhos">
+                <p class="input-align">
+                P <input type="number" min="0" value="0" data-name="Tábua P" data-price="76">
+                M <input type="number" min="0" value="0" data-name="Tábua M" data-price="100">
+                G <input type="number" min="0" value="0" data-name="Tábua G" data-price="115">
+                </p>
+            </div>
         </section>
 
         <section class="categoria torre-batata">
             <img src="img/torre de batata.jpg" alt="torre-batata" class="categoria-img">
             <p>Batata,bacon,calabresa,coração,queijo,requeijão e orégano.</p>
             <p>P (R$60,00) G (R$80,00)</p>
+            <div class="tamanhos">
+                <p class="input-align">
+                    P <input type="number" min="0" value="0" data-name="torre-batata P" data-price="60">
+                    G <input type="number" min="0" value="0" data-name="torre-batata G" data-price="80">
+                </p>
+            </div>
+
         </section>
 
         <section class="categoria porções">
             <img src="img/porções.jpg" alt="porções" class="categoria-img">
             <ul>
-                <li>Batata Frita(500g)R$22,00</li>
-                <li>Fritas com Bacon e cheddar(500g)R$32,00</li>
-                <li>Aipim(500g)R$20,00</li>
-                <li>Calabresa(400g)R$23,00</li>
-                <li>Carne(500g)R$34,00</li>
-                <li>Camarão Empanado(400g)R$54,00</li>
-                <li>Casquinha de Sirí(UND)R$10,00</li>
-                <li>Cebola Empanada R$18,00</li>
-                <li>Coração + Pãozinho(400g)R$33,00</li>
-                <li>Coxinha da Aza + Fritas R$35,00<small>(6 unidades + 250g batatas)</small></li>
-                <li>Frango Xadrez + Pãozinho(400g)R$31,00</li>
-                <li>Filezinho de Frango + fritas R$35,00<small>(450g + 250g batatas)</small></li>
-                <li>Isca de Peixe(400g)R$34,00</li>
-                <li>Polenta Frita(500g)R$18,00</li>
-                <li>Porção de Frios R$18,00</li>
-                <li>Porção de Pãozinhos R$7,00</li>
-                <li>Ovo de Codorna(24 UND)R$15,00</li>
+                <li class="com-input" data-price="22">Batata Frita(500g)<input type="number" min="0" value="0"
+                        data-name="Batata Frita(500g)" data-price="22"></li>
+                <li class="com-input" data-price="32">Fritas com Bacon e cheddar(500g)<input type="number" min="0"
+                        value="0" data-name="Fritas com Bacon e cheddar(500g)" data-price="32"></li>
+                <li class="com-input" data-price="20">Aipim(500g)<input type="number" min="0" value="0"
+                        data-name="Aipim(500g)" data-price="20"></li>
+                <li class="com-input" data-price="23">Calabresa(400g)<input type="number" min="0" value="0"
+                        data-name="Calabresa(400g)" data-price="23"></li>
+                <li class="com-input" data-price="34">Carne(500g)<input type="number" min="0" value="0"
+                        data-name="Carne(500g)" data-price="34"></li>
+                <li class="com-input" data-price="54">Camarão Empanado(400g)<input type="number" min="0" value="0"
+                        data-name="Camarão Empanado(400g)" data-price="54"></li>
+                <li class="com-input" data-price="10">Casquinha de Sirí(UND)<input type="number" min="0" value="0"
+                        data-name="Casquinha de Sirí(UND)" data-price="10"></li>
+                <li class="com-input" data-price="18">Cebola Empanada<input type="number" min="0" value="0"
+                        data-name="Cebola Empanada" data-price="18"></li>
+                <li class="com-input" data-price="33">Coração + Pãozinho(400g)<input type="number" min="0" value="0"
+                        data-name="Coração + Pãozinho(400g)" data-price="33"></li>
+                <li class="com-input" data-price="35">Coxinha da Aza + Fritas<small>(6 unidades + 250g
+                        batatas)</small><input type="number" min="0" value="0" data-name="Coxinha da Aza + Fritas"
+                        data-price="35"></li>
+                <li class="com-input" data-price="31">Frango Xadrez + Pãozinho(400g)<input type="number" min="0"
+                        value="0" data-name="Frango Xadrez + Pãozinho(400g)" data-price="31"></li>
+                <li class="com-input" data-price="35">Filezinho de Frango + fritas<small>(450g + 250g
+                        batatas)</small><input type="number" min="0" value="0" data-name="Filezinho de Frango + fritas"
+                        data-price="35"></li>
+                <li class="com-input" data-price="34">Isca de Peixe(400g)<input type="number" min="0" value="0"
+                        data-name="Isca de Peixe(400g)" data-price="34"></li>
+                <li class="com-input" data-price="18">Polenta Frita(500g)<input type="number" min="0" value="0"
+                        data-name="Polenta Frita(500g)" data-price="18"></li>
+                <li class="com-input" data-price="18">Porção de Frios<input type="number" min="0" value="0"
+                        data-name="Porção de Frios" data-price="18"></li>
+                <li class="com-input" data-price="7">Porção de Pãozinho<input type="number" min="0" value="0"
+                        data-name="Porção de Pãozinho" data-price="7"></li>
+                <li class="com-input" data-price="15">Ovo de Codorna(24 UND)<input type="number" min="0" value="0"
+                        data-name="Ovo de Codorna(24 UND)" data-price="15"></li>
             </ul>
         </section>
 
         <section class="categoria pizzas-trad">
             <img src="img/pizzas tradicionais.jpg" alt="pizza-tradicinais" class="categoria-img">
             <ul>
-                <li>Quatro Queijos <small>Molho de tomate,mussarela,parmesão,provolone,requeijão e orégano.</small></li>
-                <li>Bacon <small>Molho de tomate,mussarela,milho,bacon fatiado,requeijão e orégano.</small></li>
-                <li>Calabresa <small>Molho de tomate,mussarela,calabresa,cebola e orégano.</small></li>
-                <li>Brócolis <small>Molho de tomate,mussarela,brócolis,tomate picado,requeijão e orégano.</small></li>
-                <li>Frango com Catupiry <small>Molho de tomate,mussarela,frango,catupiry e orégano.</small></li>
-                <li>Mista <small>Molho de tomate,mussarela,presunto,milho,ervilha,tomates picados,frango,ovo e
-                        orégano.</small></li>
-                <li>Pasqualina <small>Molho de tomate,mussarela,bacon crocante,parmesão,provolone,requeijão e
-                        orégano.</small></li>
-                <li>Portuguesa <small>Molho de tomate,mussarela,presunto,tomates picados,pimentão,cebola,ovo,azeitona
-                        preta e orégano.</small></li>
-                <li>Marguerita <small>Molho de tomate,mussarela,tomate em rodelas e manjericão.</small></li>
-                <li>Lombo Defumado <small>Molho de tomate,mussarela,lombo defumado,bacon fatiado,requeijão e
-                        orégano.</small></li>
-                <li>Alho e Óleo <small>Molho de tomate,mussarela,alho crocante e orégano.</small></li>
-                <li>Tomate Seco <small>Molho de tomate,mussarela,tomate seco e rúcula.</small></li>
-                <li>Peperoni <small>Molho de tomate,mussarela,peperoni,parmesão e orégano.</small></li>
-                <li>Baiana <small>Molho de tomate,mussarela,calabresa ralada,cebola,azeitona preta e molho de
-                        pimenta.</small></li>
-                <li>Agridoce <small>Molho de tomate,mussarela,lombo defumado,abacaxi e geleia de pimenta.</small></li>
-                <h3>Preço Pizzas Treadicionais </h3>
-                <span>P (R$45,00) M (R$55,00) G (R$65,00)</span>
+                <li class="com-input">Quatro Queijos<small>Molho de tomate,mussarela,parmesão,provolone,requeijão e
+                        orégano.</small>
+                    <div class="tamanhos">
+                        P <input type="number" min="0" value="0" data-name="Quatro Queijos P" data-price="45">
+                        M <input type="number" min="0" value="0" data-name="Quatro Queijos M" data-price="55">
+                        G <input type="number" min="0" value="0" data-name="Quatro Queijos G" data-price="65">
+                    </div>
+                </li>
+                <li class="com-input">Bacon<small>Molho de tomate,mussarela,milho,bacon fatiado,requeijão e
+                        orégano.</small>
+                    <div class="tamanhos">
+                        P <input type="number" min="0" value="0" data-name="Bacon P" data-price="45">
+                        M <input type="number" min="0" value="0" data-name="Bacon M" data-price="55">
+                        G <input type="number" min="0" value="0" data-name="Bacon G" data-price="65">
+                    </div>
+                </li>
+                <li class="com-input">Calabresa<small>Molho de tomate,mussarela,calabresa,cebola e orégano.</small>
+                    <div class="tamanhos">
+                        P <input type="number" min="0" value="0" data-name="Calabresa P" data-price="45">
+                        M <input type="number" min="0" value="0" data-name="Calabresa M" data-price="55">
+                        G <input type="number" min="0" value="0" data-name="Calabresa G" data-price="65">
+                    </div>
+                </li>
+                <li class="com-input">brócolis<small>Molho de tomate,mussarela,brócolis,tomate picado,requeijão e
+                        orégano.</small>
+                    <div class="tamanhos">
+                        P
+                        <input type="number" min="0" value="0" data-name="brócolis P" data-price="45">
+                        M <input type="number" min="0" value="0" data-name="brócolis M" data-price="55">
+                        G <input type="number" min="0" value="0" data-name="brócolis G" data-price="65">
+                    </div>
+                </li>
+                <li class="com-input">Frango com Catupiry<small>Molho de tomate,mussarela,frango,catupiry e
+                        orégano.</small>
+                    <div class="tamanhos">
+                        P <input type="number" min="0" value="0" data-name="Frango com Catupiry P" data-price="45">
+                        M <input type="number" min="0" value="0" data-name="Frango com Catupiry M" data-price="55">
+                        G <input type="number" min="0" value="0" data-name="Frango com Catupiry G" data-price="65">
+                    </div>
+                </li>
+                <li class="com-input">Mista<small>Molho de tomate,mussarela,presunto,milho,ervilha,tomates
+                        picados,frango,ovo e
+                        orégano.</small>
+                    <div class="tamanhos">
+                        P <input type="number" min="0" value="0" data-name="Mista P" data-price="45">
+                        M <input type="number" min="0" value="0" data-name="Mista M" data-price="55">
+                        G <input type="number" min="0" value="0" data-name="Mista G" data-price="65">
+                    </div>
+                </li>
+                <li class="com-input">Pasqualina<small>Molho de tomate,mussarela,bacon
+                        crocante,parmesão,provolone,requeijão e
+                        orégano.</small>
+                    <div class="tamanhos">
+                        P <input type="number" min="0" value="0" data-name="Pasqualina P" data-price="45">
+                        M <input type="number" min="0" value="0" data-name="Pasqualina M" data-price="55">
+                        G <input type="number" min="0" value="0" data-name="Pasqualina G" data-price="65">
+                    </div>
+                </li>
+                <li class="com-input">Portuguesa<small>Molho de tomate,mussarela,presunto,tomates
+                        picados,pimentão,cebola,ovo,azeitona
+                        preta e orégano.</small>
+                    <div class="tamanhos">
+                        P <input type="number" min="0" value="0" data-name="Portuguesa P" data-price="45">
+                        M <input type="number" min="0" value="0" data-name="Portuguesa M" data-price="55">
+                        G <input type="number" min="0" value="0" data-name="Portuguesa G" data-price="65">
+                    </div>
+                </li>
+                <li class="com-input">Marguerita<small>Molho de tomate,mussarela,tomate em rodelas e manjericão.</small>
+                    <div class="tamanhos">
+                        P <input type="number" min="0" value="0" data-name="Marguerita P" data-price="45">
+                        M <input type="number" min="0" value="0" data-name="Marguerita M" data-price="55">
+                        G <input type="number" min="0" value="0" data-name="Marguerita G" data-price="65">
+                    </div>
+                </li>
+                <li class="com-input">Lombo Defumado<small>Molho de tomate,mussarela,lombo defumado,bacon
+                        fatiado,requeijão e
+                        orégano.</small>
+                    <div class="tamanhos">
+                        P <input type="number" min="0" value="0" data-name="Lombo Defumado P" data-price="45">
+                        M <input type="number" min="0" value="0" data-name="Lombo Defumado M" data-price="55">
+                        G <input type="number" min="0" value="0" data-name="Lombo Defumado G" data-price="65">
+                    </div>
+                </li>
+                <li class="com-input">Alho e Óleo<small>Molho de tomate,mussarela,alho crocante e orégano.</small>
+                    <div class="tamanhos">
+                        P <input type="number" min="0" value="0" data-name="Alho e Óleo P" data-price="45">
+                        M <input type="number" min="0" value="0" data-name="Alho e Óleo M" data-price="55">
+                        G <input type="number" min="0" value="0" data-name="Alho e Óleo G" data-price="65">
+                    </div>
+                </li>
+                <li class="com-input">Tomate Seco<small>Molho de tomate,mussarela,tomate seco e rúcula.</small>
+                    <div class="tamanhos">
+                        P <input type="number" min="0" value="0" data-name="Tomate Seco P" data-price="45">
+                        M <input type="number" min="0" value="0" data-name="Tomate Seco M" data-price="55">
+                        G <input type="number" min="0" value="0" data-name="Tomate Seco G" data-price="65">
+                    </div>
+                </li>
+                <li class="com-input">Peperoni<small>Molho de tomate,mussarela,peperoni,parmesão e orégano.</small>
+                    <div class="tamanhos">
+                        P <input type="number" min="0" value="0" data-name="Peperoni P" data-price="45">
+                        M <input type="number" min="0" value="0" data-name="Peperoni M" data-price="55">
+                        G <input type="number" min="0" value="0" data-name="Peperoni G" data-price="65">
+                    </div>
+                </li>
+                <li class="com-input">Baiana<small>Molho de tomate,mussarela,calabresa ralada,cebola,azeitona preta e
+                        molho de
+                        pimenta.</small>
+                    <div class="tamanhos">
+                        P <input type="number" min="0" value="0" data-name="Baiana P" data-price="45">
+                        M <input type="number" min="0" value="0" data-name="Baiana M" data-price="55">
+                        G <input type="number" min="0" value="0" data-name="Baiana G" data-price="65">
+                    </div>
+                </li>
+                <li class="com-input">Agridoce<small>Molho de tomate,mussarela,lombo defumado,abacaxi e geleia de
+                        pimenta.</small>
+                    <div class="tamanhos">
+                        P
+                        <input type="number" min="0" value="0" data-name="Agridoce P" data-price="45">
+                        M <input type="number" min="0" value="0" data-name="Agridoce M" data-price="55">
+                        G <input type="number" min="0" value="0" data-name="Agridoce G" data-price="65">
+                    </div>
+                </li>
+                <h3>Preço Pizzas Treadicionais</h3>
+                <p>P (R$45,00) M (R$55,00) G (R$65,00)</p>
                 <h3>Borda Recheada</h3>
                 <p>Catupiry,cheddar,Doce de Leite,Creme de Avelã,Chocolate Branco,Chocolate Preto.</p>
                 <p>P (R$8,00) M(R$10,00) G(R$12,00)</p>
+                <div class="tamanhos">
+                    P <input type="number" min="0" value="0" data-name="Borda P" data-price="8">
+                    M <input type="number" min="0" value="0" data-name="Borda M" data-price="10">
+                    G <input type="number" min="0" value="0" data-name="Borda G" data-price="12">
+                </div>
             </ul>
         </section>
 
         <section class="categoria pizzas-especiais">
             <img src="img/pizzas especiais.jpg" alt="pizzas-especiais" class="categoria-img">
             <ul>
-                <li>Frango Especial <small>Molho de tomate,mussarela,frango,bacon crocante,tomates
-                        picados,requeijão,azeitona preta e orégano.</small></li>
-                <li>Brócolis Especial <small>Molho de tomate,mussarela,brócolis,alho torrado,requeijão,azeitona preta e
-                        orégano.</small></li>
-                <li>Calabresa Especial <small>Molho de tomate,mussarela,calabresa,tomates picados,azeitona preta,cebola
-                        e orégano.</small></li>
-                <li>Palmito <small>Molho de tomate,mussarela,palmito,azeitona preta e requeijão.</small></li>
-                <li>Strogonoff de Carne <small>Molho de tomate,mussarela,strogonoff de carne e batata palha.</small>
+                <li class="com-input">Frango Especial<small>Molho de tomate,mussarela,frango,bacon crocante,tomates
+                        picados,requeijão,azeitona preta e orégano.</small>
+                    <div class="tamanhos">
+                        P <input type="number" min="0" value="0" data-name="Frango Especial P" data-price="53">
+                        M <input type="number" min="0" value="0" data-name="Frango Especial M" data-price="64">
+                        G <input type="number" min="0" value="0" data-name="Frango Especial G" data-price="78">
+                    </div>
                 </li>
-                <li>Americana <small>Molho de tomate,mussarela,alcatra,batata frita,requeijão e orégano.</small></li>
-                <li>Alcatra com Doritos <small>Molho de tomate,mussarela,alcatra,cheddar e doritos.</small></li>
-                <li>Coração Acebolado <small>Molho de tomate,mussarela,coração,cebola,requeijão e orégano.</small></li>
-                <li>Camarão ao Molho <small>Molho de tomate,mussarela,camarão e molho especial da casa.</small></li>
-                <li>Camarão Especial <small>Molho de tomate,mussarela,camarão,requeijão,tempero verde e alho
-                        poró.</small></li>
+                <li class="com-input">Brócolis Especial<small>Molho de tomate,mussarela,brócolis,alho
+                        torrado,requeijão,azeitona preta e
+                        orégano.</small>
+                    <div class="tamanhos">
+                        P <input type="number" min="0" value="0" data-name="Brócolis Especial P" data-price="53">
+                        M <input type="number" min="0" value="0" data-name="Brócolis Especial M" data-price="64">
+                        G <input type="number" min="0" value="0" data-name="Brócolis Especial G" data-price="78">
+                    </div>
+                </li>
+                <li class="com-input">Calabresa Especial<small>Molho de tomate,mussarela,calabresa,tomates
+                        picados,azeitona preta,cebola
+                        e orégano.</small>
+                    <div class="tamanhos">
+                        P <input type="number" min="0" value="0" data-name="Calabresa Especial P" data-price="53">
+                        M <input type="number" min="0" value="0" data-name="Calabresa Especial M" data-price="64">
+                        G <input type="number" min="0" value="0" data-name="Calabresa Especial G" data-price="78">
+                    </div>
+                </li>
+                <li class="com-input">Palmito<small>Molho de tomate,mussarela,palmito,azeitona preta e
+                        requeijão.</small>
+                    <div class="tamanhos">
+                        P <input type="number" min="0" value="0" data-name="Palmito P" data-price="53">
+                        M <input type="number" min="0" value="0" data-name="Palmito M" data-price="64">
+                        G <input type="number" min="0" value="0" data-name="Palmito G" data-price="78">
+                    </div>
+                </li>
+                <li class="com-input">Strogonoff de Carne<small>Molho de tomate,mussarela,strogonoff de carne e batata
+                        palha.</small>
+                    <div class="tamanhos">
+                        P <input type="number" min="0" value="0" data-name="Strogonoff de Carne P" data-price="53">
+                        M <input type="number" min="0" value="0" data-name="Strogonoff de Carne M" data-price="64">
+                        G <input type="number" min="0" value="0" data-name="Strogonoff de Carne G" data-price="78">
+                    </div>
+                </li>
+                <li class="com-input">Americana<small>Molho de tomate,mussarela,alcatra,batata frita,requeijão e
+                        orégano.</small>
+                    <div class="tamanhos">
+                        P <input type="number" min="0" value="0" data-name="Americana P" data-price="53">
+                        M <input type="number" min="0" value="0" data-name="Americana M" data-price="64">
+                        G <input type="number" min="0" value="0" data-name="Americana G" data-price="78">
+                    </div>
+                </li>
+                <li class="com-input">Alcatra com Doritos<small>Molho de tomate,mussarela,alcatra,cheddar e
+                        doritos.</small>
+                    <div class="tamanhos">
+                        P <input type="number" min="0" value="0" data-name="Alcatra com Doritos P" data-price="53">
+                        M <input type="number" min="0" value="0" data-name="Alcatra com Doritos M" data-price="64">
+                        G <input type="number" min="0" value="0" data-name="Alcatra com Doritos G" data-price="78">
+                    </div>
+                </li>
+                <li class="com-input">Coração Acebolado<small>Molho de tomate,mussarela,coração,cebola,requeijão e
+                        orégano.</small>
+                    <div class="tamanhos">
+                        P <input type="number" min="0" value="0" data-name="Coração Acebolado P" data-price="53">
+                        M <input type="number" min="0" value="0" data-name="Coração Acebolado M" data-price="64">
+                        G <input type="number" min="0" value="0" data-name="Coração Acebolado G" data-price="78">
+                    </div>
+                </li>
+                <li class="com-input">Camarão ao Molho<small>Molho de tomate,mussarela,camarão e molho especial da
+                        casa.</small>
+                    <div class="tamanhos">
+                        P <input type="number" min="0" value="0" data-name="Camarão ao Molho P" data-price="53">
+                        M <input type="number" min="0" value="0" data-name="Camarão ao Molho M" data-price="64">
+                        G <input type="number" min="0" value="0" data-name="Camarão ao Molho G" data-price="78">
+                    </div>
+                </li>
+                <li class="com-input">Camarão Especial<small>Molho de tomate,mussarela,camarão,requeijão,tempero verde e
+                        alho
+                        poró.</small>
+                    <div class="tamanhos">
+                        P <input type="number" min="0" value="0" data-name="Camarão Especial P" data-price="53">
+                        M <input type="number" min="0" value="0" data-name="Camarão Especial M" data-price="64">
+                        G <input type="number" min="0" value="0" data-name="Camarão Especial G" data-price="78">
+                    </div>
+                </li>
                 <h3>Preço Pizzas Especiais</h3>
-                <span>P (R$53,00) M (R$64,00) G (R$78,00)</span>
+                <p>P (R$53,00) M (R$64,00) G (R$78,00)</p>
                 <h3>Borda Recheada</h3>
                 <p>Catupiry,cheddar,Doce de Leite,Creme de Avelã,Chocolate Branco,Chocolate Preto.</p>
                 <p>P (R$8,00) M(R$10,00) G(R$12,00)</p>
+                <div class="tamanhos">
+                    P <input type="number" min="0" value="0" data-name="Borda P" data-price="8">
+                    M <input type="number" min="0" value="0" data-name="Borda M" data-price="10">
+                    G <input type="number" min="0" value="0" data-name="Borda G" data-price="12">
+                </div>
             </ul>
         </section>
 
         <section class="categoria pizzas-doces">
             <img src="img/pizzas doces.jpg" alt="pizzas-doces" class="categoria-img">
             <ul>
-                <li>Chocolate Preto com Morango <small>Creme de leite,mussarela,chocolate forneável preto,lascas de
-                        morango e raspas de chocolate.</small></li>
-                <li>Chocolate Branco com Morango <small>Creme de leite,mussarela,chocolate forneável branco,lascas de
-                        morango e raspas de chocolate.</small></li>
-                <li>Charge <small>Creme de leite,mussarela,raspas de chocolate,doce de leite e amendoim.</small></li>
-                <li>Confete <small>Creme de leite,mussarela,raspas de chocolate,chocolate forneável branco e
-                        confete.</small></li>
-                <li>Brigadeiro Especial <small>Creme de leite,mussarela,raspas de chocolate preto meio amargo,creme
-                        avelã e granulado.</small></li>
-                <li>Prestígio <small>Creme de leite,mussarela,chocolate forneável preto,coco ralado fresco e raspas de
-                        chocolate meio amargo.</small></li>
-                <li>Paçoquita <small>Creme de leite,mussarela,banana em lâminas e chocolate forneável preto.</small>
+                <li class="com-input">Chocolate Preto com Morango<small>Creme de leite,mussarela,chocolate forneável
+                        preto,lascas de
+                        morango e raspas de chocolate.</small>
+                    <div class="tamanhos">
+                        P <input type="number" min="0" value="0" data-name="Chocolate Preto com Morango P"
+                            data-price="45">
+                        M <input type="number" min="0" value="0" data-name="Chocolate Preto com Morango M"
+                            data-price="55">
+                        G <input type="number" min="0" value="0" data-name="Chocolate Preto com Morango G"
+                            data-price="65">
+                    </div>
                 </li>
-                <li>Banana com Chocolate <small>Creme de leite,mussarela,banana em lâminas e chocolate forneável
-                        preto.</small></li>
-                <li>Banana com Canela <small>Creme de leite,mussarela,banana em lâminas e canela.</small></li>
-                <li>Abacaxi <small>Creme de leite,mussarela,raspas de chocolate forneável branco e abacaxi.</small></li>
-                <li>Banana Nevada <small>Creme de leite,mussarela,chocolate forneável branco,banana e canela.</small>
+                <li class="com-input">Chocolate Branco com Morango<small>Creme de leite,mussarela,chocolate forneável
+                        branco,lascas de
+                        morango e raspas de chocolate.</small>
+                    <div class="tamanhos">
+                        P <input type="number" min="0" value="0" data-name="Chocolate Branco com Morango P"
+                            data-price="45">
+                        M <input type="number" min="0" value="0" data-name="Chocolate Branco com Morango M"
+                            data-price="55">
+                        G <input type="number" min="0" value="0" data-name="Chocolate Branco com Morango G"
+                            data-price="65">
+                    </div>
+                </li>
+                <li class="com-input">Charge<small>Creme de leite,mussarela,raspas de chocolate,doce de leite e
+                        amendoim.</small>
+                    <div class="tamanhos">
+                        P <input type="number" min="0" value="0" data-name="Charge  P" data-price="45">
+                        M <input type="number" min="0" value="0" data-name="Charge M" data-price="55">
+                        G <input type="number" min="0" value="0" data-name="Charge G" data-price="65">
+                    </div>
+                </li>
+                <li class="com-input">Confete<small>Creme de leite,mussarela,raspas de chocolate,chocolate forneável
+                        branco e
+                        confete.</small>
+                    <div class="tamanhos">
+                        P <input type="number" min="0" value="0" data-name="Confete P" data-price="45">
+                        M <input type="number" min="0" value="0" data-name="Confete M" data-price="55">
+                        G <input type="number" min="0" value="0" data-name="ConfeteG" data-price="65">
+                    </div>
+                </li>
+                <li class="com-input">Brigadeiro Especial<small>Creme de leite,mussarela,raspas de chocolate preto meio
+                        amargo,creme
+                        avelã e granulado.</small>
+                    <div class="tamanhos">
+                        P <input type="number" min="0" value="0" data-name="Brigadeiro Especial P" data-price="45">
+                        M <input type="number" min="0" value="0" data-name="Brigadeiro Especial M" data-price="55">
+                        G <input type="number" min="0" value="0" data-name="Brigadeiro Especial G" data-price="65">
+                    </div>
+                </li>
+                <li class="com-input">Prestígio<small>Creme de leite,mussarela,chocolate forneável preto,coco ralado
+                        fresco e raspas de
+                        chocolate meio amargo.</small>
+                    <div class="tamanhos">
+                        P <input type="number" min="0" value="0" data-name="Prestígio P" data-price="45">
+                        M <input type="number" min="0" value="0" data-name="Prestígio M" data-price="55">
+                        G <input type="number" min="0" value="0" data-name="Prestígio G" data-price="65">
+                    </div>
+                </li>
+                <li class="com-input">Paçoquita<small>Creme de leite,mussarela,banana em lâminas e chocolate forneável
+                        preto.</small>
+                    <div class="tamanhos">
+                        P <input type="number" min="0" value="0" data-name="Paçoquita P" data-price="45">
+                        M <input type="number" min="0" value="0" data-name="Paçoquita M" data-price="55">
+                        G <input type="number" min="0" value="0" data-name="Paçoquita G" data-price="65">
+                    </div>
+                </li>
+                <li class="com-input">Banana com Chocolate<small>Creme de leite,mussarela,banana em lâminas e chocolate
+                        forneável
+                        preto.</small>
+                    <div class="tamanhos">
+                        P <input type="number" min="0" value="0" data-name="Banana com Chocolate P" data-price="45">
+                        M <input type="number" min="0" value="0" data-name="Banana com Chocolate M" data-price="55">
+                        G <input type="number" min="0" value="0" data-name="Banana com Chocolate G" data-price="65">
+                    </div>
+                </li>
+                <li class="com-input">Banana com Canela<small>Creme de leite,mussarela,banana em lâminas e
+                        canela.</small>
+                    <div class="tamanhos">
+                        P <input type="number" min="0" value="0" data-name="Banana com Canela P" data-price="45">
+                        M <input type="number" min="0" value="0" data-name="Banana com Canela M" data-price="55">
+                        G <input type="number" min="0" value="0" data-name="Banana com Canela G" data-price="65">
+                    </div>
+                </li>
+                <li class="com-input">Abacaxi<small>Creme de leite,mussarela,raspas de chocolate forneável branco e
+                        abacaxi.</small>
+                    <div class="tamanhos">
+                        P <input type="number" min="0" value="0" data-name="Abacaxi P" data-price="45">
+                        M <input type="number" min="0" value="0" data-name="Abacaxi M" data-price="55">
+                        G <input type="number" min="0" value="0" data-name="Abacaxi G" data-price="65">
+                    </div>
+                </li>
+                <li class="com-input">Banana Nevada<small>Creme de leite,mussarela,chocolate forneável branco,banana e
+                        canela.</small>
+                    <div class="tamanhos">
+                        P <input type="number" min="0" value="0" data-name="Banana Nevada P" data-price="45">
+                        M <input type="number" min="0" value="0" data-name="Banana Nevada M" data-price="55">
+                        G <input type="number" min="0" value="0" data-name="Banana Nevada G" data-price="65">
+                    </div>
                 </li>
                 <h3>Preço Pizzas Doces</h3>
                 <p>P (R$45,00) M (R$55,00) G (R$65,00)</p>
                 <h3>Borda Recheada</h3>
                 <p>Catupiry,cheddar,Doce de Leite,Creme de Avelã,Chocolate Branco,Chocolate Preto.</p>
                 <p>P (R$8,00) M(R$10,00) G(R$12,00)</p>
+                <div class="tamanhos">
+                    P <input type="number" min="0" value="0" data-name="Borda P" data-price="8">
+                    M <input type="number" min="0" value="0" data-name="Borda M" data-price="10">
+                    G <input type="number" min="0" value="0" data-name="Borda G" data-price="12">
+                </div>
             </ul>
         </section>
 
@@ -216,20 +564,40 @@
             <img src="img/cervejas .jpg" alt="cervejas" class="categoria-img">
             <ul>
                 <h3>Cervejas 600ml</h3>
-                <li>Antartica R$12,00</li>
-                <li>Brahma R$12,00</li>
-                <li>Original R$15,00</li>
+                <li class="com-input" data-price="12">Antártica<input type="number" min="0" value="0"
+                        data-name="Antartica" data-price="12">
+                </li>
+                <li class="com-input" data-price="12">Brahma<input type="number" min="0" value="0" data-name="Brahma"
+                        data-price="12">
+                </li>
+                <li class="com-input" data-price="15">Original<input type="number" min="0" value="0"
+                        data-name="Original" data-price="15">
+                </li>
                 <h3>Cerveja Litão</h3>
-                <li>Antártica R$14,00</li>
-                <li>Brahma R$14,00</li>
+                <li class="com-input" data-price="14">Antártica<input type="number" min="0" value="0"
+                        data-name="Antártica" data-price="14">
+                </li>
+                <li class="com-input" data-price="14">Brahma<input type="number" min="0" value="0" data-name="Brahma"
+                        data-price="14">
+                </li>
                 <h3>Cerveja Long Neck</h3>
-                <li>Corona R$12,00</li>
-                <li>Budweizer R$10,00</li>
-                <li>Haineken R$12,00</li>
+                <li class="com-input" data-price="12">Corona<input type="number" min="0" value="0" data-name="Corona"
+                        data-price="12">
+                </li>
+                <li class="com-input" data-price="10">Budweizer<input type="number" min="0" value="0"
+                        data-name="Budweizer" data-price="10">
+                </li>
+                <li class="com-input" data-price="12">Haineken<input type="number" min="0" value="0"
+                        data-name="Haineken" data-price="12">
+                </li>
                 <h3>Cerveja Lata</h3>
-                <li>Antártica R$6,00</li>
-                <li>Brahma sem Álcool R$7,00</li>
-                <li>Brahma Malzebier R$7,00</li>
+                <li class="com-input" data-price="6">Antártica<input type="number" min="0" value="0"
+                        data-name="Antartica" data-price="6">
+                </li>
+                <li class="com-input" data-price="7">Brahma sem Álcool<input type="number" min="0" value="0"
+                        data-name="Brahma sem Álcool" data-price="7"></li>
+                <li class="com-input" data-price="7">Brahma Malzebier<input type="number" min="0" value="0"
+                        data-name="Brahma Malzebier" data-price="7"></li>
             </ul>
         </section>
 
@@ -237,36 +605,71 @@
             <img src="img/bebidas.jpg" alt="bebidas" class="categoria-img">
             <ul>
                 <h3>Refrigerantes</h3>
-                <li>Refri Caçulinha R$3,00</li>
-                <li>Refri Lata R$6,00</li>
-                <li>Refri 600ml R$8,00</li>
-                <li>Refri 2Litros R$13,00</li>
-                <li>Refri Coca-Cola 2lt R$14,00</li>
+                <li class="com-input" data-price="3">Refri Caçulinha<input type="number" min="0" value="0"
+                        data-name="Refri Caçulinha" data-price="3"></li>
+                <li class="com-input" data-price="6">Refri Lata<input type="number" min="0" value="0"
+                        data-name="Refri Lata" data-price="6">
+                </li>
+                <li class="com-input" data-price="8">Refri<input type="number" min="0" value="0" data-name="Refri"
+                        data-price="8">
+                </li>
+                <li class="com-input" data-price="13">Refri 2Litros<input type="number" min="0" value="0"
+                        data-name="Refri 2Litros" data-price="13"></li>
+                <li class="com-input" data-price="14">Refri Coca-Cola 2lt<input type="number" min="0" value="0"
+                        data-name="Refri Coca-Cola 2lt" data-price="14"></li>
                 <h3>Água</h3>
-                <li>H2O R$8,00</li>
-                <li>Água C/Gás R$4,00</li>
-                <li>Água S/Gás R$4,00</li>
+                <li class="com-input" data-price="8">H2O<input type="number" min="0" value="0" data-name="H2O"
+                        data-price="8"></li>
+                <li class="com-input" data-price="4">Água C/Gás<input type="number" min="0" value="0"
+                        data-name="Água C/Gás" data-price="4">
+                </li>
+                <li class="com-input" data-price="4">Água S/Gás<input type="number" min="0" value="0"
+                        data-name="Água S/Gás" data-price="4">
+                </li>
                 <h3>Energético</h3>
-                <li>Red Bull R$12,00</li>
-                <li>Bally R$6,00</li>
+                <li class="com-input" data-price="12">Red Bull<input type="number" min="0" value="0"
+                        data-name="Red Bull" data-price="12">
+                </li>
+                <li class="com-input" data-price="6">Bally<input type="number" min="0" value="0" data-name="Bally"
+                        data-price="6"></li>
                 <h3>Suco</h3>
-                <li>Suco de Laranja R$8,00</li>
-                <li>Suco de Maracujá R$7,00</li>
-                <li>Suco de Abacaxi R$8,00</li>
-                <li>Caldo de Cana R$7,00</li>
+                <li class="com-input" data-price="8">Suco de Laranja<input type="number" min="0" value="0"
+                        data-name="Suco de Laranja" data-price="8"></li>
+                <li class="com-input" data-price="7">Suco de Maracujá<input type="number" min="0" value="0"
+                        data-name="Suco de Maracujá" data-price="7"></li>
+                <li class="com-input" data-price="8">Suco de Abacaxi<input type="number" min="0" value="0"
+                        data-name="Suco de Abacaxi" data-price="8"></li>
+                <li class="com-input" data-price="7">Caldo de Cana<input type="number" min="0" value="0"
+                        data-name="Caldo de Cana" data-price="7">
+                </li>
             </ul>
         </section>
 
         <section class="categoria caipirinhas">
             <img src="img/caipirinhas.jpg" alt="caipirinhas" class="categoria-img">
             <ul>
-                <li>Caipirinha de Limão R$16,00</li>
-                <li>Caipirinha de Morango R$18,00 </li>
-                <li>Caipirinha de Vinho R$16,00</li>
-                <li>Caipirinha de Abacaxi R$16,00</li>
-                <li>Caipirinha de Maracujá R$18,00</li>
-                <li>Nevada R$19,00</li>
-                <li>Pinã Colada R$18,00</li>
+                <li class="com-input" data-price="16">Caipirinha de Limão<input type="number" min="0" value="0"
+                        data-name="Caipirinha de Limão" data-price="16"></li>
+                <li class="com-input" data-price="18">Caipirinha de Morango<input type="number" min="0" value="0"
+                        data-name="Caipirinha de Morango" data-price="18"></li>
+                <li class="com-input" data-price="16">Caipirinha de Vinho<input type="number" min="0" value="0"
+                        data-name="Caipirinha de Vinho" data-price="16"></li>
+                <li class="com-input" data-price="16">Caipirinha de Abacaxi<input type="number" min="0" value="0"
+                        data-name="Caipirinha de Abacaxi" data-price="16"></li>
+                <li class="com-input" data-price="18">Caipirinha de Maracujá<input type="number" min="0" value="0"
+                        data-name="Caipirinha de Maracujá" data-price="18"></li>
+                <li class="com-input" data-price="19">Nevada<input type="number" min="0" value="0" data-name="Nevada"
+                        data-price="19">
+                </li>
+                <li class="com-input" data-price="18">Pinã Colada<input type="number" min="0" value="0"
+                        data-name="Pinã Colada" data-price="18">
+                </li>
+            </ul>
+        </section>
+        <section class="categoria acai">
+            <img src="" alt="" class="categoria-img">
+            <ul>
+                <li></li>
             </ul>
         </section>
 
@@ -277,6 +680,10 @@
     <p>&copy; 2025 Cardoso Caldo de Cana. Todos os direitos reservados.</p>
     </footer>
     <script src="script.js"></script>
+
+    <div id="carrinho-flutuante">
+        🛒 Carrinho: <span id="itens-count">0</span> itens - R$<span id="total-count">0.00</span>
+    </div>
 
 </body>
 
