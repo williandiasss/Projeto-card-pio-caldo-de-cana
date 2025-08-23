@@ -383,12 +383,6 @@ footer {
     /* 14px */
   }
 
-  input {
-    width: 75px;
-    font-size: 0.8rem;
-    padding: 3px 5px;
-  }
-
   #carrinho-flutuante {
     font-size: 0.85rem;
     padding: 8px 12px;
@@ -405,11 +399,11 @@ footer {
   }
 
   .input-align {
-    width: 40px;
-    font-size: 0.8rem;
-    padding: 2px 4px;
     flex-wrap: wrap;
-    border-bottom: 2px solid #eee;
+    /* garante que inputs não saiam da tela */
+    width: 100%;
+    gap: 5px;
+    padding: 0;
   }
 
   h1 {
@@ -427,9 +421,37 @@ footer {
     width: 92%;
   }
 
-  li {
-    padding: 12px;
-    font-size: 0.9rem;
+  .tamanhos {
+    flex-wrap: wrap;
+    /* permite quebra de linha dos inputs */
+    justify-content: center;
+    gap: 5px;
+  }
+
+  li.com-input input {
+    width: 100%;
+    /* ocupa toda a largura do li */
+    max-width: 120px;
+    /* limite máximo para não ficar gigante */
+    font-size: 0.85rem;
+    padding: 5px;
+    box-sizing: border-box;
+  }
+
+  li.com-input small {
+    font-size: 0.75rem;
+    /* menor para caber melhor */
+    margin-top: 3px;
+    display: block;
+    word-wrap: break-word;
+    /* evita que texto saia da tela */
+  }
+
+  li.com-input {
+    width: 100%;
+    padding: 8px;
+    /* reduz padding para caber na tela */
+    font-size: 0.85rem;
   }
 
   body {
