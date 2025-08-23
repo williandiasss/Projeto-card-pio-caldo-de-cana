@@ -170,7 +170,6 @@ li.com-input {
   display: flex;
   flex-direction: column;
   /* texto em cima, inputs embaixo */
-  align-items: flex-start;
   font-size: 16px;
   /* diminui o texto dentro */
 }
@@ -386,16 +385,22 @@ footer {
   #carrinho-flutuante {
     font-size: 0.85rem;
     padding: 8px 12px;
+      width: auto;
+    height: auto;
+    display: block;
   }
 
   #whatsapp-btn {
     font-size: 0.85rem;
     padding: 8px 12px;
+    width: auto;
+    height: auto;
+    display: block;
   }
 
   #whatsapp-btn svg {
-    width: 12px;
-    height: 12px;
+    width: 10px;
+    height: 10px;
   }
 
   .input-align {
@@ -445,6 +450,7 @@ footer {
     display: block;
     word-wrap: break-word;
     /* evita que texto saia da tela */
+    
   }
 
   li.com-input {
