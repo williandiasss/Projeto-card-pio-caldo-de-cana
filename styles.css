@@ -87,7 +87,10 @@ button:active {
 }
 
 button:focus {
-  outline: 2px solid #ffff;
+  outline: 3px solid #00fd00;
+  /* cor chamativa */
+  outline-offset: 3px;
+  /* distancia o contorno do botão */
 }
 
 .categoria-img {
@@ -256,20 +259,58 @@ footer {
   color: black;
   padding: 12px 18px;
   border-radius: 50px;
+  border: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
   cursor: pointer;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-  font-size: 16px;
+  font-size: 1rem;
   font-weight: bold;
   z-index: 1000;
-  transition: background 0.3s;
+  transition: background 0.2s, transform 0.2s;
+  bottom: 80px;
+  /* sobe um pouco pra não colidir com o botão fixo */
 }
 
 #carrinho-flutuante:hover {
   background: #0bda37;
+  transform: scale(1.05);
 }
 
 #carrinho-flutuante:active {
   opacity: 0.8;
+}
+
+.whatsapp-btn:hover {
+  background: #0bda37;
+  transform: scale(1.05);
+}
+
+.whatsapp-btn:active {
+  opacity: 0.8;
+}
+
+.whatsapp-btn {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  background: rgb(132, 248, 86);
+  color: black;
+  font-size: 1rem;
+  font-weight: bold;
+  padding: 14px 18px;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  transition: background 0.2s, transform 0.2s;
+  z-index: 1001;
 }
 
 
@@ -294,6 +335,22 @@ footer {
     /* menor que no desktop */
     font-size: 1rem;
   }
+
+  #carrinho-flutuante {
+    font-size: 1.1rem;
+    padding: 12px 20px;
+  }
+
+  .whatsapp-btn {
+    font-size: 1.1rem;
+    padding: 12px 20px;
+  }
+
+  .whatsapp-btn svg {
+    width: 20px;
+    height: 20px;
+  }
+
 
   h1 {
     font-size: 2.5rem;
@@ -330,6 +387,21 @@ footer {
     width: 75px;
     font-size: 0.8rem;
     padding: 3px 5px;
+  }
+
+  #carrinho-flutuante {
+    font-size: 0.85rem;
+    padding: 8px 12px;
+  }
+
+  #whatsapp-btn {
+    font-size: 0.85rem;
+    padding: 8px 12px;
+  }
+
+  #whatsapp-btn svg {
+    width: 12px;
+    height: 12px;
   }
 
   .input-align {
@@ -388,6 +460,21 @@ footer {
     width: 95px;
     font-size: 0.9rem;
     padding: 4px 6px;
+  }
+
+  #carrinho-flutuante {
+    font-size: 0.95rem;
+    padding: 9px 14px;
+  }
+
+  .whatsapp-btn {
+    font-size: 0.95rem;
+    padding: 9px 14px;
+  }
+
+  .whatsapp-btn svg {
+    width: 17px;
+    height: 17px;
   }
 
   .input-align {

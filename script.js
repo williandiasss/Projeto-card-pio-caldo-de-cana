@@ -1,125 +1,86 @@
 
 // Função principal que abre a categoria desejada
- function openCategory(categoryName) {
-    const allSections = document.querySelectorAll('.categoria');
+function openCategory(categoryName) {
+  const allSections = document.querySelectorAll('.categoria');
 
-    // Oculta todas as categorias
-    allSections.forEach(section => {
-       section.style.display = 'none';
-    });
+  //Oculta todas as categorias
+  allSections.forEach(section => {
+    section.style.display = 'none';
+  });
 
-    // Mostra apenas a categoria clicada
-    const targetSection = document.querySelector(`.categoria.${categoryName}`);
-    if (targetSection) {
-        targetSection.style.display = 'block';
-    }
+  // Mostra apenas a categoria clicada
+  const targetSection = document.querySelector(`.categoria.${categoryName}`);
+  if (targetSection) {
+    targetSection.style.display = 'block';
+  }
 }
 
 // Oculta todas as categorias ao carregar a página
 document.addEventListener('DOMContentLoaded', () => {
-    const allSections = document.querySelectorAll('.categoria');
-    allSections.forEach(section => {
-       section.style.display = 'none';
+  const allSections = document.querySelectorAll('.categoria');
+  allSections.forEach(section => {
+    section.style.display = 'none';
   });
-}); 
+});
 
 
+//Inicializa o carrinho
+//  atualizarCarrinho();
 
 
+//Seleciona inputs
+ // const pizzaInputs = document.querySelectorAll('.com-input input');
+//  const bordaInputs = document.querySelectorAll('.borda-info input');
+//  const itensCount = document.getElementById('itens-count');
+//  const totalCount = document.getElementById('total-count');
 
-
-
-
-
-
-//--document.addEventListener('DOMContentLoaded', () => {
-  // ----------------------
-  // Código existente: abrir categoria
-  // ----------------------
-  //const allSections = document.querySelectorAll('.categoria');
-  //allSections.forEach(section => {
-      //section.style.display = 'none'; // esconde todas ao carregar
- //});
-
-//  window.openCategory = function(categoryName) {
-    //  allSections.forEach(section => {
-       //   section.style.display = 'none'; // esconde todas
-    //  });
-   //  const targetSection = document.querySelector(`.categoria.${categoryName}`);
-    //  if (targetSection) {
-      //    targetSection.style.display = 'block'; // mostra a clicada
-   //   }
-//  }
-
-  // ----------------------
-  // Código do carrinho
-  // ----------------------
- // const carrinho = [];
-//  const tamanhosContainers = document.querySelectorAll('.tamanhos');
-//  const botaoWhatsapp = document.getElementById('enviar-whatsapp');
-//  const numeroLoja = '5511999999999'; // coloque o número da sua loja
-
+//Função para atualizar o carrinho
 //  function atualizarCarrinho() {
-    //  let carrinhoHTML = '';
-    //  let totalGeral = 0;
-    //  carrinho.forEach(item => {
-   //       carrinhoHTML += `<li>${item.nome} x${item.quantidade} = R$ ${item.total.toFixed(2)}</li>`;
-   //       totalGeral += item.total;
-  //    });
+//  let totalItens = 0;
+//  let totalPreco = 0;
 
-   //   let carrinhoLista = document.getElementById('carrinho-lista');
-   //   if (!carrinhoLista) {
-    //      carrinhoLista = document.createElement('ul');
-    //      carrinhoLista.id = 'carrinho-lista';
-   //       document.body.appendChild(carrinhoLista);
-   //   }
+  //Guarda a quantidade de pizzas por tamanho
+//  const pizzaQtd = { P: 0, M: 0, G: 0 };
 
-  //    carrinhoLista.innerHTML = carrinhoHTML + `<li><strong>Total: R$ ${totalGeral.toFixed(2)}</strong></li>`;
-//  }
+//  pizzaInputs.forEach(input => {
+//    const qtd = parseInt(input.value) || 0;
+//    const preco = parseFloat(input.dataset.price) || 0;
+  //  totalItens += qtd;
+//    totalPreco += qtd * preco;
 
-//  function adicionarAoCarrinho(nome, preco, quantidade) {
-    //  if (quantidade <= 0) return;
-   //   const itemExistente = carrinho.find(item => item.nome === nome);
-   //   if (itemExistente) {
-    //      itemExistente.quantidade += quantidade;
-    //      itemExistente.total = itemExistente.preco * itemExistente.quantidade;
-   //   } else {
-      //    carrinho.push({ nome, preco, quantidade, total: preco * quantidade });
-   //   }
-  //    atualizarCarrinho();
-//  }
-
-  // Eventos nos inputs de quantidade
-//  tamanhosContainers.forEach(container => {
-   //  const inputs = container.querySelectorAll('input');
-    //  inputs.forEach(input => {
-      //    input.addEventListener('change', e => {
-       //       const quantidade = parseInt(e.target.value);
-       //       const nome = e.target.dataset.name;
-       //       const preco = parseFloat(e.target.dataset.price);
-       //       adicionarAoCarrinho(nome, preco, quantidade);
-      //    });
-    //  });
+  //  if (input.dataset.name.endsWith("P")) pizzaQtd.P += qtd;
+ //   if (input.dataset.name.endsWith("M")) pizzaQtd.M += qtd;
+  //  if (input.dataset.name.endsWith("G")) pizzaQtd.G += qtd;
 //  });
 
-  // Enviar pedido pelo WhatsApp
-//  botaoWhatsapp.addEventListener('click', () => {
-    //  if (carrinho.length === 0) {
-     ///     alert('O carrinho está vazio!');
-    //      return;
-  //    }
+  //Atualiza inputs de borda
+//  bordaInputs.forEach(input => {
+//    const tamanho = input.dataset.name.split(' ')[1]; // P, M ou G
+//    if (pizzaQtd[tamanho] === 0) {
+  //    input.disabled = true;
+  //    input.value = 0; // reseta valor
+  //  } else {
+  //    input.disabled = false;
+   // }
 
-   //   let mensagem = 'Olá! Gostaria de fazer o pedido:\n';
-   //   carrinho.forEach(item => {
-  //        mensagem += `- ${item.nome} x${item.quantidade} = R$ ${item.total.toFixed(2)}\n`;
-  //    });
+  //  const qtd = parseInt(input.value) || 0;
+  //  const preco = parseFloat(input.dataset.price) || 0;
+   // totalItens += qtd;
+     //totalPreco += qtd * preco;
+   // });
 
-   //   const totalGeral = carrinho.reduce((acc, item) => acc + item.total, 0);
-   //   mensagem += `Total: R$ ${totalGeral.toFixed(2)}`;
+  //Atualiza display do carrinho
+ // itensCount.textContent = totalItens;
+  // totalCount.textContent = totalPreco.toFixed(2);
+// }
 
-    //  const url = `https://api.whatsapp.com/send?phone=${numeroLoja}&text=${encodeURIComponent(mensagem)}`;
-     // window.open(url, '_blank');
-//  });
-//});
+// Adiciona evento de input em todos os inputs
+// pizzaInputs.forEach(input => input.addEventListener('input', atualizarCarrinho));
+// bordaInputs.forEach(input => input.addEventListener('input', atualizarCarrinho));
+
+
+
+
+
 
 
