@@ -388,6 +388,7 @@ footer {
       width: auto;
     height: auto;
     display: block;
+     flex-wrap: wrap;
   }
 
   #whatsapp-btn {
@@ -396,6 +397,7 @@ footer {
     width: auto;
     height: auto;
     display: block;
+     flex-wrap: wrap;
   }
 
   #whatsapp-btn svg {
@@ -441,6 +443,7 @@ footer {
     font-size: 0.85rem;
     padding: 5px;
     box-sizing: border-box;
+     flex-wrap: wrap;
   }
 
   li.com-input small {
@@ -451,6 +454,7 @@ footer {
     display: block;
     word-wrap: break-word;
     /* evita que texto saia da tela */
+     flex-wrap: wrap;
     
   }
 
@@ -459,6 +463,7 @@ footer {
     padding: 8px;
     /* reduz padding para caber na tela */
     font-size: 0.85rem;
+     flex-wrap: wrap;
   }
 
   body {
