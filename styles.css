@@ -343,6 +343,7 @@ footer {
   .whatsapp-btn {
     font-size: 1.1rem;
     padding: 12px 20px;
+
   }
 
   .whatsapp-btn svg {
@@ -369,110 +370,119 @@ footer {
 
 @media (max-width: 360px) {
 
-  /* Ajustes para celulares muito pequenos */
+  
+  /* Corpo e containers principais */
+  body {
+    width: 100%;
+    padding: 0 5px;
+    font-size: 0.875rem; /* 14px */
+    box-sizing: border-box;
+  }
+
   .Container-button {
+    display: flex;
+    flex-wrap: nowrap;          /* mantém todos os botões na mesma linha */
     gap: 5px;
     padding: 6px;
-    overflow-x: auto;
+    overflow-x: auto;           /* ativa scroll horizontal */
+    -webkit-overflow-scrolling: touch; /* rolagem suave em mobile */
+    width: 100%;
+    box-sizing: border-box;
   }
 
   button {
-    padding: 8px 10px;
-    font-size: 0.875rem;
-    /* 14px */
+   flex: 0 0 auto;       /* mantém tamanho natural do botão */
+  min-width: auto;       /* largura mínima automática */
+  white-space: nowrap;   /* mantém texto em uma linha */
+  overflow: visible;     /* deixa o texto visível */
+  text-overflow: unset;  /* remove reticências */
+  padding: 8px 12px;
+  font-size: 0.875rem;
+  box-sizing: border-box;
   }
 
+  /* Carrinho flutuante */
   #carrinho-flutuante {
-    font-size: 0.85rem;
-    padding: 8px 12px;
-      width: auto;
-    height: auto;
-    display: block;
-     flex-wrap: wrap;
-  }
-
-  #whatsapp-btn {
     font-size: 0.85rem;
     padding: 8px 12px;
     width: auto;
     height: auto;
-    display: block;
-     flex-wrap: wrap;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    box-sizing: border-box;
+    justify-content: center;
+    align-items: center;
+  }
+
+  /* Botão WhatsApp */
+  #whatsapp-btn {
+    font-size: 0.85rem;
+    padding: 8px 12px;
+    width: 100%;
+    height: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    box-sizing: border-box;
   }
 
   #whatsapp-btn svg {
-    width: 10px;
-    height: 10px;
+    width: 16px;
+    height: 16px;
   }
 
-  .input-align {
-    flex-wrap: wrap;
-    /* garante que inputs não saiam da tela */
-    width: 100%;
-    gap: 5px;
-    padding: 0;
-  }
-
+  /* Cabeçalhos */
   h1 {
-    font-size: 1.5rem;
-    /* 24px */
+    font-size: 1.5rem; /* 24px */
   }
 
   h3 {
-    font-size: 1.25rem;
-    /* 20px */
+    font-size: 1.25rem; /* 20px */
   }
 
+  /* Logos e imagens */
   .logo,
   .categoria-img {
     width: 92%;
+    height: auto;
   }
 
-  .tamanhos {
-    flex-wrap: wrap;
-    /* permite quebra de linha dos inputs */
-    justify-content: center;
-    gap: 5px;
-  }
-
-  li.com-input input {
+  /* Lista de pizzas */
+  li.com-input {
     width: 100%;
-    /* ocupa toda a largura do li */
-    max-width: 120px;
-    /* limite máximo para não ficar gigante */
+    padding: 8px;
     font-size: 0.85rem;
-    padding: 5px;
     box-sizing: border-box;
-     flex-wrap: wrap;
   }
 
   li.com-input small {
     width: 100%;
     font-size: 0.75rem;
-    /* menor para caber melhor */
     margin-top: 3px;
     display: block;
-    word-wrap: break-word;
-    /* evita que texto saia da tela */
-     flex-wrap: wrap;
-    
+    word-wrap: break-word; /* evita que o texto ultrapasse */
   }
 
-  li.com-input {
+  /* Inputs de quantidade */
+  li.com-input input {
     width: 100%;
-    padding: 8px;
-    /* reduz padding para caber na tela */
+    max-width: 120px;
     font-size: 0.85rem;
-     flex-wrap: wrap;
+    padding: 5px;
+    box-sizing: border-box;
   }
 
-  body {
-    width: 100%;
-    font-size: 0.875rem;
-    /* 14px */
-    padding: 0 5px;
+  /* Div de tamanhos (P, M, G) */
+  .tamanhos {
+    display: flex;
+    flex-wrap: wrap;        /* permite quebrar linha */
+    justify-content: center; /* centraliza inputs */
+    gap: 5px;
   }
 }
+
 
 @media (min-width: 391px) and (max-width: 480px) {
   body {
