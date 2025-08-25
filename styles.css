@@ -444,6 +444,7 @@ footer {
   }
 
   li.com-input small {
+    width: 100%;
     font-size: 0.75rem;
     /* menor para caber melhor */
     margin-top: 3px;
