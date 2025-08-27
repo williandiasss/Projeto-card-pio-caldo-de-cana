@@ -62,7 +62,7 @@ header {
 }
 
 button {
-    background-color: rgb(132, 248, 86);
+    background-color: #39FF14;
     border: none;
     border-radius: 5px;
     color: black;
@@ -254,7 +254,6 @@ footer {
     justify-content: center;
     align-items: center;
     gap: 8px;
-    cursor: pointer;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
     font-size: 0.9rem;
     font-weight: bold;
@@ -264,8 +263,8 @@ footer {
     text-align: center;
 }
 
-#carrinho-flutuante:hover {
-    background: #0bda37;
+#carrinho-flutuante {
+    background: #39FF14;
 }
 
 .whatsapp-btn {
@@ -273,7 +272,7 @@ footer {
     left: 15px;
     right: 15px;
     bottom: 15px;
-    background: rgb(132, 248, 86);
+    background: #39FF14;
     color: black;
     font-size: 1rem;
     font-weight: bold;
