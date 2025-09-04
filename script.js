@@ -1,7 +1,13 @@
-
-// Sistema de carrinho
+// Sistema de carrinho universal para todas as categorias
 let carrinho = [];
 let totalCarrinho = 0;
+
+// Configurações temporárias específicas para pizzas (por seção)
+let configuracoesTemporarias = {
+  'pizzas-trad': { bordaSelecionada: null, tamanhoBorda: null, querBorda: false },
+  'pizzas-especiais': { bordaSelecionada: null, tamanhoBorda: null, querBorda: false },
+  'pizzas-doces': { bordaSelecionada: null, tamanhoBorda: null, querBorda: false }
+};
 
 // Função principal que abre a categoria desejada
 function openCategory(categoryName) {
@@ -19,102 +25,449 @@ function openCategory(categoryName) {
   }
 }
 
-// Função para atualizar o carrinho flutuante
-function atualizarCarrinho() {
-  const itensCount = document.getElementById('itens-count');
-  const totalCount = document.getElementById('total-count');
+// ========== FUNÇÕES DO PAINEL LATERAL DO CARRINHO ==========
+
+function abrirCarrinho() {
+  const carrinhoPanel = document.getElementById('carrinho-painel');
+  const overlay = document.getElementById('overlay');
   
-  let totalItens = 0;
-  let valorTotal = 0;
+  if (carrinhoPanel) carrinhoPanel.classList.add('ativo');
+  if (overlay) overlay.classList.add('ativo');
   
-  carrinho.forEach(item => {
-    totalItens += item.quantidade;
-    valorTotal += item.subtotal;
-  });
+  document.body.style.overflow = 'hidden';
+  atualizarListaCarrinhoPanel();
+}
+
+function fecharCarrinho() {
+  const carrinhoPanel = document.getElementById('carrinho-painel');
+  const overlay = document.getElementById('overlay');
   
-  itensCount.textContent = totalItens;
-  totalCount.textContent = valorTotal.toFixed(2);
+  if (carrinhoPanel) carrinhoPanel.classList.remove('ativo');
+  if (overlay) overlay.classList.remove('ativo');
   
-  // Mostrar/esconder o carrinho baseado no conteúdo
-  const carrinhoFlutuante = document.getElementById('carrinho-flutuante');
-  if (totalItens > 0) {
-    carrinhoFlutuante.style.display = 'flex';
+  document.body.style.overflow = 'auto';
+}
+
+function atualizarListaCarrinhoPanel() {
+  const listaCarrinho = document.getElementById('lista-carrinho');
+  const totalSidebar = document.getElementById('total-sidebar');
+  
+  if (!listaCarrinho) return;
+  
+  listaCarrinho.innerHTML = '';
+  
+  if (carrinho.length === 0) {
+    listaCarrinho.innerHTML = `
+      <div class="carrinho-vazio">
+        <div class="carrinho-vazio-icone">🛒</div>
+        <p>Seu carrinho está vazio</p>
+        <small>Adicione produtos para continuar</small>
+      </div>
+    `;
   } else {
-    carrinhoFlutuante.style.display = 'none';
+    carrinho.forEach((item, index) => {
+      const itemElement = document.createElement('li');
+      itemElement.className = 'item-carrinho';
+      
+      let nomeExibicao = item.nome;
+      if (isPizza(item.nome) && !nomeExibicao.toLowerCase().includes('pizza')) {
+        nomeExibicao = `Pizza ${nomeExibicao}`;
+      }
+      
+      if (item.borda) {
+        nomeExibicao += ` (Borda: ${item.borda})`;
+      }
+      
+      itemElement.innerHTML = `
+        <div class="item-info">
+          <div class="item-nome">${nomeExibicao}</div>
+          <div class="item-preco">R$ ${item.subtotal.toFixed(2).replace('.', ',')}</div>
+        </div>
+        <div class="item-quantidade">
+          <button class="btn-quantidade" onclick="alterarQuantidadeCarrinho(${index}, -1)">−</button>
+          <span class="quantidade-numero">${item.quantidade}</span>
+          <button class="btn-quantidade" onclick="alterarQuantidadeCarrinho(${index}, 1)">+</button>
+        </div>
+      `;
+      
+      listaCarrinho.appendChild(itemElement);
+    });
+  }
+  
+  if (totalSidebar) {
+    const valorTotal = carrinho.reduce((total, item) => total + item.subtotal, 0);
+    totalSidebar.textContent = valorTotal.toFixed(2).replace('.', ',');
   }
 }
 
-// Função para adicionar/remover item do carrinho
-function gerenciarItem(nome, preco, quantidade) {
-  const itemExistente = carrinho.find(item => item.nome === nome);
-  
-  if (quantidade === 0) {
-    // Remove o item se a quantidade for 0
-    carrinho = carrinho.filter(item => item.nome !== nome);
-  } else {
-    if (itemExistente) {
-      // Atualiza item existente
-      itemExistente.quantidade = quantidade;
-      itemExistente.subtotal = preco * quantidade;
+function alterarQuantidadeCarrinho(index, mudanca) {
+  if (carrinho[index]) {
+    const novaQuantidade = carrinho[index].quantidade + mudanca;
+    
+    if (novaQuantidade <= 0) {
+      carrinho.splice(index, 1);
     } else {
-      // Adiciona novo item
-      carrinho.push({
-        nome: nome,
-        preco: preco,
-        quantidade: quantidade,
-        subtotal: preco * quantidade
-      });
+      carrinho[index].quantidade = novaQuantidade;
+      carrinho[index].subtotal = carrinho[index].preco * novaQuantidade;
     }
+    
+    atualizarCarrinho();
+    atualizarListaCarrinhoPanel();
+  }
+}
+
+// ========== FUNÇÕES AUXILIARES ==========
+
+function isPizza(nome) {
+  const pizzasTracionais = [
+    'Quatro Queijos', 'Bacon', 'Calabresa', 'Brócolis', 'Frango com Catupiry',
+    'Mista', 'Pasqualina', 'Portuguesa', 'Marguerita', 'Lombo Defumado',
+    'Alho e Óleo', 'Tomate Seco', 'Peperoni', 'Baiana', 'Agridoce'
+  ];
+  
+  const pizzasEspeciais = [
+    'Frango Especial', 'Brócolis Especial', 'Calabresa Especial', 'Palmito',
+    'Strogonoff de Carne', 'Americana', 'Alcatra com Doritos', 'Coração Acebolado',
+    'Camarão ao Molho', 'Camarão Especial'
+  ];
+  
+  const pizzasDoces = [
+    'Chocolate Preto com Morango', 'Chocolate Branco com Morango', 'Charge', 'Confete', 
+    'Brigadeiro Especial', 'Prestígio', 'Paçoquita', 'Banana com Chocolate', 
+    'Banana com Canela', 'Abacaxi', 'Banana Nevada'
+  ];
+  
+  return [...pizzasTracionais, ...pizzasEspeciais, ...pizzasDoces].some(pizza => nome.includes(pizza));
+}
+
+function getTamanhoPizza(nome) {
+  if (nome.includes(' P')) return 'P';
+  if (nome.includes(' M')) return 'M';
+  if (nome.includes(' G')) return 'G';
+  return null;
+}
+
+function obterPrecoBorda(tamanho) {
+  const precosBorda = { 'P': 8, 'M': 10, 'G': 12 };
+  return precosBorda[tamanho] || 0;
+}
+
+// ========== SISTEMA UNIVERSAL PARA TODAS AS CATEGORIAS ==========
+
+function adicionarItemAoCarrinho(nome, preco, quantidade, secao = null) {
+  if (quantidade <= 0) return;
+  
+  let borda = null;
+  let precoUnitario = preco;
+  
+  // Se é pizza, verifica configuração de borda
+  if (isPizza(nome) && secao && configuracoesTemporarias[secao]) {
+    const config = configuracoesTemporarias[secao];
+    
+    if (config.querBorda && config.bordaSelecionada && config.tamanhoBorda) {
+      const tamanhoPizza = getTamanhoPizza(nome);
+      
+      if (tamanhoPizza === config.tamanhoBorda) {
+        borda = config.bordaSelecionada;
+        precoUnitario += obterPrecoBorda(tamanhoPizza);
+      }
+    }
+  }
+  
+  // Adiciona cada quantidade como item individual para manter independência
+  for (let i = 0; i < quantidade; i++) {
+    const novoItem = {
+      id: Date.now() + Math.random(),
+      nome: nome,
+      preco: precoUnitario,
+      quantidade: 1,
+      subtotal: precoUnitario,
+      borda: borda
+    };
+    
+    carrinho.push(novoItem);
   }
   
   atualizarCarrinho();
 }
 
-// Função para sincronizar bordas com pizzas
-function sincronizarBorda(tamanho) {
-  const bordaInputs = document.querySelectorAll('input[data-name*="Borda"]');
-  let temPizzaDesseTamanho = false;
+// Função universal para criar botões "Adicionar ao Carrinho" em qualquer categoria
+function criarBotaoAdicionarUniversal(nomeCategoria) {
+  const secaoElement = document.querySelector(`.categoria.${nomeCategoria}`);
+  if (!secaoElement) return;
   
-  // Verifica se há alguma pizza desse tamanho no carrinho
-  carrinho.forEach(item => {
-    if (item.nome.includes('Pizza') || item.nome.includes('P') || item.nome.includes('M') || item.nome.includes('G')) {
-      if ((tamanho === 'P' && item.nome.includes(' P')) ||
-          (tamanho === 'M' && item.nome.includes(' M')) ||
-          (tamanho === 'G' && item.nome.includes(' G'))) {
-        temPizzaDesseTamanho = true;
+  let botaoAdicionar = secaoElement.querySelector('.btn-adicionar-carrinho-universal');
+  if (!botaoAdicionar) {
+    botaoAdicionar = document.createElement('div');
+    botaoAdicionar.className = 'btn-adicionar-carrinho-universal';
+    botaoAdicionar.style.cssText = `
+      background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+      color: white;
+      border: none;
+      padding: 15px 25px;
+      border-radius: 25px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      margin: 20px 0;
+      width: 100%;
+      text-align: center;
+      transition: all 0.3s ease;
+      user-select: none;
+      display: none;
+    `;
+    botaoAdicionar.textContent = '🛒 Adicionar Selecionados ao Carrinho';
+    
+    botaoAdicionar.addEventListener('mouseenter', () => {
+      botaoAdicionar.style.transform = 'translateY(-2px)';
+      botaoAdicionar.style.boxShadow = '0 6px 20px rgba(37, 211, 102, 0.3)';
+    });
+    
+    botaoAdicionar.addEventListener('mouseleave', () => {
+      botaoAdicionar.style.transform = 'translateY(0)';
+      botaoAdicionar.style.boxShadow = 'none';
+    });
+    
+    botaoAdicionar.addEventListener('click', function() {
+      adicionarItensCategoriaAoCarrinho(nomeCategoria);
+    });
+    
+    secaoElement.appendChild(botaoAdicionar);
+  }
+}
+
+function adicionarItensCategoriaAoCarrinho(nomeCategoria) {
+  const secaoElement = document.querySelector(`.categoria.${nomeCategoria}`);
+  if (!secaoElement) return;
+  
+  const inputs = secaoElement.querySelectorAll('input[type="number"]:not([data-name*="Borda"])');
+  let itensAdicionados = 0;
+  
+  inputs.forEach(input => {
+    const quantidade = parseInt(input.value) || 0;
+    if (quantidade > 0) {
+      const nome = input.getAttribute('data-name');
+      const preco = parseFloat(input.getAttribute('data-price'));
+      
+      if (nome && !isNaN(preco)) {
+        adicionarItemAoCarrinho(nome, preco, quantidade, nomeCategoria);
+        itensAdicionados += quantidade;
+        input.value = 0; // Zera após adicionar
       }
     }
   });
   
-  // Se não tem pizza desse tamanho, zera a borda correspondente
-  if (!temPizzaDesseTamanho) {
-    bordaInputs.forEach(input => {
-      if (input.getAttribute('data-name').includes(`Borda ${tamanho}`)) {
-        input.value = 0;
-        gerenciarItem(input.getAttribute('data-name'), parseFloat(input.getAttribute('data-price')), 0);
-      }
-    });
+  // Para pizzas, também verifica bordas
+  if (['pizzas-trad', 'pizzas-especiais', 'pizzas-doces'].includes(nomeCategoria)) {
+    resetarConfiguracaoSecaoPizza(nomeCategoria);
   }
-}
-
-// Função para validar bordas ao adicionar pizzas
-function validarBordaPizza(inputElement) {
-  const nomePizza = inputElement.getAttribute('data-name');
-  const quantidade = parseInt(inputElement.value);
   
-  if (nomePizza && (nomePizza.includes(' P') || nomePizza.includes(' M') || nomePizza.includes(' G'))) {
-    let tamanho = '';
-    if (nomePizza.includes(' P')) tamanho = 'P';
-    else if (nomePizza.includes(' M')) tamanho = 'M';
-    else if (nomePizza.includes(' G')) tamanho = 'G';
-    
-    if (quantidade === 0) {
-      sincronizarBorda(tamanho);
-    }
+  if (itensAdicionados > 0) {
+    alert(`${itensAdicionados} item(ns) adicionado(s) ao carrinho!`);
+    esconderBotaoAdicionar(nomeCategoria);
+  } else {
+    alert('Selecione pelo menos um item para adicionar ao carrinho.');
   }
 }
 
-// Função para gerar mensagem do pedido
+function mostrarBotaoAdicionar(nomeCategoria) {
+  const botao = document.querySelector(`.categoria.${nomeCategoria} .btn-adicionar-carrinho-universal`);
+  if (botao) {
+    botao.style.display = 'block';
+  }
+}
+
+function esconderBotaoAdicionar(nomeCategoria) {
+  const botao = document.querySelector(`.categoria.${nomeCategoria} .btn-adicionar-carrinho-universal`);
+  if (botao) {
+    botao.style.display = 'none';
+  }
+}
+
+function resetarConfiguracaoSecaoPizza(secao) {
+  const secaoElement = document.querySelector(`.categoria.${secao}`);
+  if (!secaoElement) return;
+  
+  configuracoesTemporarias[secao] = {
+    bordaSelecionada: null,
+    tamanhoBorda: null,
+    querBorda: false
+  };
+  
+  const checkboxQuerBorda = secaoElement.querySelector('#quer-borda');
+  if (checkboxQuerBorda) checkboxQuerBorda.checked = false;
+  
+  const inputsBorda = secaoElement.querySelectorAll('input[data-name*="Borda"]');
+  inputsBorda.forEach(input => {
+    input.value = 0;
+    input.disabled = true;
+    input.style.opacity = '0.5';
+  });
+  
+  const checkboxesSabor = secaoElement.querySelectorAll('.sabor-borda input[type="checkbox"]');
+  checkboxesSabor.forEach(checkbox => {
+    checkbox.checked = false;
+    checkbox.disabled = true;
+    checkbox.style.opacity = '0.5';
+  });
+}
+
+// ========== SISTEMA DE BORDAS PARA PIZZAS ==========
+
+function inicializarSistemaBordas() {
+  const secoesPizza = ['pizzas-trad', 'pizzas-especiais', 'pizzas-doces'];
+  
+  secoesPizza.forEach(secao => {
+    const secaoElement = document.querySelector(`.categoria.${secao}`);
+    if (!secaoElement) return;
+    
+    const config = configuracoesTemporarias[secao];
+    const checkboxQuerBorda = secaoElement.querySelector('#quer-borda');
+    const inputsBordaTamanho = secaoElement.querySelectorAll('input[data-name*="Borda"]');
+    const checkboxesSaborBorda = secaoElement.querySelectorAll('.sabor-borda input[type="checkbox"]');
+    
+    // Estado inicial
+    inputsBordaTamanho.forEach(input => {
+      input.disabled = true;
+      input.style.opacity = '0.5';
+      input.value = 0;
+    });
+    
+    checkboxesSaborBorda.forEach(checkbox => {
+      checkbox.disabled = true;
+      checkbox.style.opacity = '0.5';
+      checkbox.checked = false;
+    });
+    
+    if (checkboxQuerBorda) {
+      checkboxQuerBorda.addEventListener('change', function() {
+        config.querBorda = this.checked;
+        
+        if (config.querBorda) {
+          inputsBordaTamanho.forEach(input => {
+            input.disabled = false;
+            input.style.opacity = '1';
+          });
+        } else {
+          inputsBordaTamanho.forEach(input => {
+            input.disabled = true;
+            input.style.opacity = '0.5';
+            input.value = 0;
+          });
+          
+          checkboxesSaborBorda.forEach(checkbox => {
+            checkbox.disabled = true;
+            checkbox.style.opacity = '0.5';
+            checkbox.checked = false;
+          });
+          
+          config.tamanhoBorda = null;
+          config.bordaSelecionada = null;
+        }
+      });
+    }
+    
+    inputsBordaTamanho.forEach(input => {
+      input.addEventListener('change', function() {
+        const quantidade = parseInt(this.value) || 0;
+        const nomeBorda = this.getAttribute('data-name');
+        let tamanho = '';
+        
+        if (nomeBorda.includes('Borda P')) tamanho = 'P';
+        else if (nomeBorda.includes('Borda M')) tamanho = 'M';
+        else if (nomeBorda.includes('Borda G')) tamanho = 'G';
+        
+        if (quantidade > 0) {
+          inputsBordaTamanho.forEach(outroInput => {
+            if (outroInput !== this) outroInput.value = 0;
+          });
+          
+          config.tamanhoBorda = tamanho;
+          
+          checkboxesSaborBorda.forEach(checkbox => {
+            checkbox.disabled = false;
+            checkbox.style.opacity = '1';
+          });
+        } else {
+          config.tamanhoBorda = null;
+          config.bordaSelecionada = null;
+          
+          checkboxesSaborBorda.forEach(checkbox => {
+            checkbox.disabled = true;
+            checkbox.style.opacity = '0.5';
+            checkbox.checked = false;
+          });
+        }
+      });
+    });
+    
+    checkboxesSaborBorda.forEach(checkbox => {
+      checkbox.addEventListener('change', function() {
+        if (this.checked) {
+          checkboxesSaborBorda.forEach(cb => {
+            if (cb !== this) cb.checked = false;
+          });
+          config.bordaSelecionada = this.value;
+        } else {
+          config.bordaSelecionada = null;
+        }
+      });
+    });
+  });
+}
+
+// ========== LISTENERS UNIVERSAIS PARA INPUTS ==========
+
+function adicionarListenersUniversais() {
+  // Lista de todas as categorias
+  const categorias = [
+    'lanches', 'hamburguer', 'tabuas', 'torre-batata', 'porções',
+    'pizzas-trad', 'pizzas-especiais', 'pizzas-doces', 
+    'cervejas', 'bebidas', 'caipirinhas', 'acai'
+  ];
+  
+  categorias.forEach(categoria => {
+    criarBotaoAdicionarUniversal(categoria);
+    
+    const secaoElement = document.querySelector(`.categoria.${categoria}`);
+    if (!secaoElement) return;
+    
+    const inputs = secaoElement.querySelectorAll('input[type="number"]:not([data-name*="Borda"])');
+    
+    inputs.forEach(input => {
+      input.addEventListener('input', function() {
+        const temItens = Array.from(inputs).some(inp => (parseInt(inp.value) || 0) > 0);
+        
+        if (temItens) {
+          mostrarBotaoAdicionar(categoria);
+        } else {
+          esconderBotaoAdicionar(categoria);
+        }
+      });
+    });
+  });
+}
+
+// ========== OUTRAS FUNÇÕES ==========
+
+function atualizarCarrinho() {
+  const itensCount = document.getElementById('itens-count');
+  const totalCount = document.getElementById('total-count');
+  
+  let totalItens = carrinho.reduce((total, item) => total + item.quantidade, 0);
+  let valorTotal = carrinho.reduce((total, item) => total + item.subtotal, 0);
+  
+  if (itensCount) itensCount.textContent = totalItens;
+  if (totalCount) totalCount.textContent = valorTotal.toFixed(2).replace('.', ',');
+  
+  const carrinhoFlutuante = document.getElementById('carrinho-flutuante');
+  if (carrinhoFlutuante) {
+    carrinhoFlutuante.style.display = totalItens > 0 ? 'block' : 'none';
+  }
+  
+  totalCarrinho = valorTotal;
+}
+
 function gerarMensagemPedido() {
   if (carrinho.length === 0) {
     alert('Seu carrinho está vazio! Adicione alguns itens antes de finalizar o pedido.');
@@ -127,87 +480,17 @@ function gerarMensagemPedido() {
   let totalGeral = 0;
   let numeroItem = 1;
   
-  // Organiza itens por categoria
-  const categorias = {
-    'Lanches': [],
-    'Especiais': [],
-    'Tábuas': [],
-    'Torre': [],
-    'Porções': [],
-    'Pizzas Tradicionais': [],
-    'Pizzas Especiais': [],
-    'Pizzas Doces': [],
-    'Bordas': [],
-    'Cervejas': [],
-    'Bebidas': [],
-    'Caipirinhas': [],
-    'Açaí': [],
-    'Adicionais': []
-  };
-  
   carrinho.forEach(item => {
-    let categoria = 'Outros';
+    mensagem += `${numeroItem}. ${item.nome}\n`;
+    mensagem += `   Qtd: ${item.quantidade} | Valor: R$ ${item.subtotal.toFixed(2)}\n`;
     
-    if (item.nome.includes('Misto') || item.nome.includes('X ') || item.nome.includes('Hamburguer')) {
-      categoria = item.nome.includes('Hamburguer') ? 'Especiais' : 'Lanches';
-    } else if (item.nome.includes('Tábua')) {
-      categoria = 'Tábuas';
-    } else if (item.nome.includes('Torre')) {
-      categoria = 'Torre';
-    } else if (item.nome.includes('Batata') || item.nome.includes('Aipim') || item.nome.includes('Calabresa') || 
-               item.nome.includes('Carne') || item.nome.includes('Camarão') || item.nome.includes('Casquinha') ||
-               item.nome.includes('Cebola') || item.nome.includes('Coração') || item.nome.includes('Coxinha') ||
-               item.nome.includes('Frango') || item.nome.includes('Filezinho') || item.nome.includes('Isca') ||
-               item.nome.includes('Polenta') || item.nome.includes('Frios') || item.nome.includes('Pãozinho') ||
-               item.nome.includes('Ovo de Codorna')) {
-      categoria = 'Porções';
-    } else if (item.nome.includes('Borda')) {
-      categoria = 'Bordas';
-    } else if ((item.nome.includes('Quatro Queijos') || item.nome.includes('Bacon') || item.nome.includes('Calabresa') ||
-                item.nome.includes('Brócolis') || item.nome.includes('Frango com Catupiry') || item.nome.includes('Mista') ||
-                item.nome.includes('Pasqualina') || item.nome.includes('Portuguesa') || item.nome.includes('Marguerita') ||
-                item.nome.includes('Lombo Defumado') || item.nome.includes('Alho e Óleo') || item.nome.includes('Tomate Seco') ||
-                item.nome.includes('Peperoni') || item.nome.includes('Baiana') || item.nome.includes('Agridoce')) && 
-               !item.nome.includes('Especial')) {
-      categoria = 'Pizzas Tradicionais';
-    } else if (item.nome.includes('Especial') || item.nome.includes('Palmito') || item.nome.includes('Strogonoff') ||
-               item.nome.includes('Americana') || item.nome.includes('Alcatra') || item.nome.includes('Coração Acebolado') ||
-               item.nome.includes('Camarão')) {
-      categoria = 'Pizzas Especiais';
-    } else if (item.nome.includes('Chocolate') || item.nome.includes('Charge') || item.nome.includes('Confete') ||
-               item.nome.includes('Brigadeiro') || item.nome.includes('Prestígio') || item.nome.includes('Paçoquita') ||
-               item.nome.includes('Banana') || item.nome.includes('Abacaxi') || item.nome.includes('Nevada')) {
-      categoria = 'Pizzas Doces';
-    } else if (item.nome.includes('Antártica') || item.nome.includes('Brahma') || item.nome.includes('Original') ||
-               item.nome.includes('Corona') || item.nome.includes('Budweizer') || item.nome.includes('Heineken')) {
-      categoria = 'Cervejas';
-    } else if (item.nome.includes('Refri') || item.nome.includes('H2O') || item.nome.includes('Água') ||
-               item.nome.includes('Red Bull') || item.nome.includes('Bally') || item.nome.includes('Suco') ||
-               item.nome.includes('Caldo de Cana')) {
-      categoria = 'Bebidas';
-    } else if (item.nome.includes('Caipirinha') || item.nome.includes('Nevada') || item.nome.includes('Piña Colada')) {
-      categoria = 'Caipirinhas';
-    } else if (item.nome.includes('Partido') || item.nome.includes('Gostinho') || item.nome.includes('+ Carne') ||
-               item.nome.includes('+ Frango') || item.nome.includes('Grãos') || item.nome.includes('Salada') ||
-               item.nome.includes('Queijo') && !item.nome.includes('Quatro') || item.nome.includes('Ovo') && !item.nome.includes('Codorna')) {
-      categoria = 'Adicionais';
+    if (item.borda) {
+      mensagem += `   🍕 Borda: ${item.borda}\n`;
     }
     
-    if (!categorias[categoria]) categorias[categoria] = [];
-    categorias[categoria].push(item);
-  });
-  
-  // Adiciona itens por categoria
-  Object.keys(categorias).forEach(categoria => {
-    if (categorias[categoria].length > 0) {
-      mensagem += `*${categoria.toUpperCase()}:*\n`;
-      categorias[categoria].forEach(item => {
-        mensagem += `${numeroItem}. ${item.nome}\n`;
-        mensagem += `   Qtd: ${item.quantidade} | Valor: R$ ${item.subtotal.toFixed(2)}\n\n`;
-        totalGeral += item.subtotal;
-        numeroItem++;
-      });
-    }
+    mensagem += '\n';
+    totalGeral += item.subtotal;
+    numeroItem++;
   });
   
   mensagem += '━━━━━━━━━━━━━━━━━━━━━━━━\n';
@@ -218,7 +501,6 @@ function gerarMensagemPedido() {
   return mensagem;
 }
 
-// Função para enviar pedido pelo WhatsApp
 function enviarPedido() {
   const mensagem = gerarMensagemPedido();
   
@@ -231,120 +513,29 @@ function enviarPedido() {
   }
 }
 
-// Event listeners para todos os inputs
-function adicionarEventListeners() {
-  const inputs = document.querySelectorAll('input[type="number"]');
-  
-  inputs.forEach(input => {
-    input.addEventListener('change', function() {
-      const nome = this.getAttribute('data-name');
-      const preco = parseFloat(this.getAttribute('data-price'));
-      const quantidade = parseInt(this.value) || 0;
-      
-      if (nome && !isNaN(preco)) {
-        gerenciarItem(nome, preco, quantidade);
-        
-        // Valida bordas se for uma pizza
-        validarBordaPizza(this);
-      }
-    });
-    
-    // Event listener para input em tempo real (não só no change)
-    input.addEventListener('input', function() {
-      const nome = this.getAttribute('data-name');
-      const preco = parseFloat(this.getAttribute('data-price'));
-      const quantidade = parseInt(this.value) || 0;
-      
-      if (nome && !isNaN(preco)) {
-        gerenciarItem(nome, preco, quantidade);
-      }
-    });
-  });
-}
+// ========== INICIALIZAÇÃO ==========
 
-// Função para validar bordas ao escolher pizzas
-function validarBordas() {
-  const pizzaInputs = document.querySelectorAll('input[data-name*="Pizza"], input[data-name$=" P"], input[data-name$=" M"], input[data-name$=" G"]');
-  const bordaInputs = document.querySelectorAll('input[data-name*="Borda"]');
-  
-  pizzaInputs.forEach(pizzaInput => {
-    pizzaInput.addEventListener('change', function() {
-      const nomePizza = this.getAttribute('data-name');
-      const quantidade = parseInt(this.value) || 0;
-      
-      // Detecta o tamanho da pizza
-      let tamanho = '';
-      if (nomePizza.endsWith(' P')) tamanho = 'P';
-      else if (nomePizza.endsWith(' M')) tamanho = 'M';
-      else if (nomePizza.endsWith(' G')) tamanho = 'G';
-      
-      if (tamanho) {
-        // Se a quantidade da pizza for 0, remove a borda correspondente
-        if (quantidade === 0) {
-          const bordaCorrespondente = document.querySelector(`input[data-name="Borda ${tamanho}"]`);
-          if (bordaCorrespondente && bordaCorrespondente.value > 0) {
-            bordaCorrespondente.value = 0;
-            const precoBorda = parseFloat(bordaCorrespondente.getAttribute('data-price'));
-            gerenciarItem(`Borda ${tamanho}`, precoBorda, 0);
-          }
-        }
-      }
-    });
-  });
-  
-  // Valida se pode adicionar borda
-  bordaInputs.forEach(bordaInput => {
-    bordaInput.addEventListener('change', function() {
-      const nomeBorda = this.getAttribute('data-name');
-      const quantidade = parseInt(this.value) || 0;
-      
-      if (quantidade > 0) {
-        let tamanho = '';
-        if (nomeBorda.includes('Borda P')) tamanho = 'P';
-        else if (nomeBorda.includes('Borda M')) tamanho = 'M';
-        else if (nomeBorda.includes('Borda G')) tamanho = 'G';
-        
-        // Verifica se tem pizza do mesmo tamanho
-        let temPizzaDoTamanho = false;
-        const pizzasDoTamanho = document.querySelectorAll(`input[data-name$=" ${tamanho}"]`);
-        
-        pizzasDoTamanho.forEach(pizzaInput => {
-          if (parseInt(pizzaInput.value) > 0 && !pizzaInput.getAttribute('data-name').includes('Borda')) {
-            temPizzaDoTamanho = true;
-          }
-        });
-        
-        if (!temPizzaDoTamanho) {
-          alert(`Para adicionar borda ${tamanho}, você precisa ter pelo menos uma pizza tamanho ${tamanho} no seu pedido.`);
-          this.value = 0;
-          const precoBorda = parseFloat(this.getAttribute('data-price'));
-          gerenciarItem(nomeBorda, precoBorda, 0);
-        }
-      }
-    });
-  });
-}
-
-// Inicialização quando a página carrega
 document.addEventListener('DOMContentLoaded', () => {
-  // Oculta todas as categorias ao carregar
   const allSections = document.querySelectorAll('.categoria');
   allSections.forEach(section => {
     section.style.display = 'none';
   });
   
-  // Esconde o carrinho inicialmente
   const carrinhoFlutuante = document.getElementById('carrinho-flutuante');
   if (carrinhoFlutuante) {
     carrinhoFlutuante.style.display = 'none';
   }
   
-  // Adiciona event listeners
-  adicionarEventListeners();
-  validarBordas();
+  inicializarSistemaBordas();
+  adicionarListenersUniversais();
   
-  // Atualiza o carrinho na inicialização
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      fecharCarrinho();
+    }
+  });
+  
   atualizarCarrinho();
   
-  console.log('Sistema de pedidos inicializado com sucesso!');
+  console.log('Sistema de carrinho universal inicializado para todas as categorias!');
 });

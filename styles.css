@@ -152,6 +152,79 @@ li.com-input small {
     opacity: 0.9;
     line-height: 1.3;
 }
+.sabor-borda {
+   /* Estilização base para os checkboxes de borda */
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 15px 0;
+    padding: 15px; 
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+    font-weight: bold;
+}
+
+.sabor-borda label {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    padding: 8px 12px;
+    border-radius: 20px;
+    background-color: #fff;
+    border: 2px solid #ddd;
+    min-width: fit-content;
+}
+
+.sabor-borda label:hover {
+    background-color: #f0f0f0;
+    border-color: #007bff;
+    transform: translateY(-2px);
+}
+
+.sabor-borda input[type="checkbox"] {
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border: 2px solid #ddd;
+    border-radius: 3px;
+    margin-right: 8px;
+    position: relative;
+    background-color: #fff;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.sabor-borda input[type="checkbox"]:hover {
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+.sabor-borda input[type="checkbox"]:checked {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.sabor-borda input[type="checkbox"]:checked::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.sabor-borda label:has(input[type="checkbox"]:checked) {
+    background-color: #e3f2fd;
+    border-color: #007bff;
+    color: #0056b3;
+}
+
 
 input {
     width: 100px;
@@ -239,34 +312,246 @@ footer {
     margin-top: 2rem;
     width: 100%;
 }
-
+/* CSS do Carrinho Flutuante - Base */
 #carrinho-flutuante {
     position: fixed;
-    bottom: 80px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: #138808;
-    color: black;
-    padding: 12px 18px;
+    top: 20px;
+    right: 20px;
+    background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+    color: white;
+    padding: 12px 20px;
     border-radius: 50px;
-    border: none;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-    font-size: 0.9rem;
-    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
+    font-weight: 600;
+    font-size: 14px;
     z-index: 1000;
-    transition: background 0.2s, transform 0.2s;
-    max-width: 90%;
+    transition: all 0.3s ease;
+    user-select: none;
+}
+
+#carrinho-flutuante:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(37, 211, 102, 0.4);
+}
+
+#carrinho-flutuante:active {
+    transform: translateY(0);
+}
+
+/* Overlay escuro */
+#overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1001;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+#overlay.ativo {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Painel lateral do carrinho */
+#carrinho-painel {
+    position: fixed;
+    top: 0;
+    right: -400px;
+    width: 400px;
+    height: 100vh;
+    background: white;
+    z-index: 1002;
+    transition: right 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    box-shadow: -5px 0 25px rgba(0, 0, 0, 0.15);
+}
+
+#carrinho-painel.ativo {
+    right: 0;
+}
+
+/* Header do carrinho */
+.carrinho-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+    color: white;
+    flex-shrink: 0;
+}
+
+.carrinho-header h2 {
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.carrinho-header button {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.carrinho-header button:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: rotate(90deg);
+}
+
+/* Lista do carrinho */
+#lista-carrinho {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0;
+    list-style: none;
+    margin: 0;
+}
+
+.item-carrinho {
+    display: flex;
+    align-items: center;
+    padding: 15px 20px;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background-color 0.2s ease;
+}
+
+.item-carrinho:hover {
+    background-color: #f8f9fa;
+}
+
+.item-info {
+    flex: 1;
+}
+
+.item-nome {
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: #333;
+    font-size: 14px;
+    line-height: 1.3;
+}
+
+.item-preco {
+    color: #25D366;
+    font-weight: 600;
+    font-size: 13px;
+}
+
+.item-quantidade {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: 15px;
+    flex-shrink: 0;
+}
+
+.btn-quantidade {
+    width: 30px;
+    height: 30px;
+    border: 1px solid #ddd;
+    background: white;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    color: #666;
+    transition: all 0.2s ease;
+    font-size: 16px;
+}
+
+.btn-quantidade:hover {
+    background: #f8f9fa;
+    border-color: #25D366;
+    color: #25D366;
+}
+
+.quantidade-numero {
+    min-width: 30px;
+    text-align: center;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+/* Footer do carrinho */
+.carrinho-footer {
+    padding: 20px;
+    border-top: 2px solid #f0f0f0;
+    background: #f8f9fa;
+    flex-shrink: 0;
+}
+
+.carrinho-footer strong {
+    display: block;
+    font-size: 18px;
+    color: #333;
+    margin-bottom: 15px;
     text-align: center;
 }
 
-#carrinho-flutuante {
-    background: #138808;
+/* Carrinho vazio */
+.carrinho-vazio {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    color: #999;
+    text-align: center;
+    height: 100%;
 }
 
+.carrinho-vazio-icone {
+    font-size: 48px;
+    margin-bottom: 15px;
+    opacity: 0.5;
+}
+
+.carrinho-vazio p {
+    margin: 8px 0 4px 0;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.carrinho-vazio small {
+    font-size: 13px;
+    opacity: 0.7;
+}
+
+/* Scrollbar personalizada */
+#lista-carrinho::-webkit-scrollbar {
+    width: 6px;
+}
+
+#lista-carrinho::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+#lista-carrinho::-webkit-scrollbar-thumb {
+    background: #25D366;
+    border-radius: 3px;
+}
+
+#lista-carrinho::-webkit-scrollbar-thumb:hover {
+    background: #128C7E;
+}
 .whatsapp-btn {
     position: fixed;
     left: 15px;
@@ -342,6 +627,32 @@ footer {
         font-size: 0.8rem;
         margin-top: 3px;
     }
+    
+      .sabor-borda {
+        gap: 6px;
+        padding: 8px;
+        margin: 8px 0;
+    }
+    
+    .sabor-borda label {
+        font-size: 11px;
+        padding: 5px 6px;
+        flex: 1 1 calc(50% - 3px);
+        min-width: calc(50% - 3px);
+        justify-content: center;
+        text-align: center;
+        border-radius: 15px;
+    }
+    
+    .sabor-borda input[type="checkbox"] {
+        width: 14px;
+        height: 14px;
+        margin-right: 5px;
+    }
+    
+    .sabor-borda input[type="checkbox"]:checked::after {
+        font-size: 9px;
+    }
 
     input {
         width: 85px;
@@ -366,11 +677,48 @@ footer {
     }
 
     #carrinho-flutuante {
-        font-size: 0.8rem;
-        padding: 10px 15px;
-        bottom: 75px;
+        top: 15px;
+        right: 15px;
+        padding: 10px 16px;
+        font-size: 12px;
     }
-
+    
+    #carrinho-painel {
+        width: 100vw;
+        right: -100vw;
+    }
+    
+    .carrinho-header {
+        padding: 18px;
+    }
+    
+    .carrinho-header h2 {
+        font-size: 18px;
+    }
+    
+    .carrinho-header button {
+        width: 32px;
+        height: 32px;
+        font-size: 15px;
+    }
+    
+    .item-carrinho {
+        padding: 12px 18px;
+    }
+    
+    .item-nome {
+        font-size: 13px;
+    }
+    
+    .item-preco {
+        font-size: 12px;
+    }
+    
+    .btn-quantidade {
+        width: 28px;
+        height: 28px;
+        font-size: 15px;
+    }
     .whatsapp-btn {
         font-size: 0.9rem;
         padding: 12px 15px;
@@ -403,24 +751,87 @@ footer {
     li.com-input small {
         font-size: 0.75rem;
     }
-
-    input {
-        width: 75px;
-        height: 30px;
-        font-size: 0.85rem;
+    .sabor-borda {
+        width: 50px;
+        height: 15px;
     }
 
-    .tamanhos input, .input-align input {
-        width: 65px;
-        height: 30px;
+         .sabor-borda {
+        gap: 8px;
+        padding: 10px;
+        margin: 10px 0;
+    }
+    
+    .sabor-borda label {
+        font-size: 12px;
+        padding: 6px 8px;
+        flex: 1 1 calc(50% - 4px);
+        min-width: calc(50% - 4px);
+        justify-content: center;
+        text-align: center;
+    }
+    
+    .sabor-borda input[type="checkbox"] {
+        width: 16px;
+        height: 16px;
+        margin-right: 6px;
+    }
+    
+    .sabor-borda input[type="checkbox"]:checked::after {
+        font-size: 10px;
     }
 
-    h3 {
-        font-size: 1.1rem;
+ #carrinho-flutuante {
+        top: 10px;
+        right: 10px;
+        padding: 8px 12px;
+        font-size: 11px;
+        border-radius: 30px;
     }
-
-    p {
-        font-size: 0.9rem;
+    
+    #carrinho-painel {
+        width: 100vw;
+        right: -100vw;
+    }
+    
+    .carrinho-header {
+        padding: 15px;
+    }
+    
+    .carrinho-header h2 {
+        font-size: 16px;
+    }
+    
+    .carrinho-header button {
+        width: 28px;
+        height: 28px;
+        font-size: 14px;
+    }
+    
+    .item-carrinho {
+        padding: 12px 15px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    
+    .item-quantidade {
+        margin-left: 0;
+        align-self: flex-end;
+    }
+    
+    .btn-quantidade {
+        width: 28px;
+        height: 28px;
+        font-size: 14px;
+    }
+    
+    .carrinho-footer {
+        padding: 15px;
+    }
+    
+    .carrinho-footer strong {
+        font-size: 16px;
     }
 }
 
@@ -473,6 +884,29 @@ footer {
         line-height: 1.4;
     }
 
+          .sabor-borda {
+        gap: 10px;
+        padding: 12px;
+    }
+    
+    .sabor-borda label {
+        font-size: 13px;
+        padding: 7px 10px;
+        flex: 1 1 calc(50% - 5px);
+        min-width: calc(50% - 5px);
+        justify-content: center;
+    }
+    
+    .sabor-borda input[type="checkbox"] {
+        width: 17px;
+        height: 17px;
+        margin-right: 7px;
+    }
+    
+    .sabor-borda input[type="checkbox"]:checked::after {
+        font-size: 11px;
+    }
+
     input {
         width: 110px;
         height: 38px;
@@ -516,13 +950,28 @@ footer {
         margin: 18px 0;
         border-radius: 8px;
     }
-
-    #carrinho-flutuante {
-        font-size: 1rem;
+ #carrinho-flutuante {
+        top: 20px;
+        right: 20px;
+        padding: 11px 18px;
+        font-size: 13px;
+    }
+    
+    #carrinho-painel {
+        width: 85vw;
+        right: -85vw;
+    }
+    
+    .carrinho-header {
+        padding: 20px;
+    }
+    
+    .item-carrinho {
         padding: 14px 20px;
-        bottom: 85px;
-        border-radius: 60px;
-        max-width: 85%;
+    }
+    
+    .item-quantidade {
+        gap: 8px;
     }
 
     .whatsapp-btn {
@@ -622,6 +1071,29 @@ footer {
         min-width: 200px;
     }
 
+    .sabor-borda {
+        gap: 15px;
+        padding: 18px;
+    }
+    
+    .sabor-borda label {
+        font-size: 15px;
+        padding: 10px 15px;
+        flex: 1 1 calc(33.333% - 10px);
+        min-width: calc(33.333% - 10px);
+        justify-content: flex-start;
+    }
+    
+    .sabor-borda input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        margin-right: 10px;
+    }
+    
+    .sabor-borda input[type="checkbox"]:checked::after {
+        font-size: 14px;
+    }
+
     input {
         width: 120px;
         height: 42px;
@@ -672,13 +1144,57 @@ footer {
         grid-column: span 2;
     }
 
-    #carrinho-flutuante {
-        font-size: 1.1rem;
-        padding: 16px 24px;
-        bottom: 100px;
-        border-radius: 50px;
-        max-width: 400px;
+   #carrinho-flutuante {
+        top: 25px;
+        right: 25px;
+        padding: 14px 22px;
+        font-size: 15px;
     }
+    
+    #carrinho-painel {
+        width: 420px;
+        right: -420px;
+    }
+    
+    .carrinho-header {
+        padding: 25px;
+    }
+    
+    .carrinho-header h2 {
+        font-size: 22px;
+    }
+    
+    .carrinho-header button {
+        width: 38px;
+        height: 38px;
+        font-size: 17px;
+    }
+    
+    .item-carrinho {
+        padding: 18px 25px;
+    }
+    
+    .item-nome {
+        font-size: 15px;
+    }
+    
+    .item-preco {
+        font-size: 14px;
+    }
+    
+    .btn-quantidade {
+        width: 32px;
+        height: 32px;
+    }
+    
+    .carrinho-footer {
+        padding: 25px;
+    }
+    
+    .carrinho-footer strong {
+        font-size: 20px;
+    }
+}
 
     .whatsapp-btn {
         font-size: 1.2rem;
@@ -696,7 +1212,7 @@ footer {
         padding: 2rem;
         margin-top: 3rem;
     }
-}
+
 
 
 /* Media Query para Desktop (1024px+) */
@@ -757,6 +1273,30 @@ footer {
         margin-left: 20px;
     }
 
+    .sabor-borda {
+        gap: 18px;
+        padding: 20px;
+        justify-content: space-between;
+    }
+    
+    .sabor-borda label {
+        font-size: 16px;
+        padding: 12px 18px;
+        flex: 1 1 calc(33.333% - 12px);
+        min-width: calc(33.333% - 12px);
+        max-width: calc(33.333% - 12px);
+    }
+    
+    .sabor-borda input[type="checkbox"] {
+        width: 22px;
+        height: 22px;
+        margin-right: 12px;
+    }
+    
+    .sabor-borda input[type="checkbox"]:checked::after {
+        font-size: 15px;
+    }
+
     input {
         width: 130px;
         height: 45px;
@@ -798,11 +1338,55 @@ footer {
         grid-column: span 3;
     }
 
-    #carrinho-flutuante {
-        font-size: 1.2rem;
-        padding: 18px 28px;
-        bottom: 120px;
-        max-width: 450px;
+   #carrinho-flutuante {
+        top: 30px;
+        right: 30px;
+        padding: 15px 25px;
+        font-size: 16px;
+    }
+    
+    #carrinho-painel {
+        width: 450px;
+        right: -450px;
+    }
+    
+    .carrinho-header {
+        padding: 30px;
+    }
+    
+    .carrinho-header h2 {
+        font-size: 24px;
+    }
+    
+    .carrinho-header button {
+        width: 40px;
+        height: 40px;
+        font-size: 18px;
+    }
+    
+    .item-carrinho {
+        padding: 20px 30px;
+    }
+    
+    .item-nome {
+        font-size: 16px;
+    }
+    
+    .item-preco {
+        font-size: 15px;
+    }
+    
+    .btn-quantidade {
+        width: 34px;
+        height: 34px;
+    }
+    
+    .carrinho-footer {
+        padding: 30px;
+    }
+    
+    .carrinho-footer strong {
+        font-size: 22px;
     }
 
     .whatsapp-btn {
@@ -875,6 +1459,30 @@ footer {
         margin-left: 25px;
     }
 
+     .sabor-borda {
+        gap: 20px;
+        padding: 25px;
+        max-width: 100%;
+    }
+    
+    .sabor-borda label {
+        font-size: 17px;
+        padding: 15px 20px;
+        flex: 1 1 calc(33.333% - 13px);
+        min-width: calc(33.333% - 13px);
+        max-width: calc(33.333% - 13px);
+    }
+    
+    .sabor-borda input[type="checkbox"] {
+        width: 24px;
+        height: 24px;
+        margin-right: 15px;
+    }
+    
+    .sabor-borda input[type="checkbox"]:checked::after {
+        font-size: 16px;
+    }
+
     input {
         width: 140px;
         height: 48px;
@@ -915,13 +1523,79 @@ footer {
         grid-column: span 4;
     }
 
-    #carrinho-flutuante {
-        font-size: 1.3rem;
-        padding: 20px 32px;
-        bottom: 130px;
-        max-width: 500px;
+ #carrinho-flutuante {
+        top: 35px;
+        right: 35px;
+        padding: 16px 28px;
+        font-size: 17px;
     }
-
+    
+    #carrinho-painel {
+        width: 480px;
+        right: -480px;
+    }
+    
+    .carrinho-header {
+        padding: 35px;
+    }
+    
+    .carrinho-header h2 {
+        font-size: 26px;
+    }
+    
+    .carrinho-header button {
+        width: 42px;
+        height: 42px;
+        font-size: 19px;
+    }
+    
+    .item-carrinho {
+        padding: 22px 35px;
+    }
+    
+    .item-nome {
+        font-size: 17px;
+    }
+    
+    .item-preco {
+        font-size: 16px;
+    }
+    
+    .btn-quantidade {
+        width: 36px;
+        height: 36px;
+        font-size: 17px;
+    }
+    
+    .quantidade-numero {
+        font-size: 15px;
+    }
+    
+    .carrinho-footer {
+        padding: 35px;
+    }
+    
+    .carrinho-footer strong {
+        font-size: 24px;
+        margin-bottom: 20px;
+    }
+    
+    .carrinho-vazio {
+        padding: 50px 30px;
+    }
+    
+    .carrinho-vazio-icone {
+        font-size: 56px;
+        margin-bottom: 20px;
+    }
+    
+    .carrinho-vazio p {
+        font-size: 18px;
+    }
+    
+    .carrinho-vazio small {
+        font-size: 14px;
+    }
     .whatsapp-btn {
         font-size: 1.4rem;
         padding: 22px 35px;
