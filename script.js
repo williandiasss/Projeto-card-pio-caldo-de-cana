@@ -48,6 +48,7 @@ function fecharCarrinho() {
   document.body.style.overflow = 'auto';
 }
 
+// CORRIGIDO: Estrutura HTML dos itens com as classes CSS corretas
 function atualizarListaCarrinhoPanel() {
   const listaCarrinho = document.getElementById('lista-carrinho');
   const totalSidebar = document.getElementById('total-sidebar');
@@ -78,15 +79,18 @@ function atualizarListaCarrinhoPanel() {
         nomeExibicao += ` (Borda: ${item.borda})`;
       }
       
+      // ESTRUTURA HTML CORRIGIDA com as classes CSS necessárias
       itemElement.innerHTML = `
         <div class="item-info">
-          <div class="item-nome">${nomeExibicao}</div>
-          <div class="item-preco">R$ ${item.subtotal.toFixed(2).replace('.', ',')}</div>
-        </div>
-        <div class="item-quantidade">
-          <button class="btn-quantidade" onclick="alterarQuantidadeCarrinho(${index}, -1)">−</button>
-          <span class="quantidade-numero">${item.quantidade}</span>
-          <button class="btn-quantidade" onclick="alterarQuantidadeCarrinho(${index}, 1)">+</button>
+          <div class="item-detalhes">
+            <div class="item-nome">${nomeExibicao}</div>
+            <div class="item-preco">R$ ${item.subtotal.toFixed(2).replace('.', ',')}</div>
+          </div>
+          <div class="item-quantidade">
+            <button class="btn-quantidade" onclick="alterarQuantidadeCarrinho(${index}, -1)">−</button>
+            <span class="quantidade-numero">${item.quantidade}</span>
+            <button class="btn-quantidade" onclick="alterarQuantidadeCarrinho(${index}, 1)">+</button>
+          </div>
         </div>
       `;
       
@@ -144,6 +148,24 @@ function getTamanhoPizza(nome) {
   if (nome.includes(' P')) return 'P';
   if (nome.includes(' M')) return 'M';
   if (nome.includes(' G')) return 'G';
+  return null;
+}
+
+// NOVO: Função para detectar tamanho da pizza selecionada na seção
+function getTamanhoPizzaSelecionadaNaSecao(secao) {
+  const secaoElement = document.querySelector(`.categoria.${secao}`);
+  if (!secaoElement) return null;
+  
+  const inputs = secaoElement.querySelectorAll('input[type="number"]:not([data-name*="Borda"])');
+  
+  for (let input of inputs) {
+    const quantidade = parseInt(input.value) || 0;
+    if (quantidade > 0) {
+      const nome = input.getAttribute('data-name');
+      return getTamanhoPizza(nome);
+    }
+  }
+  
   return null;
 }
 
@@ -312,7 +334,7 @@ function resetarConfiguracaoSecaoPizza(secao) {
   });
 }
 
-// ========== SISTEMA DE BORDAS PARA PIZZAS ==========
+// ========== SISTEMA DE BORDAS MELHORADO PARA PIZZAS ==========
 
 function inicializarSistemaBordas() {
   const secoesPizza = ['pizzas-trad', 'pizzas-especiais', 'pizzas-doces'];
@@ -325,39 +347,69 @@ function inicializarSistemaBordas() {
     const checkboxQuerBorda = secaoElement.querySelector('#quer-borda');
     const inputsBordaTamanho = secaoElement.querySelectorAll('input[data-name*="Borda"]');
     const checkboxesSaborBorda = secaoElement.querySelectorAll('.sabor-borda input[type="checkbox"]');
+    const inputsPizza = secaoElement.querySelectorAll('input[type="number"]:not([data-name*="Borda"])');
     
-    // Estado inicial
-    inputsBordaTamanho.forEach(input => {
-      input.disabled = true;
-      input.style.opacity = '0.5';
-      input.value = 0;
+    // Estado inicial - tudo desabilitado
+    resetarTodosSistemasBorda(secao);
+    
+    // PASSO 1: Monitorar seleção de pizza para habilitar checkbox "quer borda"
+    inputsPizza.forEach(input => {
+      input.addEventListener('input', function() {
+        const temPizzaSelecionada = Array.from(inputsPizza).some(inp => (parseInt(inp.value) || 0) > 0);
+        
+        if (checkboxQuerBorda) {
+          if (temPizzaSelecionada) {
+            checkboxQuerBorda.disabled = false;
+            checkboxQuerBorda.style.opacity = '1';
+            checkboxQuerBorda.parentElement.style.opacity = '1';
+          } else {
+            // Se não tem pizza selecionada, reseta tudo
+            resetarTodosSistemasBorda(secao);
+          }
+        }
+      });
     });
     
-    checkboxesSaborBorda.forEach(checkbox => {
-      checkbox.disabled = true;
-      checkbox.style.opacity = '0.5';
-      checkbox.checked = false;
-    });
-    
+    // PASSO 2: Checkbox "quer borda" habilita tamanhos de borda correspondentes
     if (checkboxQuerBorda) {
       checkboxQuerBorda.addEventListener('change', function() {
         config.querBorda = this.checked;
         
         if (config.querBorda) {
-          inputsBordaTamanho.forEach(input => {
-            input.disabled = false;
-            input.style.opacity = '1';
-          });
+          // Detectar tamanho da pizza selecionada
+          const tamanhoPizza = getTamanhoPizzaSelecionadaNaSecao(secao);
+          
+          if (tamanhoPizza) {
+            // Habilitar apenas o tamanho de borda correspondente à pizza
+            inputsBordaTamanho.forEach(input => {
+              const nomeBorda = input.getAttribute('data-name');
+              const ehTamanhoCorreto = nomeBorda.includes(`Borda ${tamanhoPizza}`);
+              
+              if (ehTamanhoCorreto) {
+                input.disabled = false;
+                input.style.opacity = '1';
+                input.parentElement.style.opacity = '1';
+              } else {
+                input.disabled = true;
+                input.style.opacity = '0.3';
+                input.parentElement.style.opacity = '0.3';
+                input.value = 0;
+              }
+            });
+          }
         } else {
+          // Desabilitar bordas e sabores
           inputsBordaTamanho.forEach(input => {
             input.disabled = true;
             input.style.opacity = '0.5';
+            input.parentElement.style.opacity = '0.5';
             input.value = 0;
           });
           
           checkboxesSaborBorda.forEach(checkbox => {
             checkbox.disabled = true;
             checkbox.style.opacity = '0.5';
+            checkbox.parentElement.style.opacity = '0.5';
             checkbox.checked = false;
           });
           
@@ -367,8 +419,9 @@ function inicializarSistemaBordas() {
       });
     }
     
+    // PASSO 3: Seleção de quantidade de borda habilita sabores
     inputsBordaTamanho.forEach(input => {
-      input.addEventListener('change', function() {
+      input.addEventListener('input', function() {
         const quantidade = parseInt(this.value) || 0;
         const nomeBorda = this.getAttribute('data-name');
         let tamanho = '';
@@ -378,29 +431,37 @@ function inicializarSistemaBordas() {
         else if (nomeBorda.includes('Borda G')) tamanho = 'G';
         
         if (quantidade > 0) {
+          // Garantir que apenas um tamanho de borda seja selecionado
           inputsBordaTamanho.forEach(outroInput => {
-            if (outroInput !== this) outroInput.value = 0;
+            if (outroInput !== this && !outroInput.disabled) {
+              outroInput.value = 0;
+            }
           });
           
           config.tamanhoBorda = tamanho;
           
+          // Habilitar sabores de borda
           checkboxesSaborBorda.forEach(checkbox => {
             checkbox.disabled = false;
             checkbox.style.opacity = '1';
+            checkbox.parentElement.style.opacity = '1';
           });
         } else {
           config.tamanhoBorda = null;
           config.bordaSelecionada = null;
           
+          // Desabilitar sabores
           checkboxesSaborBorda.forEach(checkbox => {
             checkbox.disabled = true;
             checkbox.style.opacity = '0.5';
+            checkbox.parentElement.style.opacity = '0.5';
             checkbox.checked = false;
           });
         }
       });
     });
     
+    // PASSO 4: Seleção de sabor da borda (apenas um por vez)
     checkboxesSaborBorda.forEach(checkbox => {
       checkbox.addEventListener('change', function() {
         if (this.checked) {
@@ -413,6 +474,45 @@ function inicializarSistemaBordas() {
         }
       });
     });
+  });
+}
+
+// NOVA: Função para resetar todos os sistemas de borda
+function resetarTodosSistemasBorda(secao) {
+  const secaoElement = document.querySelector(`.categoria.${secao}`);
+  if (!secaoElement) return;
+  
+  const config = configuracoesTemporarias[secao];
+  
+  config.querBorda = false;
+  config.tamanhoBorda = null;
+  config.bordaSelecionada = null;
+  
+  // Desabilitar checkbox "quer borda"
+  const checkboxQuerBorda = secaoElement.querySelector('#quer-borda');
+  if (checkboxQuerBorda) {
+    checkboxQuerBorda.checked = false;
+    checkboxQuerBorda.disabled = true;
+    checkboxQuerBorda.style.opacity = '0.5';
+    checkboxQuerBorda.parentElement.style.opacity = '0.5';
+  }
+  
+  // Desabilitar todos os inputs de borda
+  const inputsBorda = secaoElement.querySelectorAll('input[data-name*="Borda"]');
+  inputsBorda.forEach(input => {
+    input.value = 0;
+    input.disabled = true;
+    input.style.opacity = '0.5';
+    input.parentElement.style.opacity = '0.5';
+  });
+  
+  // Desabilitar todos os sabores de borda
+  const checkboxesSabor = secaoElement.querySelectorAll('.sabor-borda input[type="checkbox"]');
+  checkboxesSabor.forEach(checkbox => {
+    checkbox.checked = false;
+    checkbox.disabled = true;
+    checkbox.style.opacity = '0.5';
+    checkbox.parentElement.style.opacity = '0.5';
   });
 }
 
@@ -537,5 +637,5 @@ document.addEventListener('DOMContentLoaded', () => {
   
   atualizarCarrinho();
   
-  console.log('Sistema de carrinho universal inicializado para todas as categorias!');
+  console.log('Sistema de carrinho universal inicializado com bordas sequenciais!');
 });

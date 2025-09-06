@@ -586,7 +586,7 @@ footer {
 
 /* Media Query para telas muito pequenas (≤360px) */
 @media (max-width: 360px) {
-    body {
+   body {
         padding: 0;
         padding-bottom: 120px;
     }
@@ -627,13 +627,13 @@ footer {
         font-size: 0.8rem;
         margin-top: 3px;
     }
-    
-      .sabor-borda {
+           
+    .sabor-borda {
         gap: 6px;
         padding: 8px;
         margin: 8px 0;
     }
-    
+         
     .sabor-borda label {
         font-size: 11px;
         padding: 5px 6px;
@@ -643,13 +643,13 @@ footer {
         text-align: center;
         border-radius: 15px;
     }
-    
+         
     .sabor-borda input[type="checkbox"] {
         width: 14px;
         height: 14px;
         margin-right: 5px;
     }
-    
+         
     .sabor-borda input[type="checkbox"]:checked::after {
         font-size: 9px;
     }
@@ -675,50 +675,78 @@ footer {
         font-size: 0.95rem;
         padding: 8px 0;
     }
-
+       
     #carrinho-flutuante {
         top: 15px;
-        right: 15px;
-        padding: 10px 16px;
-        font-size: 12px;
+        right: 10px; /* Reduzido de 15px para 10px */
+        left: auto; /* Garante que não há conflito de posicionamento */
+        padding: 8px 12px; /* Reduzido padding direito */
+        font-size: 11px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: calc(100vw - 20px); /* Ajustado para nova margem */
+        min-width: 80px; /* Largura mínima para não ficar muito pequeno */
+        box-sizing: border-box;
+        transform: none; /* Remove qualquer transform que possa causar overflow */
     }
-    
+                  
     #carrinho-painel {
         width: 100vw;
         right: -100vw;
+        left: 0; /* Garante posicionamento correto */
     }
-    
+             
     .carrinho-header {
-        padding: 18px;
+        padding: 18px 15px; /* Reduz padding lateral */
     }
-    
+             
     .carrinho-header h2 {
         font-size: 18px;
+        margin: 0; /* Remove margem que pode causar overflow */
     }
-    
+             
     .carrinho-header button {
         width: 32px;
         height: 32px;
         font-size: 15px;
     }
-    
+             
     .item-carrinho {
-        padding: 12px 18px;
+        padding: 12px 15px; /* Reduz padding lateral */
     }
-    
+             
     .item-nome {
         font-size: 13px;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        hyphens: auto; /* Adiciona hifenização automática */
+        max-width: 100%; /* Garante que não ultrapasse o container */
     }
-    
+             
     .item-preco {
         font-size: 12px;
     }
-    
+             
     .btn-quantidade {
         width: 28px;
         height: 28px;
         font-size: 15px;
     }
+    
+    .whatsapp-btn {
+        font-size: 0.9rem;
+        padding: 12px 15px;
+        left: 10px;
+        right: 10px;
+        bottom: 10px;
+        width: calc(100% - 20px);
+    }
+
+    .categoria-img, .logo {
+        margin: 5px auto;
+    }
+
     .whatsapp-btn {
         font-size: 0.9rem;
         padding: 12px 15px;
@@ -735,7 +763,7 @@ footer {
 
 /* Media Query para telas ainda menores (≤320px) */
 @media (max-width: 320px) {
-    h1 {
+   h1 {
         font-size: 1.3rem;
     }
 
@@ -751,55 +779,69 @@ footer {
     li.com-input small {
         font-size: 0.75rem;
     }
-    .sabor-borda {
-        width: 50px;
-        height: 15px;
-    }
 
-         .sabor-borda {
-        gap: 8px;
-        padding: 10px;
-        margin: 10px 0;
+    .sabor-borda {
+        gap: 5px; /* Reduzido de 8px para 5px */
+        padding: 8px 5px; /* Reduz padding lateral */
+        margin: 8px 0; /* Reduzido de 10px para 8px */
     }
     
     .sabor-borda label {
-        font-size: 12px;
-        padding: 6px 8px;
-        flex: 1 1 calc(50% - 4px);
-        min-width: calc(50% - 4px);
+        font-size: 10px; /* Reduzido de 12px para 10px */
+        padding: 4px 6px; /* Reduzido padding */
+        flex: 1 1 calc(50% - 2.5px); /* Ajustado para novo gap */
+        min-width: calc(50% - 2.5px);
         justify-content: center;
         text-align: center;
     }
     
     .sabor-borda input[type="checkbox"] {
-        width: 16px;
-        height: 16px;
-        margin-right: 6px;
+        width: 12px; /* Reduzido de 16px para 12px */
+        height: 12px;
+        margin-right: 4px; /* Reduzido de 6px para 4px */
     }
     
     .sabor-borda input[type="checkbox"]:checked::after {
-        font-size: 10px;
+        font-size: 8px; /* Reduzido de 10px para 8px */
     }
 
- #carrinho-flutuante {
+    #carrinho-flutuante {
         top: 10px;
-        right: 10px;
-        padding: 8px 12px;
-        font-size: 11px;
-        border-radius: 30px;
+        right: 5px; /* Reduzido de 10px para 5px */
+        left: auto;
+        padding: 6px 8px; /* Reduzido padding direito */
+        font-size: 10px;
+        border-radius: 20px; /* Reduzido de 25px para 20px */
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: calc(100vw - 10px); /* Ajustado para nova margem */
+        min-width: 70px; /* Largura mínima menor */
+        box-sizing: border-box;
+        transform: none;
+    }
+    
+    /* Simplificar o texto em telas muito pequenas */
+    #carrinho-flutuante span {
+        display: inline-block;
+        max-width: 35px; /* Reduzido de 40px para 35px */
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
     
     #carrinho-painel {
         width: 100vw;
         right: -100vw;
+        left: 0;
     }
     
     .carrinho-header {
-        padding: 15px;
+        padding: 12px 10px; /* Reduzido de 15px para 10px */
     }
     
     .carrinho-header h2 {
         font-size: 16px;
+        margin: 0;
     }
     
     .carrinho-header button {
@@ -809,29 +851,72 @@ footer {
     }
     
     .item-carrinho {
-        padding: 12px 15px;
+        padding: 8px 10px; /* Reduzido padding lateral */
         flex-direction: column;
         align-items: flex-start;
-        gap: 8px;
+        gap: 6px;
+    }
+    
+    .item-info {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 6px; /* Reduzido de 8px para 6px */
+    }
+    
+    .item-detalhes {
+        flex: 1;
+        min-width: 0;
+        padding-right: 5px; /* Adiciona espaço para evitar sobreposição */
+    }
+    
+    .item-nome {
+        font-size: 11px;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        hyphens: auto; /* Adiciona hifenização automática */
+        line-height: 1.2;
+        margin-bottom: 2px;
+        max-width: 160px; /* Reduzido de 180px para 160px */
+    }
+    
+    .item-preco {
+        font-size: 10px;
+        color: #27ae60;
+        font-weight: bold;
     }
     
     .item-quantidade {
         margin-left: 0;
-        align-self: flex-end;
+        align-self: flex-end; /* Alinha no final para evitar sobreposição */
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        gap: 6px; /* Reduzido de 8px para 6px */
     }
     
     .btn-quantidade {
-        width: 28px;
-        height: 28px;
-        font-size: 14px;
+        width: 24px; /* Reduzido de 26px para 24px */
+        height: 24px;
+        font-size: 12px; /* Reduzido de 13px para 12px */
     }
     
     .carrinho-footer {
-        padding: 15px;
+        padding: 12px 10px; /* Reduzido padding lateral */
     }
     
     .carrinho-footer strong {
-        font-size: 16px;
+        font-size: 14px; /* Reduzido de 15px para 14px */
+    }
+}
+
+/* CSS adicional para melhorar a responsividade geral */
+@media (max-width: 280px) {
+    /* Para telas extremamente pequenas */
+    #carrinho-flutuante {
+        font-size: 9px;
+        padding: 5px 8px;
     }
 }
 
@@ -1612,3 +1697,142 @@ footer {
         margin-top: 4rem;
     }
 }
+
+/* Adicione este CSS específico para iPhone SE */
+
+/* iPhone SE específico (375px) */
+@media (max-width: 375px) and (min-width: 361px) {
+    #carrinho-flutuante {
+        top: 15px;
+        right: 5px !important; /* Força a posição */
+        left: auto !important;
+        padding: 8px 8px !important; /* Padding bem reduzido */
+        font-size: 10px !important;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: calc(100vw - 10px) !important;
+        min-width: 75px;
+        box-sizing: border-box;
+        transform: none;
+        border-radius: 20px;
+    }
+    
+    #carrinho-painel {
+        width: 100vw !important;
+        right: -100vw !important;
+        left: 0 !important;
+        max-width: 100vw;
+        overflow-x: hidden;
+    }
+    
+    .carrinho-header {
+        padding: 15px 8px !important; /* Padding lateral bem reduzido */
+    }
+    
+    .item-carrinho {
+        padding: 10px 8px !important; /* Padding lateral reduzido */
+    }
+    
+    .item-nome {
+        font-size: 12px !important;
+        max-width: 170px !important; /* Ajustado para iPhone SE */
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        hyphens: auto;
+        line-height: 1.2;
+    }
+    
+    .item-detalhes {
+        padding-right: 8px !important; /* Espaço extra para evitar corte */
+    }
+}
+
+/* iPhone SE em modo landscape ou zoom específico */
+@media (max-width: 375px) and (orientation: landscape) {
+    #carrinho-flutuante {
+        right: 2px !important;
+        padding: 6px 6px !important;
+        font-size: 9px !important;
+        max-width: calc(100vw - 4px) !important;
+    }
+    
+    #carrinho-painel {
+        padding: 0 !important;
+    }
+    
+    .carrinho-header {
+        padding: 10px 5px !important;
+    }
+    
+    .item-carrinho {
+        padding: 8px 5px !important;
+    }
+}
+
+/* Fallback mais agressivo para iPhone SE problemático */
+@media (device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) {
+    /* iPhone SE 2020/2022 específico */
+    #carrinho-flutuante {
+        position: fixed !important;
+        top: 10px !important;
+        right: 2px !important;
+        left: auto !important;
+        padding: 6px 5px !important;
+        font-size: 9px !important;
+        max-width: calc(100vw - 4px) !important;
+        width: auto !important;
+        min-width: 60px !important;
+        box-sizing: border-box !important;
+        border-radius: 15px !important;
+    }
+    
+    #carrinho-painel {
+        width: 100% !important;
+        max-width: 100% !important;
+        left: 0 !important;
+        right: -100% !important;
+        box-sizing: border-box !important;
+    }
+    
+    .carrinho-header {
+        padding: 12px 5px !important;
+        box-sizing: border-box !important;
+    }
+    
+    .carrinho-header h2 {
+        font-size: 16px !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    
+    .item-carrinho {
+        padding: 8px 5px !important;
+        box-sizing: border-box !important;
+    }
+    
+    .item-nome {
+        font-size: 11px !important;
+        max-width: 150px !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important; /* Força uma linha só se necessário */
+    }
+    
+    .item-detalhes {
+        padding-right: 10px !important;
+        box-sizing: border-box !important;
+    }
+    
+    /* Se ainda estiver cortando, força o painel a ocupar toda a tela */
+    .carrinho-header,
+    .item-carrinho,
+    .carrinho-footer {
+        margin: 0 !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+}
+
+
+
