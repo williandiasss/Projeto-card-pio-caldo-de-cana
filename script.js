@@ -151,7 +151,6 @@ function getTamanhoPizza(nome) {
   return null;
 }
 
-// NOVO: Função para detectar tamanho da pizza selecionada na seção
 function getTamanhoPizzaSelecionadaNaSecao(secao) {
   const secaoElement = document.querySelector(`.categoria.${secao}`);
   if (!secaoElement) return null;
@@ -172,6 +171,41 @@ function getTamanhoPizzaSelecionadaNaSecao(secao) {
 function obterPrecoBorda(tamanho) {
   const precosBorda = { 'P': 8, 'M': 10, 'G': 12 };
   return precosBorda[tamanho] || 0;
+}
+
+// ========== SISTEMA DE UMA PIZZA POR VEZ ==========
+
+function limitarUmaPizzaPorVez(secao, inputAtual) {
+  const secaoElement = document.querySelector(`.categoria.${secao}`);
+  if (!secaoElement) return;
+  
+  const inputsPizza = secaoElement.querySelectorAll('input[type="number"]:not([data-name*="Borda"])');
+  const valorAtual = parseInt(inputAtual.value) || 0;
+  
+  if (valorAtual > 0) {
+    // Limita o input atual a 1
+    if (valorAtual > 1) {
+      inputAtual.value = 1;
+    }
+    
+    // Zera todos os outros inputs de pizza
+    inputsPizza.forEach(input => {
+      if (input !== inputAtual) {
+        input.value = 0;
+      }
+    });
+    
+    // Resetar configurações de borda quando muda de pizza
+    resetarSistemaBordaPorCompleto(secao);
+  }
+}
+
+function temPizzaSelecionadaNaSecao(secao) {
+  const secaoElement = document.querySelector(`.categoria.${secao}`);
+  if (!secaoElement) return false;
+  
+  const inputsPizza = secaoElement.querySelectorAll('input[type="number"]:not([data-name*="Borda"])');
+  return Array.from(inputsPizza).some(input => (parseInt(input.value) || 0) > 0);
 }
 
 // ========== SISTEMA UNIVERSAL PARA TODAS AS CATEGORIAS ==========
@@ -281,7 +315,7 @@ function adicionarItensCategoriaAoCarrinho(nomeCategoria) {
   
   // Para pizzas, também verifica bordas
   if (['pizzas-trad', 'pizzas-especiais', 'pizzas-doces'].includes(nomeCategoria)) {
-    resetarConfiguracaoSecaoPizza(nomeCategoria);
+    resetarSistemaBordaPorCompleto(nomeCategoria);
   }
   
   if (itensAdicionados > 0) {
@@ -306,35 +340,47 @@ function esconderBotaoAdicionar(nomeCategoria) {
   }
 }
 
-function resetarConfiguracaoSecaoPizza(secao) {
+// NOVA: Função para resetar COMPLETAMENTE sistema de borda
+function resetarSistemaBordaPorCompleto(secao) {
   const secaoElement = document.querySelector(`.categoria.${secao}`);
   if (!secaoElement) return;
   
+  // Resetar configuração
   configuracoesTemporarias[secao] = {
     bordaSelecionada: null,
     tamanhoBorda: null,
     querBorda: false
   };
   
+  // Resetar checkbox "quer borda"
   const checkboxQuerBorda = secaoElement.querySelector('#quer-borda');
-  if (checkboxQuerBorda) checkboxQuerBorda.checked = false;
+  if (checkboxQuerBorda) {
+    checkboxQuerBorda.checked = false;
+    checkboxQuerBorda.disabled = true;
+    checkboxQuerBorda.style.opacity = '0.3';
+    checkboxQuerBorda.parentElement.style.opacity = '0.3';
+  }
   
+  // Resetar inputs de borda
   const inputsBorda = secaoElement.querySelectorAll('input[data-name*="Borda"]');
   inputsBorda.forEach(input => {
     input.value = 0;
     input.disabled = true;
-    input.style.opacity = '0.5';
+    input.style.opacity = '0.3';
+    input.parentElement.style.opacity = '0.3';
   });
   
+  // Resetar sabores de borda
   const checkboxesSabor = secaoElement.querySelectorAll('.sabor-borda input[type="checkbox"]');
   checkboxesSabor.forEach(checkbox => {
     checkbox.checked = false;
     checkbox.disabled = true;
-    checkbox.style.opacity = '0.5';
+    checkbox.style.opacity = '0.3';
+    checkbox.parentElement.style.opacity = '0.3';
   });
 }
 
-// ========== SISTEMA DE BORDAS MELHORADO PARA PIZZAS ==========
+// ========== SISTEMA DE BORDAS CORRIGIDO ==========
 
 function inicializarSistemaBordas() {
   const secoesPizza = ['pizzas-trad', 'pizzas-especiais', 'pizzas-doces'];
@@ -349,38 +395,52 @@ function inicializarSistemaBordas() {
     const checkboxesSaborBorda = secaoElement.querySelectorAll('.sabor-borda input[type="checkbox"]');
     const inputsPizza = secaoElement.querySelectorAll('input[type="number"]:not([data-name*="Borda"])');
     
-    // Estado inicial - tudo desabilitado
-    resetarTodosSistemasBorda(secao);
+    // ESTADO INICIAL - Tudo desabilitado
+    resetarSistemaBordaPorCompleto(secao);
     
-    // PASSO 1: Monitorar seleção de pizza para habilitar checkbox "quer borda"
+    // Aplicar limites máximos
+    inputsBordaTamanho.forEach(input => {
+      input.setAttribute('max', '1');
+      input.setAttribute('min', '0');
+    });
+    
+    inputsPizza.forEach(input => {
+      input.setAttribute('max', '1');
+      input.setAttribute('min', '0');
+    });
+    
+    // STEP 1: Monitorar inputs de pizza
     inputsPizza.forEach(input => {
       input.addEventListener('input', function() {
-        const temPizzaSelecionada = Array.from(inputsPizza).some(inp => (parseInt(inp.value) || 0) > 0);
+        // Aplicar limite de uma pizza por vez
+        limitarUmaPizzaPorVez(secao, this);
+        
+        const temPizza = temPizzaSelecionadaNaSecao(secao);
         
         if (checkboxQuerBorda) {
-          if (temPizzaSelecionada) {
+          if (temPizza) {
+            // Habilitar checkbox "quer borda" - 100% VISÍVEL
             checkboxQuerBorda.disabled = false;
             checkboxQuerBorda.style.opacity = '1';
             checkboxQuerBorda.parentElement.style.opacity = '1';
           } else {
-            // Se não tem pizza selecionada, reseta tudo
-            resetarTodosSistemasBorda(secao);
+            // Resetar tudo se não tem pizza
+            resetarSistemaBordaPorCompleto(secao);
           }
         }
       });
     });
     
-    // PASSO 2: Checkbox "quer borda" habilita tamanhos de borda correspondentes
+    // STEP 2: Checkbox "quer borda"
     if (checkboxQuerBorda) {
       checkboxQuerBorda.addEventListener('change', function() {
         config.querBorda = this.checked;
         
         if (config.querBorda) {
-          // Detectar tamanho da pizza selecionada
           const tamanhoPizza = getTamanhoPizzaSelecionadaNaSecao(secao);
           
           if (tamanhoPizza) {
-            // Habilitar apenas o tamanho de borda correspondente à pizza
+            // Habilitar APENAS o tamanho de borda correspondente - 100% VISÍVEL
             inputsBordaTamanho.forEach(input => {
               const nomeBorda = input.getAttribute('data-name');
               const ehTamanhoCorreto = nomeBorda.includes(`Borda ${tamanhoPizza}`);
@@ -389,6 +449,7 @@ function inicializarSistemaBordas() {
                 input.disabled = false;
                 input.style.opacity = '1';
                 input.parentElement.style.opacity = '1';
+                input.setAttribute('max', '1');
               } else {
                 input.disabled = true;
                 input.style.opacity = '0.3';
@@ -398,18 +459,18 @@ function inicializarSistemaBordas() {
             });
           }
         } else {
-          // Desabilitar bordas e sabores
+          // Desabilitar bordas
           inputsBordaTamanho.forEach(input => {
             input.disabled = true;
-            input.style.opacity = '0.5';
-            input.parentElement.style.opacity = '0.5';
+            input.style.opacity = '0.3';
+            input.parentElement.style.opacity = '0.3';
             input.value = 0;
           });
           
           checkboxesSaborBorda.forEach(checkbox => {
             checkbox.disabled = true;
-            checkbox.style.opacity = '0.5';
-            checkbox.parentElement.style.opacity = '0.5';
+            checkbox.style.opacity = '0.3';
+            checkbox.parentElement.style.opacity = '0.3';
             checkbox.checked = false;
           });
           
@@ -419,10 +480,17 @@ function inicializarSistemaBordas() {
       });
     }
     
-    // PASSO 3: Seleção de quantidade de borda habilita sabores
+    // STEP 3: Inputs de tamanho da borda
     inputsBordaTamanho.forEach(input => {
       input.addEventListener('input', function() {
-        const quantidade = parseInt(this.value) || 0;
+        let quantidade = parseInt(this.value) || 0;
+        
+        // Garantir máximo 1
+        if (quantidade > 1) {
+          quantidade = 1;
+          this.value = 1;
+        }
+        
         const nomeBorda = this.getAttribute('data-name');
         let tamanho = '';
         
@@ -431,7 +499,7 @@ function inicializarSistemaBordas() {
         else if (nomeBorda.includes('Borda G')) tamanho = 'G';
         
         if (quantidade > 0) {
-          // Garantir que apenas um tamanho de borda seja selecionado
+          // Garantir que apenas um tamanho seja selecionado
           inputsBordaTamanho.forEach(outroInput => {
             if (outroInput !== this && !outroInput.disabled) {
               outroInput.value = 0;
@@ -440,7 +508,7 @@ function inicializarSistemaBordas() {
           
           config.tamanhoBorda = tamanho;
           
-          // Habilitar sabores de borda
+          // Habilitar sabores de borda - 100% VISÍVEL
           checkboxesSaborBorda.forEach(checkbox => {
             checkbox.disabled = false;
             checkbox.style.opacity = '1';
@@ -453,15 +521,15 @@ function inicializarSistemaBordas() {
           // Desabilitar sabores
           checkboxesSaborBorda.forEach(checkbox => {
             checkbox.disabled = true;
-            checkbox.style.opacity = '0.5';
-            checkbox.parentElement.style.opacity = '0.5';
+            checkbox.style.opacity = '0.3';
+            checkbox.parentElement.style.opacity = '0.3';
             checkbox.checked = false;
           });
         }
       });
     });
     
-    // PASSO 4: Seleção de sabor da borda (apenas um por vez)
+    // STEP 4: Sabores de borda (apenas um por vez)
     checkboxesSaborBorda.forEach(checkbox => {
       checkbox.addEventListener('change', function() {
         if (this.checked) {
@@ -477,49 +545,9 @@ function inicializarSistemaBordas() {
   });
 }
 
-// NOVA: Função para resetar todos os sistemas de borda
-function resetarTodosSistemasBorda(secao) {
-  const secaoElement = document.querySelector(`.categoria.${secao}`);
-  if (!secaoElement) return;
-  
-  const config = configuracoesTemporarias[secao];
-  
-  config.querBorda = false;
-  config.tamanhoBorda = null;
-  config.bordaSelecionada = null;
-  
-  // Desabilitar checkbox "quer borda"
-  const checkboxQuerBorda = secaoElement.querySelector('#quer-borda');
-  if (checkboxQuerBorda) {
-    checkboxQuerBorda.checked = false;
-    checkboxQuerBorda.disabled = true;
-    checkboxQuerBorda.style.opacity = '0.5';
-    checkboxQuerBorda.parentElement.style.opacity = '0.5';
-  }
-  
-  // Desabilitar todos os inputs de borda
-  const inputsBorda = secaoElement.querySelectorAll('input[data-name*="Borda"]');
-  inputsBorda.forEach(input => {
-    input.value = 0;
-    input.disabled = true;
-    input.style.opacity = '0.5';
-    input.parentElement.style.opacity = '0.5';
-  });
-  
-  // Desabilitar todos os sabores de borda
-  const checkboxesSabor = secaoElement.querySelectorAll('.sabor-borda input[type="checkbox"]');
-  checkboxesSabor.forEach(checkbox => {
-    checkbox.checked = false;
-    checkbox.disabled = true;
-    checkbox.style.opacity = '0.5';
-    checkbox.parentElement.style.opacity = '0.5';
-  });
-}
-
 // ========== LISTENERS UNIVERSAIS PARA INPUTS ==========
 
 function adicionarListenersUniversais() {
-  // Lista de todas as categorias
   const categorias = [
     'lanches', 'hamburguer', 'tabuas', 'torre-batata', 'porções',
     'pizzas-trad', 'pizzas-especiais', 'pizzas-doces', 
@@ -533,15 +561,28 @@ function adicionarListenersUniversais() {
     if (!secaoElement) return;
     
     const inputs = secaoElement.querySelectorAll('input[type="number"]:not([data-name*="Borda"])');
+    const ehCategoriaPizza = ['pizzas-trad', 'pizzas-especiais', 'pizzas-doces'].includes(categoria);
     
     inputs.forEach(input => {
       input.addEventListener('input', function() {
-        const temItens = Array.from(inputs).some(inp => (parseInt(inp.value) || 0) > 0);
-        
-        if (temItens) {
-          mostrarBotaoAdicionar(categoria);
+        if (ehCategoriaPizza) {
+          // Para pizzas: só permite uma por vez
+          const temItens = temPizzaSelecionadaNaSecao(categoria);
+          
+          if (temItens) {
+            mostrarBotaoAdicionar(categoria);
+          } else {
+            esconderBotaoAdicionar(categoria);
+          }
         } else {
-          esconderBotaoAdicionar(categoria);
+          // Para outras categorias: permite múltiplos itens
+          const temItens = Array.from(inputs).some(inp => (parseInt(inp.value) || 0) > 0);
+          
+          if (temItens) {
+            mostrarBotaoAdicionar(categoria);
+          } else {
+            esconderBotaoAdicionar(categoria);
+          }
         }
       });
     });
@@ -626,6 +667,7 @@ document.addEventListener('DOMContentLoaded', () => {
     carrinhoFlutuante.style.display = 'none';
   }
   
+  // CORRIGIDO: Inicializar na ordem correta
   inicializarSistemaBordas();
   adicionarListenersUniversais();
   
@@ -637,5 +679,5 @@ document.addEventListener('DOMContentLoaded', () => {
   
   atualizarCarrinho();
   
-  console.log('Sistema de carrinho universal inicializado com bordas sequenciais!');
+  console.log('✅ Sistema corrigido e funcionando:\n- Uma pizza por vez\n- Bordas 100% visíveis\n- Limite máximo 1');
 });
