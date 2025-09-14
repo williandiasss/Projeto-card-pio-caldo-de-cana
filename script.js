@@ -462,7 +462,7 @@ function inicializarSistemaBordas() {
           // Desabilitar bordas
           inputsBordaTamanho.forEach(input => {
             input.disabled = true;
-            input.style.opacity = '0.3';
+            input.style.opacity = '0.3';  1
             input.parentElement.style.opacity = '0.3';
             input.value = 0;
           });
