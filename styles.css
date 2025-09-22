@@ -661,44 +661,6 @@ footer {
     color: #333;
 }
 
-.btn-remover-item {
-    width: 24px;
-    height: 24px;
-    border: 1px solid #dc3545;
-    background: #dc3545;
-    color: white;
-    border-radius: 50%;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    font-size: 14px;
-    transition: all 0.2s ease;
-    flex-shrink: 0;
-    line-height: 1;
-    padding: 0;
-    margin-left: 8px;
-    box-sizing: border-box;
-}
-
-.btn-remover-item:hover {
-    background: #c82333;
-    border-color: #bd2130;
-    transform: scale(1.05);
-    box-shadow: 0 2px 4px rgba(220, 53, 69, 0.3);
-}
-
-.btn-remover-item:active {
-    transform: scale(0.95);
-}
-
-.btn-remover-item:focus {
-    outline: 2px solid #dc3545;
-    outline-offset: 1px;
-}
-
-
 /* Media Query para telas muito pequenas (≤360px) */
 @media (max-width: 360px) {
 
@@ -728,12 +690,6 @@ footer {
         min-width: 20px;
     }
     
-    .btn-remover-item {
-        width: 20px;
-        height: 20px;
-        font-size: 12px;
-        margin-left: 5px;
-    }
     
     .item-quantidade {
         gap: 6px;
@@ -944,12 +900,6 @@ footer {
         min-width: 18px;
     }
     
-    .btn-remover-item {
-        width: 18px;
-        height: 18px;
-        font-size: 11px;
-        margin-left: 4px;
-    }
     
     .item-quantidade {
         gap: 5px;
@@ -1140,13 +1090,6 @@ footer {
         min-width: 25px;
     }
     
-    .btn-remover-item {
-        width: 22px;
-        height: 22px;
-        font-size: 13px;
-        margin-left: 8px;
-    }
-    
     .item-quantidade {
         gap: 8px;
     }
@@ -1327,13 +1270,6 @@ footer {
     .quantidade-numero {
         font-size: 15px;
         min-width: 30px;
-    }
-    
-    .btn-remover-item {
-        width: 26px;
-        height: 26px;
-        font-size: 15px;
-        margin-left: 10px;
     }
     
     .item-quantidade {
@@ -1589,12 +1525,6 @@ footer {
         min-width: 32px;
     }
     
-    .btn-remover-item {
-        width: 28px;
-        height: 28px;
-        font-size: 16px;
-        margin-left: 12px;
-    }
     
     .item-quantidade {
         gap: 12px;
@@ -2025,13 +1955,6 @@ footer {
         min-width: 22px;
     }
     
-    .btn-remover-item {
-        width: 20px;
-        height: 20px;
-        font-size: 12px;
-        margin-left: 6px;
-    }
-    
     .item-quantidade {
         gap: 6px;
     }
@@ -2080,93 +2003,4 @@ footer {
         padding-right: 8px !important; /* Espaço extra para evitar corte */
     }
 }
-
-/* iPhone SE em modo landscape ou zoom específico */
-@media (max-width: 375px) and (orientation: landscape) {
-    #carrinho-flutuante {
-        right: 2px !important;
-        padding: 6px 6px !important;
-        font-size: 9px !important;
-        max-width: calc(100vw - 4px) !important;
-    }
-    
-    #carrinho-painel {
-        padding: 0 !important;
-    }
-    
-    .carrinho-header {
-        padding: 10px 5px !important;
-    }
-    
-    .item-carrinho {
-        padding: 8px 5px !important;
-    }
-}
-
-/* Fallback mais agressivo para iPhone SE problemático */
-@media (device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) {
-    /* iPhone SE 2020/2022 específico */
-    #carrinho-flutuante {
-        position: fixed !important;
-        top: 10px !important;
-        right: 2px !important;
-        left: auto !important;
-        padding: 6px 5px !important;
-        font-size: 9px !important;
-        max-width: calc(100vw - 4px) !important;
-        width: auto !important;
-        min-width: 60px !important;
-        box-sizing: border-box !important;
-        border-radius: 15px !important;
-    }
-    
-    #carrinho-painel {
-        width: 100% !important;
-        max-width: 100% !important;
-        left: 0 !important;
-        right: -100% !important;
-        box-sizing: border-box !important;
-    }
-    
-    .carrinho-header {
-        padding: 12px 5px !important;
-        box-sizing: border-box !important;
-    }
-    
-    .carrinho-header h2 {
-        font-size: 16px !important;
-        margin: 0 !important;
-        padding: 0 !important;
-    }
-    
-    .item-carrinho {
-        padding: 8px 5px !important;
-        box-sizing: border-box !important;
-    }
-    
-    .item-nome {
-        font-size: 11px !important;
-        max-width: 150px !important;
-        overflow: hidden !important;
-        text-overflow: ellipsis !important;
-        white-space: nowrap !important; /* Força uma linha só se necessário */
-    }
-    
-    .item-detalhes {
-        padding-right: 10px !important;
-        box-sizing: border-box !important;
-    }
-    
-    /* Se ainda estiver cortando, força o painel a ocupar toda a tela */
-    .carrinho-header,
-    .item-carrinho,
-    .carrinho-footer {
-        margin: 0 !important;
-        width: 100% !important;
-        box-sizing: border-box !important;
-    }
-}
-
-
-
 
