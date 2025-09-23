@@ -2,6 +2,13 @@
 let carrinho = [];
 let totalCarrinho = 0;
 
+// Controle de estado para pedidos em construção
+let pedidoEmConstrucao = {
+  ativo: false,
+  categoria: null,
+  produto: null
+};
+
 // Configurações temporárias específicas para pizzas (por seção)
 let configuracoesTemporarias = {
   'pizzas-trad': { bordaSelecionada: null, tamanhoBorda: null, querBorda: false },
@@ -11,14 +18,16 @@ let configuracoesTemporarias = {
 
 // Função principal que abre a categoria desejada
 function openCategory(categoryName) {
-  const allSections = document.querySelectorAll('.categoria');
+  if (pedidoEmConstrucao.ativo) {
+    mostrarMensagemInline('Finalize o pedido atual antes de mudar de categoria');
+    return;
+  }
 
-  // Oculta todas as categorias
+  const allSections = document.querySelectorAll('.categoria');
   allSections.forEach(section => {
     section.style.display = 'none';
   });
 
-  // Mostra apenas a categoria clicada
   const targetSection = document.querySelector(`.categoria.${categoryName}`);
   if (targetSection) {
     targetSection.style.display = 'block';
@@ -48,7 +57,6 @@ function fecharCarrinho() {
   document.body.style.overflow = 'auto';
 }
 
-// CORRIGIDO: Estrutura HTML dos itens com as classes CSS corretas
 function atualizarListaCarrinhoPanel() {
   const listaCarrinho = document.getElementById('lista-carrinho');
   const totalSidebar = document.getElementById('total-sidebar');
@@ -71,6 +79,7 @@ function atualizarListaCarrinhoPanel() {
       itemElement.className = 'item-carrinho';
       
       let nomeExibicao = item.nome;
+      
       if (isPizza(item.nome) && !nomeExibicao.toLowerCase().includes('pizza')) {
         nomeExibicao = `Pizza ${nomeExibicao}`;
       }
@@ -79,7 +88,12 @@ function atualizarListaCarrinhoPanel() {
         nomeExibicao += ` (Borda: ${item.borda})`;
       }
       
-      // ESTRUTURA HTML CORRIGIDA com as classes CSS necessárias
+      if (item.adicionais && item.adicionais.length > 0) {
+        if (!nomeExibicao.includes('(+ ')) {
+          nomeExibicao += ` (+ ${item.adicionais.join(', ')})`;
+        }
+      }
+      
       itemElement.innerHTML = `
         <div class="item-info">
           <div class="item-detalhes">
@@ -141,7 +155,12 @@ function isPizza(nome) {
     'Banana com Canela', 'Abacaxi', 'Banana Nevada'
   ];
   
-  return [...pizzasTracionais, ...pizzasEspeciais, ...pizzasDoces].some(pizza => nome.includes(pizza));
+  const todasPizzas = [...pizzasTracionais, ...pizzasEspeciais, ...pizzasDoces];
+  
+  const comecaComPizza = nome.toLowerCase().startsWith('pizza');
+  const ehPizzaExata = todasPizzas.some(pizza => nome.trim() === pizza.trim());
+  
+  return comecaComPizza || ehPizzaExata;
 }
 
 function getTamanhoPizza(nome) {
@@ -168,6 +187,7 @@ function getTamanhoPizzaSelecionadaNaSecao(secao) {
   return null;
 }
 
+// ========== CORREÇÃO PRINCIPAL: FUNÇÃO DE PREÇO DA BORDA ==========
 function obterPrecoBorda(tamanho) {
   const precosBorda = { 'P': 8, 'M': 10, 'G': 12 };
   return precosBorda[tamanho] || 0;
@@ -183,19 +203,16 @@ function limitarUmaPizzaPorVez(secao, inputAtual) {
   const valorAtual = parseInt(inputAtual.value) || 0;
   
   if (valorAtual > 0) {
-    // Limita o input atual a 1
     if (valorAtual > 1) {
       inputAtual.value = 1;
     }
     
-    // Zera todos os outros inputs de pizza
     inputsPizza.forEach(input => {
       if (input !== inputAtual) {
         input.value = 0;
       }
     });
     
-    // Resetar configurações de borda quando muda de pizza
     resetarSistemaBordaPorCompleto(secao);
   }
 }
@@ -208,37 +225,22 @@ function temPizzaSelecionadaNaSecao(secao) {
   return Array.from(inputsPizza).some(input => (parseInt(input.value) || 0) > 0);
 }
 
-// ========== SISTEMA UNIVERSAL PARA TODAS AS CATEGORIAS ==========
+// ========== SISTEMA UNIVERSAL PARA OUTRAS CATEGORIAS ==========
 
 function adicionarItemAoCarrinho(nome, preco, quantidade, secao = null) {
   if (quantidade <= 0) return;
   
-  let borda = null;
-  let precoUnitario = preco;
+  // Esta função agora é usada apenas para categorias simples (não pizzas/lanches)
+  // Pizzas e lanches são processados diretamente em adicionarItensCategoriaAoCarrinho
   
-  // Se é pizza, verifica configuração de borda
-  if (isPizza(nome) && secao && configuracoesTemporarias[secao]) {
-    const config = configuracoesTemporarias[secao];
-    
-    if (config.querBorda && config.bordaSelecionada && config.tamanhoBorda) {
-      const tamanhoPizza = getTamanhoPizza(nome);
-      
-      if (tamanhoPizza === config.tamanhoBorda) {
-        borda = config.bordaSelecionada;
-        precoUnitario += obterPrecoBorda(tamanhoPizza);
-      }
-    }
-  }
-  
-  // Adiciona cada quantidade como item individual para manter independência
   for (let i = 0; i < quantidade; i++) {
     const novoItem = {
       id: Date.now() + Math.random(),
       nome: nome,
-      preco: precoUnitario,
+      preco: preco,
       quantidade: 1,
-      subtotal: precoUnitario,
-      borda: borda
+      subtotal: preco,
+      categoria: secao
     };
     
     carrinho.push(novoItem);
@@ -292,10 +294,488 @@ function criarBotaoAdicionarUniversal(nomeCategoria) {
   }
 }
 
+// Sistema sequencial para lanches
+function iniciarPedidoLanche(produtoInput) {
+  const categoria = 'lanches';
+  const secaoElement = document.querySelector(`.categoria.${categoria}`);
+  if (!secaoElement) return;
+
+  pedidoEmConstrucao.ativo = true;
+  pedidoEmConstrucao.categoria = categoria;
+  pedidoEmConstrucao.produto = produtoInput.getAttribute('data-name');
+
+  desabilitarOutrosProdutosLanche(categoria, produtoInput);
+  habilitarGrupoSequencialLanche(secaoElement, 1);
+}
+
+function desabilitarOutrosProdutosLanche(categoriaAtiva, inputAtivo) {
+  const secaoElement = document.querySelector(`.categoria.${categoriaAtiva}`);
+  if (!secaoElement) return;
+
+  const inputsProdutos = secaoElement.querySelectorAll('input[type="number"][data-name]:not([data-adicional]):not([data-borda])');
+  inputsProdutos.forEach(input => {
+    if (input !== inputAtivo) {
+      input.disabled = true;
+      input.setAttribute('aria-disabled', 'true');
+    }
+  });
+
+  const botoesCategoria = document.querySelectorAll('button[onclick*="openCategory"]');
+  botoesCategoria.forEach(botao => {
+    if (!botao.onclick?.toString().includes(categoriaAtiva)) {
+      botao.disabled = true;
+      botao.setAttribute('aria-disabled', 'true');
+    }
+  });
+
+  const todosAdicionais = secaoElement.querySelectorAll('input[data-adicional], input[data-grupo], .grupo-adicional input, .adicionais input');
+  todosAdicionais.forEach(input => {
+    input.disabled = true;
+    input.setAttribute('aria-disabled', 'true');
+  });
+}
+
+function habilitarGrupoSequencialLanche(secaoElement, etapa) {
+  let seletorGrupo = '';
+  
+  switch(etapa) {
+    case 1:
+      seletorGrupo = 'input[data-adicional="true"], input[data-grupo="adicionais"], .grupo-adicional input, .adicionais input[type="checkbox"]';
+      break;
+    case 2:
+      seletorGrupo = 'input[data-grupo="extras"], input[data-grupo="molhos"], .grupo-extras input, .molhos input';
+      break;
+    case 3:
+      seletorGrupo = 'textarea[data-grupo="obs"], input[data-grupo="observacoes"], .observacoes textarea';
+      break;
+  }
+
+  const elementosGrupo = secaoElement.querySelectorAll(seletorGrupo);
+  elementosGrupo.forEach(elemento => {
+    elemento.disabled = false;
+    elemento.removeAttribute('aria-disabled');
+    
+    if (etapa < 3) {
+      elemento.addEventListener('change', function() {
+        const grupoAtual = secaoElement.querySelectorAll(seletorGrupo);
+        const temSelecionado = Array.from(grupoAtual).some(el => 
+          (el.type === 'checkbox' && el.checked) || 
+          (el.type === 'radio' && el.checked) ||
+          (el.type === 'number' && parseInt(el.value) > 0) ||
+          (el.tagName === 'TEXTAREA' && el.value.trim().length > 0)
+        );
+        
+        if (temSelecionado) {
+          setTimeout(() => habilitarGrupoSequencialLanche(secaoElement, etapa + 1), 100);
+        }
+      }, { once: true });
+    }
+  });
+}
+
+// Sistema sequencial para pizzas
+function iniciarPedidoPizza(produtoInput, secao) {
+  const secaoElement = document.querySelector(`.categoria.${secao}`);
+  if (!secaoElement) return;
+
+  pedidoEmConstrucao.ativo = true;
+  pedidoEmConstrucao.categoria = secao;
+  pedidoEmConstrucao.produto = produtoInput.getAttribute('data-name');
+
+  desabilitarOutrosProdutosPizza(secao, produtoInput);
+  habilitarTamanhosExclusivos(secaoElement, produtoInput);
+}
+
+function desabilitarOutrosProdutosPizza(secao, inputAtivo) {
+  const secaoElement = document.querySelector(`.categoria.${secao}`);
+  if (!secaoElement) return;
+
+  const inputsPizza = secaoElement.querySelectorAll('input[type="number"]:not([data-name*="Borda"])');
+  inputsPizza.forEach(input => {
+    if (input !== inputAtivo) {
+      input.disabled = true;
+      input.setAttribute('aria-disabled', 'true');
+    }
+  });
+
+  resetarSistemaBordaPorCompleto(secao);
+  
+  const botoesCategoria = document.querySelectorAll('button[onclick*="openCategory"]');
+  botoesCategoria.forEach(botao => {
+    const categoriaBotao = botao.onclick?.toString().match(/openCategory\('([^']+)'\)/)?.[1];
+    if (categoriaBotao && categoriaBotao !== secao) {
+      botao.disabled = true;
+      botao.setAttribute('aria-disabled', 'true');
+    }
+  });
+}
+
+function habilitarTamanhosExclusivos(secaoElement, produtoAtivo) {
+  const nomeProduto = produtoAtivo.getAttribute('data-name');
+  const inputsTamanho = secaoElement.querySelectorAll(`input[data-name*="${nomeProduto.split(' ')[0]}"]`);
+  const tamanhosDisponiveis = ['P', 'M', 'G'];
+  
+  tamanhosDisponiveis.forEach(tamanho => {
+    const inputTamanho = Array.from(inputsTamanho).find(input => 
+      input.getAttribute('data-name').includes(` ${tamanho}`)
+    );
+    
+    if (inputTamanho) {
+      inputTamanho.disabled = false;
+      inputTamanho.removeAttribute('aria-disabled');
+      
+      inputTamanho.addEventListener('input', function() {
+        const valor = parseInt(this.value) || 0;
+        
+        if (valor > 0) {
+          if (valor > 1) this.value = 1;
+          
+          tamanhosDisponiveis.forEach(outroTamanho => {
+            if (outroTamanho !== tamanho) {
+              const outroInput = Array.from(inputsTamanho).find(input => 
+                input.getAttribute('data-name').includes(` ${outroTamanho}`)
+              );
+              if (outroInput) {
+                outroInput.disabled = true;
+                outroInput.setAttribute('aria-disabled', 'true');
+                outroInput.value = 0;
+              }
+            }
+          });
+          
+          setTimeout(() => habilitarCheckboxBorda(secaoElement), 100);
+        }
+      });
+    }
+  });
+}
+
+function habilitarCheckboxBorda(secaoElement) {
+  const checkboxQuerBorda = secaoElement.querySelector('#quer-borda');
+  if (checkboxQuerBorda) {
+    checkboxQuerBorda.disabled = false;
+    checkboxQuerBorda.removeAttribute('aria-disabled');
+    
+    checkboxQuerBorda.addEventListener('change', function() {
+      if (this.checked) {
+        setTimeout(() => habilitarTamanhosBorda(secaoElement), 100);
+      } else {
+        resetarSistemaBorda(secaoElement);
+      }
+    }, { once: false });
+  }
+}
+
+function habilitarTamanhosBorda(secaoElement) {
+  const tamanhoPizzaSelecionada = getTamanhoPizzaSelecionadaNaSecao(
+    secaoElement.className.includes('pizzas-trad') ? 'pizzas-trad' :
+    secaoElement.className.includes('pizzas-especiais') ? 'pizzas-especiais' : 'pizzas-doces'
+  );
+  
+  if (!tamanhoPizzaSelecionada) return;
+  
+  const inputsBorda = secaoElement.querySelectorAll('input[data-name*="Borda"]');
+  inputsBorda.forEach(input => {
+    const nomeBorda = input.getAttribute('data-name');
+    const ehTamanhoCorreto = nomeBorda.includes(`Borda ${tamanhoPizzaSelecionada}`);
+    
+    if (ehTamanhoCorreto) {
+      input.disabled = false;
+      input.removeAttribute('aria-disabled');
+      
+      input.addEventListener('input', function() {
+        const valor = parseInt(this.value) || 0;
+        if (valor > 0) {
+          if (valor > 1) this.value = 1;
+          
+          inputsBorda.forEach(outro => {
+            if (outro !== this && !outro.disabled) {
+              outro.value = 0;
+            }
+          });
+          
+          setTimeout(() => habilitarSaboresBorda(secaoElement), 100);
+        } else {
+          desabilitarSaboresBorda(secaoElement);
+        }
+      });
+    } else {
+      input.disabled = true;
+      input.setAttribute('aria-disabled', 'true');
+      input.value = 0;
+    }
+  });
+}
+
+function habilitarSaboresBorda(secaoElement) {
+  const checkboxesSabor = secaoElement.querySelectorAll('.sabor-borda input[type="checkbox"], [data-sabor-borda] input[type="checkbox"]');
+  checkboxesSabor.forEach(checkbox => {
+    checkbox.disabled = false;
+    checkbox.removeAttribute('aria-disabled');
+    
+    checkbox.addEventListener('change', function() {
+      if (this.checked) {
+        checkboxesSabor.forEach(outro => {
+          if (outro !== this) outro.checked = false;
+        });
+      }
+    });
+  });
+}
+
+function desabilitarSaboresBorda(secaoElement) {
+  const checkboxesSabor = secaoElement.querySelectorAll('.sabor-borda input[type="checkbox"], [data-sabor-borda] input[type="checkbox"]');
+  checkboxesSabor.forEach(checkbox => {
+    checkbox.disabled = true;
+    checkbox.setAttribute('aria-disabled', 'true');
+    checkbox.checked = false;
+  });
+}
+
+function resetarSistemaBorda(secaoElement) {
+  const inputsBorda = secaoElement.querySelectorAll('input[data-name*="Borda"]');
+  inputsBorda.forEach(input => {
+    input.disabled = true;
+    input.setAttribute('aria-disabled', 'true');
+    input.value = 0;
+  });
+  
+  desabilitarSaboresBorda(secaoElement);
+}
+
+function mostrarMensagemInline(mensagem) {
+  const mensagemExistente = document.querySelector('.mensagem-inline');
+  if (mensagemExistente) {
+    mensagemExistente.remove();
+  }
+
+  const divMensagem = document.createElement('div');
+  divMensagem.className = 'mensagem-inline';
+  divMensagem.style.cssText = `
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #ff6b6b;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 25px;
+    font-weight: 600;
+    z-index: 9999;
+    box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+    animation: slideDown 0.3s ease;
+  `;
+  divMensagem.textContent = mensagem;
+
+  document.body.appendChild(divMensagem);
+
+  setTimeout(() => {
+    if (divMensagem && divMensagem.parentNode) {
+      divMensagem.remove();
+    }
+  }, 4000);
+}
+
+function resetarPedidoEmConstrucao() {
+  pedidoEmConstrucao.ativo = false;
+  pedidoEmConstrucao.categoria = null;
+  pedidoEmConstrucao.produto = null;
+
+  const todosInputs = document.querySelectorAll('input[disabled], button[disabled], select[disabled]');
+  todosInputs.forEach(elemento => {
+    elemento.disabled = false;
+    elemento.removeAttribute('aria-disabled');
+  });
+
+  const inputsNumeros = document.querySelectorAll('input[type="number"]');
+  inputsNumeros.forEach(input => {
+    if (!input.closest('#carrinho-painel')) {
+      input.value = 0;
+    }
+  });
+
+  const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+  checkboxes.forEach(checkbox => {
+    if (!checkbox.closest('#carrinho-painel')) {
+      checkbox.checked = false;
+    }
+  });
+
+  const radios = document.querySelectorAll('input[type="radio"]');
+  radios.forEach(radio => {
+    if (!radio.closest('#carrinho-painel')) {
+      radio.checked = false;
+    }
+  });
+
+  const secaoLanches = document.querySelector('.categoria.lanches');
+  if (secaoLanches) {
+    const adicionaisLanche = secaoLanches.querySelectorAll('input[type="checkbox"], input[data-adicional], .adicionais input, .grupo-adicional input, input[data-grupo="adicionais"]');
+    adicionaisLanche.forEach(adicional => {
+      adicional.disabled = true;
+      adicional.setAttribute('aria-disabled', 'true');
+      adicional.checked = false;
+    });
+  }
+}
+
 function adicionarItensCategoriaAoCarrinho(nomeCategoria) {
   const secaoElement = document.querySelector(`.categoria.${nomeCategoria}`);
   if (!secaoElement) return;
   
+  if (nomeCategoria === 'lanches') {
+    const inputsProdutos = secaoElement.querySelectorAll('input[type="number"]:not([data-name*="Borda"]):not([data-adicional])');
+    let itensAdicionados = 0;
+    
+    inputsProdutos.forEach(inputProduto => {
+      const quantidade = parseInt(inputProduto.value) || 0;
+      if (quantidade > 0) {
+        const nomeProduto = inputProduto.getAttribute('data-name');
+        let precoProduto = parseFloat(inputProduto.getAttribute('data-price')) || 0;
+        
+        const adicionaisSelecionados = secaoElement.querySelectorAll('input[type="checkbox"]:checked, input[data-adicional]:checked, .adicionais input:checked, .grupo-adicional input:checked');
+        let valorAdicionais = 0;
+        let nomeAdicionais = [];
+        
+        adicionaisSelecionados.forEach(adicional => {
+          const precoAdicional = parseFloat(adicional.getAttribute('data-price')) || 0;
+          const nomeAdicional = adicional.getAttribute('data-name') || adicional.value || adicional.nextElementSibling?.textContent || 'Adicional';
+          
+          valorAdicionais += precoAdicional;
+          nomeAdicionais.push(nomeAdicional);
+        });
+        
+        const precoFinal = precoProduto + valorAdicionais;
+        
+        let nomeFinal = nomeProduto;
+        if (nomeAdicionais.length > 0) {
+          nomeFinal += ` (+ ${nomeAdicionais.join(', ')})`;
+        }
+        
+        if (nomeFinal && !isNaN(precoFinal)) {
+          for (let i = 0; i < quantidade; i++) {
+            const novoItem = {
+              id: Date.now() + Math.random(),
+              nome: nomeFinal,
+              preco: precoFinal,
+              quantidade: 1,
+              subtotal: precoFinal,
+              categoria: nomeCategoria,
+              adicionais: nomeAdicionais.length > 0 ? nomeAdicionais : null
+            };
+            
+            carrinho.push(novoItem);
+          }
+          
+          itensAdicionados += quantidade;
+          inputProduto.value = 0;
+          
+          adicionaisSelecionados.forEach(adicional => {
+            adicional.checked = false;
+          });
+        }
+      }
+    });
+    
+    if (itensAdicionados > 0) {
+      resetarPedidoEmConstrucao();
+      alert(`${itensAdicionados} lanche(s) adicionado(s) ao carrinho com adicionais!`);
+      esconderBotaoAdicionar(nomeCategoria);
+      atualizarCarrinho();
+    } else {
+      alert('Selecione pelo menos um lanche para adicionar ao carrinho.');
+    }
+    
+    return;
+  }
+  
+  // LÓGICA PARA PIZZAS - COMPLETAMENTE REFEITA
+  if (['pizzas-trad', 'pizzas-especiais', 'pizzas-doces'].includes(nomeCategoria)) {
+    const inputsPizza = secaoElement.querySelectorAll('input[type="number"]:not([data-name*="Borda"])');
+    let itensAdicionados = 0;
+    
+    inputsPizza.forEach(inputPizza => {
+      const quantidade = parseInt(inputPizza.value) || 0;
+      if (quantidade > 0) {
+        const nomePizza = inputPizza.getAttribute('data-name');
+        let precoPizza = parseFloat(inputPizza.getAttribute('data-price')) || 0;
+        
+        console.log(`🍕 Processando pizza: ${nomePizza} - R$ ${precoPizza}`);
+        
+        // VERIFICAR SE TEM BORDA SELECIONADA
+        const checkboxQuerBorda = secaoElement.querySelector('#quer-borda');
+        let valorBorda = 0;
+        let nomeBorda = null;
+        
+        if (checkboxQuerBorda && checkboxQuerBorda.checked) {
+          console.log('✅ Cliente quer borda');
+          
+          // Encontrar input de borda com quantidade > 0
+          const inputsBorda = secaoElement.querySelectorAll('input[data-name*="Borda"]');
+          const bordaSelecionada = Array.from(inputsBorda).find(inp => parseInt(inp.value) > 0);
+          
+          if (bordaSelecionada) {
+            // Encontrar sabor selecionado
+            const checkboxesSabor = secaoElement.querySelectorAll('.sabor-borda input[type="checkbox"]:checked');
+            const saborSelecionado = Array.from(checkboxesSabor).find(cb => cb.checked);
+            
+            if (saborSelecionado) {
+              const tamanhoPizza = getTamanhoPizza(nomePizza);
+              valorBorda = obterPrecoBorda(tamanhoPizza);
+              nomeBorda = saborSelecionado.value;
+              
+              console.log(`🍞 Borda encontrada: ${nomeBorda} (${tamanhoPizza}) - R$ ${valorBorda}`);
+            }
+          }
+        }
+        
+        // CALCULAR PREÇO FINAL
+        const precoFinal = precoPizza + valorBorda;
+        
+        // CRIAR NOME FINAL (igual aos lanches)
+        let nomeFinal = nomePizza;
+        if (nomeBorda) {
+          nomeFinal += ` (+ Borda ${nomeBorda})`;
+        }
+        
+        console.log(`💰 Pizza final: ${nomeFinal} - R$ ${precoFinal}`);
+        
+        if (nomeFinal && !isNaN(precoFinal)) {
+          // Adicionar cada pizza individual ao carrinho
+          for (let i = 0; i < quantidade; i++) {
+            const novoItem = {
+              id: Date.now() + Math.random(),
+              nome: nomeFinal,
+              preco: precoFinal,
+              quantidade: 1,
+              subtotal: precoFinal,
+              categoria: nomeCategoria,
+              borda: nomeBorda // Manter para compatibilidade
+            };
+            
+            carrinho.push(novoItem);
+          }
+          
+          itensAdicionados += quantidade;
+          inputPizza.value = 0;
+        }
+      }
+    });
+    
+    if (itensAdicionados > 0) {
+      resetarPedidoEmConstrucao();
+      resetarSistemaBordaPorCompleto(nomeCategoria);
+      alert(`${itensAdicionados} pizza(s) adicionada(s) ao carrinho!`);
+      esconderBotaoAdicionar(nomeCategoria);
+      atualizarCarrinho();
+    } else {
+      alert('Selecione pelo menos uma pizza para adicionar ao carrinho.');
+    }
+    
+    return;
+  }
+  
+  // LÓGICA PARA OUTRAS CATEGORIAS (hamburguer, porções, etc.)
   const inputs = secaoElement.querySelectorAll('input[type="number"]:not([data-name*="Borda"])');
   let itensAdicionados = 0;
   
@@ -308,17 +788,13 @@ function adicionarItensCategoriaAoCarrinho(nomeCategoria) {
       if (nome && !isNaN(preco)) {
         adicionarItemAoCarrinho(nome, preco, quantidade, nomeCategoria);
         itensAdicionados += quantidade;
-        input.value = 0; // Zera após adicionar
+        input.value = 0;
       }
     }
   });
   
-  // Para pizzas, também verifica bordas
-  if (['pizzas-trad', 'pizzas-especiais', 'pizzas-doces'].includes(nomeCategoria)) {
-    resetarSistemaBordaPorCompleto(nomeCategoria);
-  }
-  
   if (itensAdicionados > 0) {
+    resetarPedidoEmConstrucao();
     alert(`${itensAdicionados} item(ns) adicionado(s) ao carrinho!`);
     esconderBotaoAdicionar(nomeCategoria);
   } else {
@@ -340,43 +816,38 @@ function esconderBotaoAdicionar(nomeCategoria) {
   }
 }
 
-// NOVA: Função para resetar COMPLETAMENTE sistema de borda
 function resetarSistemaBordaPorCompleto(secao) {
   const secaoElement = document.querySelector(`.categoria.${secao}`);
   if (!secaoElement) return;
   
-  // Resetar configuração
-  configuracoesTemporarias[secao] = {
-    bordaSelecionada: null,
-    tamanhoBorda: null,
-    querBorda: false
-  };
+  // CORREÇÃO: Resetar configuração temporal
+  if (configuracoesTemporarias[secao]) {
+    configuracoesTemporarias[secao] = {
+      bordaSelecionada: null,
+      tamanhoBorda: null,
+      querBorda: false
+    };
+  }
   
-  // Resetar checkbox "quer borda"
   const checkboxQuerBorda = secaoElement.querySelector('#quer-borda');
   if (checkboxQuerBorda) {
     checkboxQuerBorda.checked = false;
     checkboxQuerBorda.disabled = true;
-    checkboxQuerBorda.style.opacity = '0.3';
-    checkboxQuerBorda.parentElement.style.opacity = '0.3';
+    checkboxQuerBorda.setAttribute('aria-disabled', 'true');
   }
   
-  // Resetar inputs de borda
   const inputsBorda = secaoElement.querySelectorAll('input[data-name*="Borda"]');
   inputsBorda.forEach(input => {
     input.value = 0;
     input.disabled = true;
-    input.style.opacity = '0.3';
-    input.parentElement.style.opacity = '0.3';
+    input.setAttribute('aria-disabled', 'true');
   });
   
-  // Resetar sabores de borda
   const checkboxesSabor = secaoElement.querySelectorAll('.sabor-borda input[type="checkbox"]');
   checkboxesSabor.forEach(checkbox => {
     checkbox.checked = false;
     checkbox.disabled = true;
-    checkbox.style.opacity = '0.3';
-    checkbox.parentElement.style.opacity = '0.3';
+    checkbox.setAttribute('aria-disabled', 'true');
   });
 }
 
@@ -398,6 +869,16 @@ function inicializarSistemaBordas() {
     // ESTADO INICIAL - Tudo desabilitado
     resetarSistemaBordaPorCompleto(secao);
     
+    // Desabilitar inicialmente todos os adicionais para lanches
+    if (secao === 'lanches') {
+      const todosAdicionais = secaoElement.querySelectorAll('input[type="checkbox"], input[data-adicional], .adicionais input, .grupo-adicional input');
+      todosAdicionais.forEach(input => {
+        input.disabled = true;
+        input.setAttribute('aria-disabled', 'true');
+        input.checked = false;
+      });
+    }
+    
     // Aplicar limites máximos
     inputsBordaTamanho.forEach(input => {
       input.setAttribute('max', '1');
@@ -412,26 +893,50 @@ function inicializarSistemaBordas() {
     // STEP 1: Monitorar inputs de pizza
     inputsPizza.forEach(input => {
       input.addEventListener('input', function() {
-        // Aplicar limite de uma pizza por vez
-        limitarUmaPizzaPorVez(secao, this);
+        const quantidade = parseInt(this.value) || 0;
         
-        const temPizza = temPizzaSelecionadaNaSecao(secao);
-        
-        if (checkboxQuerBorda) {
-          if (temPizza) {
-            // Habilitar checkbox "quer borda" - 100% VISÍVEL
+        if (quantidade > 0 && !pedidoEmConstrucao.ativo) {
+          iniciarPedidoPizza(this, secao);
+          
+          setTimeout(() => {
+            if (checkboxQuerBorda && temPizzaSelecionadaNaSecao(secao)) {
+              checkboxQuerBorda.disabled = false;
+              checkboxQuerBorda.removeAttribute('aria-disabled');
+            }
+          }, 50);
+          
+          return;
+        } else if (quantidade > 0 && pedidoEmConstrucao.ativo && pedidoEmConstrucao.produto !== this.getAttribute('data-name')) {
+          this.value = 0;
+          mostrarMensagemInline('Finalize o pedido atual antes de iniciar outro');
+          return;
+        } else if (quantidade === 0 && pedidoEmConstrucao.ativo && pedidoEmConstrucao.produto === this.getAttribute('data-name')) {
+          resetarPedidoEmConstrucao();
+          resetarSistemaBordaPorCompleto(secao);
+          return;
+        }
+
+        if (quantidade > 0) {
+          limitarUmaPizzaPorVez(secao, this);
+          
+          const temPizza = temPizzaSelecionadaNaSecao(secao);
+          
+          if (checkboxQuerBorda && temPizza) {
             checkboxQuerBorda.disabled = false;
-            checkboxQuerBorda.style.opacity = '1';
-            checkboxQuerBorda.parentElement.style.opacity = '1';
-          } else {
-            // Resetar tudo se não tem pizza
-            resetarSistemaBordaPorCompleto(secao);
+            checkboxQuerBorda.removeAttribute('aria-disabled');
           }
+        } else {
+          if (checkboxQuerBorda) {
+            checkboxQuerBorda.disabled = true;
+            checkboxQuerBorda.setAttribute('aria-disabled', 'true');
+            checkboxQuerBorda.checked = false;
+          }
+          resetarSistemaBordaPorCompleto(secao);
         }
       });
     });
     
-    // STEP 2: Checkbox "quer borda"
+    // STEP 2: Checkbox "quer borda" - CORRIGIDO
     if (checkboxQuerBorda) {
       checkboxQuerBorda.addEventListener('change', function() {
         config.querBorda = this.checked;
@@ -440,37 +945,31 @@ function inicializarSistemaBordas() {
           const tamanhoPizza = getTamanhoPizzaSelecionadaNaSecao(secao);
           
           if (tamanhoPizza) {
-            // Habilitar APENAS o tamanho de borda correspondente - 100% VISÍVEL
             inputsBordaTamanho.forEach(input => {
               const nomeBorda = input.getAttribute('data-name');
               const ehTamanhoCorreto = nomeBorda.includes(`Borda ${tamanhoPizza}`);
               
               if (ehTamanhoCorreto) {
                 input.disabled = false;
-                input.style.opacity = '1';
-                input.parentElement.style.opacity = '1';
+                input.removeAttribute('aria-disabled');
                 input.setAttribute('max', '1');
               } else {
                 input.disabled = true;
-                input.style.opacity = '0.3';
-                input.parentElement.style.opacity = '0.3';
+                input.setAttribute('aria-disabled', 'true');
                 input.value = 0;
               }
             });
           }
         } else {
-          // Desabilitar bordas
           inputsBordaTamanho.forEach(input => {
             input.disabled = true;
-            input.style.opacity = '0.3';  1
-            input.parentElement.style.opacity = '0.3';
+            input.setAttribute('aria-disabled', 'true');
             input.value = 0;
           });
           
           checkboxesSaborBorda.forEach(checkbox => {
             checkbox.disabled = true;
-            checkbox.style.opacity = '0.3';
-            checkbox.parentElement.style.opacity = '0.3';
+            checkbox.setAttribute('aria-disabled', 'true');
             checkbox.checked = false;
           });
           
@@ -485,7 +984,6 @@ function inicializarSistemaBordas() {
       input.addEventListener('input', function() {
         let quantidade = parseInt(this.value) || 0;
         
-        // Garantir máximo 1
         if (quantidade > 1) {
           quantidade = 1;
           this.value = 1;
@@ -499,7 +997,6 @@ function inicializarSistemaBordas() {
         else if (nomeBorda.includes('Borda G')) tamanho = 'G';
         
         if (quantidade > 0) {
-          // Garantir que apenas um tamanho seja selecionado
           inputsBordaTamanho.forEach(outroInput => {
             if (outroInput !== this && !outroInput.disabled) {
               outroInput.value = 0;
@@ -508,21 +1005,17 @@ function inicializarSistemaBordas() {
           
           config.tamanhoBorda = tamanho;
           
-          // Habilitar sabores de borda - 100% VISÍVEL
           checkboxesSaborBorda.forEach(checkbox => {
             checkbox.disabled = false;
-            checkbox.style.opacity = '1';
-            checkbox.parentElement.style.opacity = '1';
+            checkbox.removeAttribute('aria-disabled');
           });
         } else {
           config.tamanhoBorda = null;
           config.bordaSelecionada = null;
           
-          // Desabilitar sabores
           checkboxesSaborBorda.forEach(checkbox => {
             checkbox.disabled = true;
-            checkbox.style.opacity = '0.3';
-            checkbox.parentElement.style.opacity = '0.3';
+            checkbox.setAttribute('aria-disabled', 'true');
             checkbox.checked = false;
           });
         }
@@ -560,13 +1053,55 @@ function adicionarListenersUniversais() {
     const secaoElement = document.querySelector(`.categoria.${categoria}`);
     if (!secaoElement) return;
     
+    if (categoria === 'lanches') {
+      const todosAdicionais = secaoElement.querySelectorAll('input[type="checkbox"], input[data-adicional], .adicionais input, .grupo-adicional input, input[data-grupo="adicionais"]');
+      todosAdicionais.forEach(input => {
+        input.disabled = true;
+        input.setAttribute('aria-disabled', 'true');
+        input.checked = false;
+      });
+    }
+    
     const inputs = secaoElement.querySelectorAll('input[type="number"]:not([data-name*="Borda"])');
     const ehCategoriaPizza = ['pizzas-trad', 'pizzas-especiais', 'pizzas-doces'].includes(categoria);
+    const ehCategoriaLanche = categoria === 'lanches';
     
     inputs.forEach(input => {
       input.addEventListener('input', function() {
-        if (ehCategoriaPizza) {
-          // Para pizzas: só permite uma por vez
+        if (ehCategoriaLanche) {
+          const quantidade = parseInt(this.value) || 0;
+          
+          if (quantidade > 0 && !pedidoEmConstrucao.ativo) {
+            iniciarPedidoLanche(this);
+            
+            setTimeout(() => {
+              const adicionaisLanche = secaoElement.querySelectorAll('input[type="checkbox"], input[data-adicional], .adicionais input, .grupo-adicional input, input[data-grupo="adicionais"]');
+              adicionaisLanche.forEach(adicional => {
+                adicional.disabled = false;
+                adicional.removeAttribute('aria-disabled');
+              });
+            }, 50);
+            
+          } else if (quantidade > 0 && pedidoEmConstrucao.ativo && pedidoEmConstrucao.produto !== this.getAttribute('data-name')) {
+            this.value = 0;
+            mostrarMensagemInline('Finalize o pedido atual antes de iniciar outro');
+            return;
+          }
+          
+          if (quantidade > 0) {
+            mostrarBotaoAdicionar(categoria);
+          } else if (pedidoEmConstrucao.ativo && pedidoEmConstrucao.produto === this.getAttribute('data-name')) {
+            const adicionaisLanche = secaoElement.querySelectorAll('input[type="checkbox"], input[data-adicional], .adicionais input, .grupo-adicional input, input[data-grupo="adicionais"]');
+            adicionaisLanche.forEach(adicional => {
+              adicional.disabled = true;
+              adicional.setAttribute('aria-disabled', 'true');
+              adicional.checked = false;
+            });
+            
+            resetarPedidoEmConstrucao();
+            esconderBotaoAdicionar(categoria);
+          }
+        } else if (ehCategoriaPizza) {
           const temItens = temPizzaSelecionadaNaSecao(categoria);
           
           if (temItens) {
@@ -575,7 +1110,14 @@ function adicionarListenersUniversais() {
             esconderBotaoAdicionar(categoria);
           }
         } else {
-          // Para outras categorias: permite múltiplos itens
+          const quantidade = parseInt(this.value) || 0;
+          
+          if (quantidade > 0 && pedidoEmConstrucao.ativo && pedidoEmConstrucao.categoria !== categoria) {
+            this.value = 0;
+            mostrarMensagemInline('Finalize o pedido atual antes de mudar de categoria');
+            return;
+          }
+          
           const temItens = Array.from(inputs).some(inp => (parseInt(inp.value) || 0) > 0);
           
           if (temItens) {
@@ -622,11 +1164,21 @@ function gerarMensagemPedido() {
   let numeroItem = 1;
   
   carrinho.forEach(item => {
-    mensagem += `${numeroItem}. ${item.nome}\n`;
+    let nomeItem = item.nome;
+    
+    if (isPizza(item.nome) && !nomeItem.toLowerCase().includes('pizza')) {
+      nomeItem = `Pizza ${nomeItem}`;
+    }
+    
+    mensagem += `${numeroItem}. ${nomeItem}\n`;
     mensagem += `   Qtd: ${item.quantidade} | Valor: R$ ${item.subtotal.toFixed(2)}\n`;
     
     if (item.borda) {
       mensagem += `   🍕 Borda: ${item.borda}\n`;
+    }
+    
+    if (item.adicionais && item.adicionais.length > 0) {
+      mensagem += `   🍔 Adicionais: ${item.adicionais.join(', ')}\n`;
     }
     
     mensagem += '\n';
@@ -654,6 +1206,15 @@ function enviarPedido() {
   }
 }
 
+function addToFloatingCart(item) {
+  if (typeof adicionarItemAoCarrinho === 'function') {
+    adicionarItemAoCarrinho(item.nome, item.preco, item.quantidade, item.categoria);
+  } else {
+    carrinho.push(item);
+    atualizarCarrinho();
+  }
+}
+
 // ========== INICIALIZAÇÃO ==========
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -667,17 +1228,33 @@ document.addEventListener('DOMContentLoaded', () => {
     carrinhoFlutuante.style.display = 'none';
   }
   
-  // CORRIGIDO: Inicializar na ordem correta
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+    }
+  `;
+  document.head.appendChild(style);
+  
   inicializarSistemaBordas();
   adicionarListenersUniversais();
   
   document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
       fecharCarrinho();
+      if (pedidoEmConstrucao.ativo) {
+        resetarPedidoEmConstrucao();
+        mostrarMensagemInline('Pedido cancelado');
+      }
     }
   });
   
   atualizarCarrinho();
-  
-  console.log('✅ Sistema corrigido e funcionando:\n- Uma pizza por vez\n- Bordas 100% visíveis\n- Limite máximo 1');
 });

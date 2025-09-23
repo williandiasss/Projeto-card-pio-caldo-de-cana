@@ -584,83 +584,6 @@ footer {
     opacity: 0.8;
 }
 
-/* Estrutura base do item do carrinho */
-.item-carrinho {
-    display: flex;
-    align-items: center;
-    padding: 15px 20px;
-    border-bottom: 1px solid #f0f0f0;
-    transition: background-color 0.2s ease;
-    gap: 10px;
-    width: 100%;
-    box-sizing: border-box;
-}
-
-.item-carrinho:hover {
-    background-color: #f8f9fa;
-}
-
-.item-info {
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.item-nome {
-    font-weight: 600;
-    color: #111111;
-    font-size: 14px;
-    line-height: 1.3;
-    word-wrap: break-word;
-    overflow-wrap: break-word;
-    hyphens: auto;
-}
-
-.item-preco {
-    color: #25D366;
-    font-weight: 600;
-    font-size: 13px;
-}
-
-.item-quantidade {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-shrink: 0;
-}
-
-.btn-quantidade {
-    width: 30px;
-    height: 30px;
-    border: 1px solid #ddd;
-    background: white;
-    border-radius: 6px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 600;
-    color: #666;
-    transition: all 0.2s ease;
-    font-size: 16px;
-}
-
-.btn-quantidade:hover {
-    background: #f8f9fa;
-    border-color: #25D366;
-    color: #25D366;
-}
-
-.quantidade-numero {
-    min-width: 25px;
-    text-align: center;
-    font-weight: 600;
-    font-size: 14px;
-    color: #333;
-}
-
 /* Media Query para telas muito pequenas (≤360px) */
 @media (max-width: 360px) {
 
@@ -1925,23 +1848,76 @@ footer {
     }
 }
 
-/* Adicione este CSS específico para iPhone SE */
-
 /* iPhone SE específico (375px) */
-@media (max-width: 375px) and (min-width: 361px) {
-
-     .item-carrinho {
-        padding: 12px 12px;
-        gap: 8px;
+@media (max-width: 375px) {
+  /* Carrinho flutuante menor e reposicionado */
+    #carrinho-flutuante {
+        top: 15px;
+        right: 15px;
+        padding: 8px 12px;
+        font-size: 12px;
+        border-radius: 30px;
+        box-shadow: 0 2px 10px rgba(37, 211, 102, 0.3);
+    }
+    
+    #carrinho-flutuante:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4);
+    }
+    
+    /* Painel do carrinho ocupa toda a tela */
+    #carrinho-painel {
+        right: -100%;
+        width: 100%;
+        max-width: 375px;
+    }
+    
+    #carrinho-painel.ativo {
+        right: 0;
+    }
+    
+    /* Header compacto */
+    .carrinho-header {
+        padding: 15px;
+    }
+    
+    .carrinho-header h2 {
+        font-size: 18px;
+    }
+    
+    .carrinho-header button {
+        width: 32px;
+        height: 32px;
+        font-size: 14px;
+    }
+    
+    /* Itens do carrinho mais compactos */
+    .item-carrinho {
+        padding: 12px 15px;
+        flex-wrap: wrap;
+    }
+    
+    .item-info {
+        flex: 1;
+        min-width: 0;
+        margin-right: 10px;
     }
     
     .item-nome {
-        font-size: 12px;
-        max-width: 150px;
+        font-size: 13px;
+        line-height: 1.2;
+        word-break: break-word;
+        margin-bottom: 3px;
     }
     
     .item-preco {
-        font-size: 11px;
+        font-size: 12px;
+    }
+    
+    .item-quantidade {
+        gap: 8px;
+        margin-left: 0;
+        flex-shrink: 0;
     }
     
     .btn-quantidade {
@@ -1951,56 +1927,41 @@ footer {
     }
     
     .quantidade-numero {
+        min-width: 25px;
+        font-size: 13px;
+    }
+    
+    /* Footer compacto */
+    .carrinho-footer {
+        padding: 15px;
+    }
+    
+    .carrinho-footer strong {
+        font-size: 16px;
+        margin-bottom: 10px;
+    }
+    
+    /* Carrinho vazio adaptado */
+    .carrinho-vazio {
+        padding: 30px 20px;
+    }
+    
+    .carrinho-vazio-icone {
+        font-size: 40px;
+        margin-bottom: 12px;
+    }
+    
+    .carrinho-vazio p {
+        font-size: 14px;
+    }
+    
+    .carrinho-vazio small {
         font-size: 12px;
-        min-width: 22px;
     }
     
-    .item-quantidade {
-        gap: 6px;
-    }
-    #carrinho-flutuante {
-        top: 15px;
-        right: 5px !important; /* Força a posição */
-        left: auto !important;
-        padding: 8px 8px !important; /* Padding bem reduzido */
-        font-size: 10px !important;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        max-width: calc(100vw - 10px) !important;
-        min-width: 75px;
-        box-sizing: border-box;
-        transform: none;
-        border-radius: 20px;
-    }
-    
-    #carrinho-painel {
-        width: 100vw !important;
-        right: -100vw !important;
-        left: 0 !important;
-        max-width: 100vw;
-        overflow-x: hidden;
-    }
-    
-    .carrinho-header {
-        padding: 15px 8px !important; /* Padding lateral bem reduzido */
-    }
-    
-    .item-carrinho {
-        padding: 10px 8px !important; /* Padding lateral reduzido */
-    }
-    
-    .item-nome {
-        font-size: 12px !important;
-        max-width: 170px !important; /* Ajustado para iPhone SE */
-        word-wrap: break-word;
-        overflow-wrap: break-word;
-        hyphens: auto;
-        line-height: 1.2;
-    }
-    
-    .item-detalhes {
-        padding-right: 8px !important; /* Espaço extra para evitar corte */
+    /* Scrollbar mais fina em mobile */
+    #lista-carrinho::-webkit-scrollbar {
+        width: 3px;
     }
 }
 
