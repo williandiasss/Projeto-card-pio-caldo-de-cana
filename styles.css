@@ -62,7 +62,7 @@ header {
 }
 
 button {
-    background-color: #FFFAFA;
+    background-color: #eef08f;
     border: none;
     border-radius: 5px; 
     color: #020304;
@@ -306,11 +306,17 @@ h3 {
 
 footer {
     background-color: #1b1b1b;
-    color: white;
+    color: #ffff;
     text-align: center;
     padding: 1rem;
     margin-top: 2rem;
     width: 100%;
+}
+footer a {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 20px;
 }
 /* CSS do Carrinho Flutuante - Base */
 #carrinho-flutuante {
