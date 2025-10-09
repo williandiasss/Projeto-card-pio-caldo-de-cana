@@ -511,6 +511,13 @@ function adicionarLancheAoCarrinho(secaoElement, categoria) {
           nome: adicional.getAttribute('data-name') || adicional.value || 'Adicional',
           preco: parseFloat(adicional.getAttribute('data-price')) || 0
         }));
+              // Coletar ingredientes removidos
+      const removerSelecionados = Array.from(secaoElement.querySelectorAll('.remover-ingredientes input[type="checkbox"]:checked'))
+        .map(remover => remover.value);
+
+      if (removerSelecionados.length > 0) {
+        nomeFinal += ` (sem ${removerSelecionados.join(', ')})`;
+      }
       
       const valorAdicionais = adicionaisSelecionados.reduce((total, adicional) => total + adicional.preco, 0);
       const nomesAdicionais = adicionaisSelecionados.map(adicional => adicional.nome);
@@ -744,6 +751,11 @@ function atualizarCarrinho() {
 function gerarMensagemPedido() {
   if (carrinho.length === 0) {
     alert('Seu carrinho está vazio! Adicione alguns itens antes de finalizar o pedido.');
+
+      const entregaSelecionada = document.querySelector('input[name="entrega"]:checked');
+  if (entregaSelecionada) {
+    mensagem += `🚚 *Tipo de Pedido:* ${entregaSelecionada.value}\n\n`;
+  }
     return '';
   }
   
