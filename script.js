@@ -760,7 +760,7 @@ function gerarMensagemPedido() {
   }
   
   let mensagem = '*🍽️ NOVO PEDIDO - CARDOSO CALDO DE CANA*\n\n';
-  mensagem += '📋 *ITENS DO PEDIDO:*\n\n';
+  mensagem += '🍽 *ITENS DO PEDIDO:*\n\n';
   
   let totalGeral = 0;
   let numeroItem = 1;
@@ -776,11 +776,11 @@ function gerarMensagemPedido() {
     mensagem += `   Qtd: ${item.quantidade} | Valor: R$ ${item.subtotal.toFixed(2)}\n`;
     
     if (item.borda) {
-      mensagem += `   🍕 Borda: ${item.borda}\n`;
+      mensagem += `  🍕  Borda: ${item.borda}\n`;
     }
     
     if (item.adicionais && item.adicionais.length > 0) {
-      mensagem += `   🍔 Adicionais: ${item.adicionais.join(', ')}\n`;
+      mensagem += `   ➕ Adicionais: ${item.adicionais.join(', ')}\n`;
     }
     
     mensagem += '\n';
@@ -790,8 +790,8 @@ function gerarMensagemPedido() {
   
   mensagem += '━━━━━━━━━━━━━━━━━━━━━━━━\n';
   mensagem += `💰 *TOTAL DO PEDIDO: R$ ${totalGeral.toFixed(2)}*\n\n`;
-  mensagem += '📱 _Pedido enviado pelo site_\n';
-  mensagem += '🕐 _Aguardando confirmação..._';
+  mensagem += '🌐 _Pedido enviado pelo site_\n';
+  mensagem += '⏳ _Aguardando confirmação..._';
   
   return mensagem;
 }
