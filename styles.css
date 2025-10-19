@@ -200,7 +200,7 @@ input:hover {
 .input-align input {
     margin-left: 5px;
 }
-
+.gratis-acompanhamentos,
 .remover-ingredientes,
 .sabores-meio-meio,
 .sabor-borda {
@@ -212,7 +212,7 @@ input:hover {
     background-color: rgba(255, 255, 255, 0.05);
     border-radius: 8px;
 }
-
+.gratis-acompanhamentos label,
 .remover-ingredientes label,
 .sabores-meio-meio label,
 .sabor-borda label {
@@ -225,7 +225,7 @@ input:hover {
     padding: 4px 0;
     text-align: left !important;
 }
-
+.gratis-acompanhamentos input[type="checkbox"],
 .remover-ingredientes input[type="checkbox"],
 .sabores-meio-meio input[type="checkbox"],
 .sabor-borda input[type="checkbox"] {
@@ -314,6 +314,7 @@ footer {
     padding: 1rem;
     margin-top: 2rem;
     width: 100%;
+    
 }
 
 footer a {
