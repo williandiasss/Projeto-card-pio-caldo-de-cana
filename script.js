@@ -17,10 +17,6 @@ let estadoPedido = {
 
 // ========== FUNÇÕES DE NAVEGAÇÃO ==========
 
-/**
- * Abre uma categoria específica do cardápio
- * Apenas uma categoria pode estar aberta por vez
- */
 function openCategory(categoryName) {
   if (estadoPedido.ativo) {
     mostrarMensagemInline('Finalize o pedido atual antes de mudar de categoria');
@@ -40,9 +36,6 @@ function openCategory(categoryName) {
 
 // ========== SISTEMA DE CARRINHO FLUTUANTE ==========
 
-/**
- * Abre o painel lateral do carrinho
- */
 function abrirCarrinho() {
   const carrinhoPanel = document.getElementById('carrinho-painel');
   const overlay = document.getElementById('overlay');
@@ -54,9 +47,6 @@ function abrirCarrinho() {
   atualizarListaCarrinhoPanel();
 }
 
-/**
- * Fecha o painel lateral do carrinho
- */
 function fecharCarrinho() {
   const carrinhoPanel = document.getElementById('carrinho-painel');
   const overlay = document.getElementById('overlay');
@@ -67,9 +57,6 @@ function fecharCarrinho() {
   document.body.style.overflow = 'auto';
 }
 
-/**
- * Atualiza a lista de itens no painel do carrinho
- */
 function atualizarListaCarrinhoPanel() {
   const listaCarrinho = document.getElementById('lista-carrinho');
   const totalSidebar = document.getElementById('total-sidebar');
@@ -93,7 +80,6 @@ function atualizarListaCarrinhoPanel() {
       
       let nomeExibicao = item.nome;
       
-      // Formatação especial para pizzas
       if (isPizza(item.nome) && !nomeExibicao.toLowerCase().includes('pizza')) {
         nomeExibicao = `Pizza ${nomeExibicao}`;
       }
@@ -131,9 +117,6 @@ function atualizarListaCarrinhoPanel() {
   }
 }
 
-/**
- * Altera a quantidade de um item no carrinho
- */
 function alterarQuantidadeCarrinho(index, mudanca) {
   if (carrinho[index]) {
     const novaQuantidade = carrinho[index].quantidade + mudanca;
@@ -150,9 +133,6 @@ function alterarQuantidadeCarrinho(index, mudanca) {
   }
 }
 
-/**
- * Atualiza o contador do carrinho flutuante
- */
 function atualizarCarrinho() {
   const itensCount = document.getElementById('itens-count');
   const totalCount = document.getElementById('total-count');
@@ -173,9 +153,6 @@ function atualizarCarrinho() {
 
 // ========== FUNÇÕES AUXILIARES ==========
 
-/**
- * Verifica se o produto é uma pizza
- */
 function isPizza(nome) {
   const pizzasTracionais = [
     'Quatro Queijos', 'Bacon', 'Calabresa', 'Brócolis', 'Frango com Catupiry',
@@ -201,9 +178,6 @@ function isPizza(nome) {
          todasPizzas.some(pizza => nome.trim() === pizza.trim());
 }
 
-/**
- * Extrai o tamanho da pizza do nome
- */
 function getTamanhoPizza(nome) {
   if (nome.includes(' P')) return 'P';
   if (nome.includes(' M')) return 'M';
@@ -211,17 +185,11 @@ function getTamanhoPizza(nome) {
   return null;
 }
 
-/**
- * Retorna o preço da borda baseado no tamanho
- */
 function obterPrecoBorda(tamanho) {
   const precosBorda = { 'P': 8, 'M': 10, 'G': 12 };
   return precosBorda[tamanho] || 0;
 }
 
-/**
- * Mostra mensagem temporária na tela
- */
 function mostrarMensagemInline(mensagem) {
   const mensagemExistente = document.querySelector('.mensagem-inline');
   if (mensagemExistente) mensagemExistente.remove();
@@ -255,9 +223,6 @@ function mostrarMensagemInline(mensagem) {
 
 // ========== CONTROLE DE ESTADO DO PEDIDO ==========
 
-/**
- * Inicia um novo pedido bloqueando outros inputs
- */
 function iniciarPedido(input, categoria) {
   if (estadoPedido.ativo && estadoPedido.produto !== input.getAttribute('data-name')) {
     input.value = 0;
@@ -276,9 +241,6 @@ function iniciarPedido(input, categoria) {
   return true;
 }
 
-/**
- * Desabilita outros inputs da mesma categoria
- */
 function desabilitarOutrosInputs(categoria, inputAtivo) {
   const secaoElement = document.querySelector(`.categoria.${categoria}`);
   if (!secaoElement) return;
@@ -292,9 +254,6 @@ function desabilitarOutrosInputs(categoria, inputAtivo) {
   });
 }
 
-/**
- * Desabilita botões de outras categorias
- */
 function desabilitarOutrasCategorias(categoriaAtiva) {
   const botoesCategoria = document.querySelectorAll('button[onclick*="openCategory"]');
   botoesCategoria.forEach(botao => {
@@ -306,23 +265,18 @@ function desabilitarOutrasCategorias(categoriaAtiva) {
   });
 }
 
-/**
- * Reseta o estado do pedido e reabilita todos os inputs
- */
 function resetarEstadoPedido() {
   estadoPedido.ativo = false;
   estadoPedido.categoria = null;
   estadoPedido.produto = null;
   estadoPedido.dadosTemporarios = {};
 
-  // Reabilitar todos os inputs e botões
   const todosElementos = document.querySelectorAll('input[disabled], button[disabled]');
   todosElementos.forEach(elemento => {
     elemento.disabled = false;
     elemento.style.opacity = '1';
   });
 
-  // Zerar todos os inputs
   const inputsNumeros = document.querySelectorAll('input[type="number"]');
   inputsNumeros.forEach(input => {
     if (!input.closest('#carrinho-painel')) {
@@ -337,17 +291,14 @@ function resetarEstadoPedido() {
     }
   });
 
-  // Resetar sistemas específicos
   resetarAdicionaisLanche();
   resetarSistemaBordas();
   resetarAcai();
+  resetarHamburguer();
 }
 
 // ========== SISTEMA PARA LANCHES ==========
 
-/**
- * Processa seleção de lanches com sequência de inputs
- */
 function processarLanche(input) {
   const quantidade = parseInt(input.value) || 0;
   const categoria = 'lanches';
@@ -355,7 +306,6 @@ function processarLanche(input) {
   if (quantidade > 0) {
     if (!iniciarPedido(input, categoria)) return;
     
-    // Habilitar remover ingredientes e adicionais
     habilitarRemoverIngredientesLanche(input);
     habilitarAdicionaisLanche(categoria);
     mostrarBotaoAdicionar(categoria);
@@ -365,9 +315,6 @@ function processarLanche(input) {
   }
 }
 
-/**
- * Habilita checkboxes de remover ingredientes para o lanche específico
- */
 function habilitarRemoverIngredientesLanche(input) {
   const li = input.closest('li');
   if (!li) return;
@@ -379,14 +326,10 @@ function habilitarRemoverIngredientesLanche(input) {
   }
 }
 
-/**
- * Habilita adicionais de lanches
- */
 function habilitarAdicionaisLanche(categoria) {
   const secaoElement = document.querySelector(`.categoria.${categoria}`);
   if (!secaoElement) return;
 
-  // Encontrar seção de adicionais (após o h3 "Adicionais")
   const h3Adicionais = Array.from(secaoElement.querySelectorAll('h3')).find(h3 => h3.textContent.trim() === 'Adicionais');
   if (!h3Adicionais) return;
   
@@ -398,9 +341,6 @@ function habilitarAdicionaisLanche(categoria) {
   }
 }
 
-/**
- * Reseta adicionais de lanches
- */
 function resetarAdicionaisLanche() {
   const secaoElement = document.querySelector('.categoria.lanches');
   if (!secaoElement) return;
@@ -412,26 +352,16 @@ function resetarAdicionaisLanche() {
   });
 }
 
-// ========== SISTEMA PARA PIZZAS ==========
+// ========== SISTEMA PARA HAMBÚRGUER ==========
 
-/**
- * Processa seleção de pizzas com sistema de borda
- */
-function processarPizza(input, categoria) {
+function processarHamburguer(input) {
   const quantidade = parseInt(input.value) || 0;
+  const categoria = 'hamburguer';
   
   if (quantidade > 0) {
     if (!iniciarPedido(input, categoria)) return;
     
-    // Limitar quantidade a 1 por vez
-    if (quantidade > 1) input.value = 1;
-    
-    // Habilitar checkbox meio a meio
-    habilitarCheckboxMeioMeio(input);
-    
-    // Habilitar sistema de borda
-    habilitarCheckboxQuerBorda(categoria);
-    
+    habilitarRemoverIngredientesHamburguer(input);
     mostrarBotaoAdicionar(categoria);
   } else if (estadoPedido.ativo && estadoPedido.produto === input.getAttribute('data-name')) {
     resetarEstadoPedido();
@@ -439,9 +369,297 @@ function processarPizza(input, categoria) {
   }
 }
 
-/**
- * Habilita checkbox de pizza meio a meio
- */
+function habilitarRemoverIngredientesHamburguer(input) {
+  const li = input.closest('li');
+  if (!li) return;
+  
+  const divRemover = li.querySelector('.remover-ingredientes');
+  if (divRemover) {
+    const checkboxes = divRemover.querySelectorAll('input[type="checkbox"]');
+    checkboxes.forEach(cb => {
+      cb.disabled = false;
+      cb.style.pointerEvents = 'auto';
+      cb.style.opacity = '1';
+    });
+  }
+}
+
+function resetarHamburguer() {
+  const secaoElement = document.querySelector('.categoria.hamburguer');
+  if (!secaoElement) return;
+
+  const checkboxes = secaoElement.querySelectorAll('input[type="checkbox"]');
+  checkboxes.forEach(checkbox => {
+    checkbox.disabled = true;
+    checkbox.checked = false;
+    checkbox.style.pointerEvents = 'none';
+  });
+}
+
+// ========== SISTEMA PARA TÁBUAS - CORRIGIDO ==========
+
+function processarTabuas(input) {
+  const quantidade = parseInt(input.value) || 0;
+  const categoria = 'tabuas';
+  
+  if (quantidade > 0) {
+    if (!estadoPedido.ativo) {
+      estadoPedido.ativo = true;
+      estadoPedido.categoria = categoria;
+      estadoPedido.produto = input.getAttribute('data-name');
+      desabilitarOutrasCategorias(categoria);
+      
+      const secaoElement = document.querySelector(`.categoria.${categoria}`);
+      if (secaoElement) {
+        const todosInputs = secaoElement.querySelectorAll('input[type="number"]');
+        todosInputs.forEach(inp => {
+          if (inp !== input) {
+            inp.disabled = true;
+            inp.value = 0;
+          }
+        });
+      }
+    } else if (estadoPedido.produto !== input.getAttribute('data-name')) {
+      input.value = 0;
+      mostrarMensagemInline('Finalize o pedido atual antes de iniciar outro');
+      return;
+    }
+    
+    mostrarBotaoAdicionar(categoria);
+  } else if (estadoPedido.ativo && estadoPedido.produto === input.getAttribute('data-name')) {
+    resetarCategoriaSimples(categoria);
+    esconderBotaoAdicionar(categoria);
+  }
+}
+
+// ========== SISTEMA PARA TORRE DE BATATA - CORRIGIDO ==========
+
+function processarTorreBatata(input) {
+  const quantidade = parseInt(input.value) || 0;
+  const categoria = 'torre-batata';
+  
+  if (quantidade > 0) {
+    if (!estadoPedido.ativo) {
+      estadoPedido.ativo = true;
+      estadoPedido.categoria = categoria;
+      estadoPedido.produto = input.getAttribute('data-name');
+      desabilitarOutrasCategorias(categoria);
+      
+      const secaoElement = document.querySelector(`.categoria.${categoria}`);
+      if (secaoElement) {
+        const todosInputs = secaoElement.querySelectorAll('input[type="number"]');
+        todosInputs.forEach(inp => {
+          if (inp !== input) {
+            inp.disabled = true;
+            inp.value = 0;
+          }
+        });
+      }
+    } else if (estadoPedido.produto !== input.getAttribute('data-name')) {
+      input.value = 0;
+      mostrarMensagemInline('Finalize o pedido atual antes de iniciar outro');
+      return;
+    }
+    
+    mostrarBotaoAdicionar(categoria);
+  } else if (estadoPedido.ativo && estadoPedido.produto === input.getAttribute('data-name')) {
+    resetarCategoriaSimples(categoria);
+    esconderBotaoAdicionar(categoria);
+  }
+}
+
+// ========== SISTEMA PARA PORÇÕES - CORRIGIDO COM ACENTO ==========
+
+function processarPorcoes(input) {
+  const quantidade = parseInt(input.value) || 0;
+  const categoria = 'porções'; // CORRIGIDO: com acento
+  
+  console.log(`🔍 processarPorcoes chamado - Quantidade: ${quantidade}, Produto: ${input.getAttribute('data-name')}`);
+  
+  if (quantidade > 0) {
+    if (!estadoPedido.ativo) {
+      console.log('✅ Iniciando novo pedido de porções');
+      estadoPedido.ativo = true;
+      estadoPedido.categoria = categoria;
+      estadoPedido.produto = input.getAttribute('data-name');
+      desabilitarOutrasCategorias(categoria);
+      
+      const secaoElement = document.querySelector(`.categoria.${categoria}`);
+      if (secaoElement) {
+        const todosInputs = secaoElement.querySelectorAll('input[type="number"]');
+        console.log(`📋 Total de inputs na categoria: ${todosInputs.length}`);
+        todosInputs.forEach(inp => {
+          if (inp !== input) {
+            inp.disabled = true;
+            inp.value = 0;
+          }
+        });
+      }
+    } else if (estadoPedido.produto !== input.getAttribute('data-name')) {
+      console.log('⚠️ Tentativa de iniciar outro pedido bloqueada');
+      input.value = 0;
+      mostrarMensagemInline('Finalize o pedido atual antes de iniciar outro');
+      return;
+    }
+    
+    mostrarBotaoAdicionar(categoria);
+  } else if (estadoPedido.ativo && estadoPedido.produto === input.getAttribute('data-name')) {
+    console.log('🔄 Resetando categoria porções');
+    resetarCategoriaSimples(categoria);
+    esconderBotaoAdicionar(categoria);
+  }
+}
+
+// ========== SISTEMA PARA CERVEJAS - CORRIGIDO ==========
+
+function processarCervejas(input) {
+  const quantidade = parseInt(input.value) || 0;
+  const categoria = 'cervejas';
+  
+  if (quantidade > 0) {
+    if (!estadoPedido.ativo) {
+      estadoPedido.ativo = true;
+      estadoPedido.categoria = categoria;
+      estadoPedido.produto = input.getAttribute('data-name');
+      desabilitarOutrasCategorias(categoria);
+      
+      const secaoElement = document.querySelector(`.categoria.${categoria}`);
+      if (secaoElement) {
+        const todosInputs = secaoElement.querySelectorAll('input[type="number"]');
+        todosInputs.forEach(inp => {
+          if (inp !== input) {
+            inp.disabled = true;
+            inp.value = 0;
+          }
+        });
+      }
+    } else if (estadoPedido.produto !== input.getAttribute('data-name')) {
+      input.value = 0;
+      mostrarMensagemInline('Finalize o pedido atual antes de iniciar outro');
+      return;
+    }
+    
+    mostrarBotaoAdicionar(categoria);
+  } else if (estadoPedido.ativo && estadoPedido.produto === input.getAttribute('data-name')) {
+    resetarCategoriaSimples(categoria);
+    esconderBotaoAdicionar(categoria);
+  }
+}
+
+// ========== SISTEMA PARA BEBIDAS - CORRIGIDO ==========
+
+function processarBebidas(input) {
+  const quantidade = parseInt(input.value) || 0;
+  const categoria = 'bebidas';
+  
+  if (quantidade > 0) {
+    if (!estadoPedido.ativo) {
+      estadoPedido.ativo = true;
+      estadoPedido.categoria = categoria;
+      estadoPedido.produto = input.getAttribute('data-name');
+      desabilitarOutrasCategorias(categoria);
+      
+      const secaoElement = document.querySelector(`.categoria.${categoria}`);
+      if (secaoElement) {
+        const todosInputs = secaoElement.querySelectorAll('input[type="number"]');
+        todosInputs.forEach(inp => {
+          if (inp !== input) {
+            inp.disabled = true;
+            inp.value = 0;
+          }
+        });
+      }
+    } else if (estadoPedido.produto !== input.getAttribute('data-name')) {
+      input.value = 0;
+      mostrarMensagemInline('Finalize o pedido atual antes de iniciar outro');
+      return;
+    }
+    
+    mostrarBotaoAdicionar(categoria);
+  } else if (estadoPedido.ativo && estadoPedido.produto === input.getAttribute('data-name')) {
+    resetarCategoriaSimples(categoria);
+    esconderBotaoAdicionar(categoria);
+  }
+}
+
+// ========== SISTEMA PARA CAIPIRINHAS - CORRIGIDO ==========
+
+function processarCaipirinhas(input) {
+  const quantidade = parseInt(input.value) || 0;
+  const categoria = 'caipirinhas';
+  
+  if (quantidade > 0) {
+    if (!estadoPedido.ativo) {
+      estadoPedido.ativo = true;
+      estadoPedido.categoria = categoria;
+      estadoPedido.produto = input.getAttribute('data-name');
+      desabilitarOutrasCategorias(categoria);
+      
+      const secaoElement = document.querySelector(`.categoria.${categoria}`);
+      if (secaoElement) {
+        const todosInputs = secaoElement.querySelectorAll('input[type="number"]');
+        todosInputs.forEach(inp => {
+          if (inp !== input) {
+            inp.disabled = true;
+            inp.value = 0;
+          }
+        });
+      }
+    } else if (estadoPedido.produto !== input.getAttribute('data-name')) {
+      input.value = 0;
+      mostrarMensagemInline('Finalize o pedido atual antes de iniciar outro');
+      return;
+    }
+    
+    mostrarBotaoAdicionar(categoria);
+  } else if (estadoPedido.ativo && estadoPedido.produto === input.getAttribute('data-name')) {
+    resetarCategoriaSimples(categoria);
+    esconderBotaoAdicionar(categoria);
+  }
+}
+
+// ========== FUNÇÃO DE RESET PARA CATEGORIAS SIMPLES ==========
+
+function resetarCategoriaSimples(categoria) {
+  estadoPedido.ativo = false;
+  estadoPedido.categoria = null;
+  estadoPedido.produto = null;
+  
+  const secaoElement = document.querySelector(`.categoria.${categoria}`);
+  if (secaoElement) {
+    const todosInputs = secaoElement.querySelectorAll('input[type="number"]');
+    todosInputs.forEach(inp => {
+      inp.disabled = false;
+      inp.value = 0;
+    });
+  }
+  
+  const todosElementos = document.querySelectorAll('button[disabled]');
+  todosElementos.forEach(elemento => {
+    elemento.disabled = false;
+    elemento.style.opacity = '1';
+  });
+}
+
+// ========== SISTEMA PARA PIZZAS ==========
+
+function processarPizza(input, categoria) {
+  const quantidade = parseInt(input.value) || 0;
+  
+  if (quantidade > 0) {
+    if (!iniciarPedido(input, categoria)) return;
+    
+    if (quantidade > 1) input.value = 1;
+    
+    habilitarCheckboxMeioMeio(input);
+    habilitarCheckboxQuerBorda(categoria);
+    mostrarBotaoAdicionar(categoria);
+  } else if (estadoPedido.ativo && estadoPedido.produto === input.getAttribute('data-name')) {
+    resetarEstadoPedido();
+    esconderBotaoAdicionar(categoria);
+  }
+}
+
 function habilitarCheckboxMeioMeio(input) {
   const li = input.closest('li');
   if (!li) return;
@@ -453,13 +671,11 @@ function habilitarCheckboxMeioMeio(input) {
   if (checkboxMeio) {
     checkboxMeio.disabled = false;
     
-    // Configurar evento de mudança
     checkboxMeio.onchange = function() {
       const saboresDiv = divMeioMeio.querySelector('.sabores-meio-meio');
       if (this.checked) {
         saboresDiv.style.display = 'block';
         
-        // Habilitar apenas um sabor
         const checkboxesSabores = saboresDiv.querySelectorAll('input[type="checkbox"]');
         checkboxesSabores.forEach(cb => {
           cb.disabled = false;
@@ -483,9 +699,6 @@ function habilitarCheckboxMeioMeio(input) {
   }
 }
 
-/**
- * Habilita checkbox de borda recheada
- */
 function habilitarCheckboxQuerBorda(categoria) {
   const secaoElement = document.querySelector(`.categoria.${categoria}`);
   if (!secaoElement) return;
@@ -512,9 +725,6 @@ function habilitarCheckboxQuerBorda(categoria) {
   }
 }
 
-/**
- * Habilita inputs de tamanho de borda correspondente ao tamanho da pizza
- */
 function habilitarTamanhosBorda(categoria) {
   const secaoElement = document.querySelector(`.categoria.${categoria}`);
   if (!secaoElement) return;
@@ -537,7 +747,6 @@ function habilitarTamanhosBorda(categoria) {
         if (valor > 0) {
           if (valor > 1) this.value = 1;
           
-          // Desabilitar outros tamanhos
           inputsBorda.forEach(outro => {
             if (outro !== this && outro.getAttribute('data-name').includes('Borda')) {
               outro.value = 0;
@@ -558,9 +767,6 @@ function habilitarTamanhosBorda(categoria) {
   });
 }
 
-/**
- * Habilita sabores de borda (apenas um pode ser selecionado)
- */
 function habilitarSaboresBorda(categoria) {
   const secaoElement = document.querySelector(`.categoria.${categoria}`);
   if (!secaoElement) return;
@@ -583,9 +789,6 @@ function habilitarSaboresBorda(categoria) {
   });
 }
 
-/**
- * Desabilita sabores de borda
- */
 function desabilitarSaboresBorda(categoria) {
   const secaoElement = document.querySelector(`.categoria.${categoria}`);
   if (!secaoElement) return;
@@ -601,9 +804,6 @@ function desabilitarSaboresBorda(categoria) {
   });
 }
 
-/**
- * Reseta todo o sistema de bordas
- */
 function resetarSistemaBordas(categoria = null) {
   const secoes = categoria ? [categoria] : ['pizzas-trad', 'pizzas-especiais', 'pizzas-doces'];
   
@@ -614,14 +814,12 @@ function resetarSistemaBordas(categoria = null) {
     const bordaInfo = secaoElement.querySelector('.borda-info');
     if (!bordaInfo) return;
 
-    // Resetar checkbox quer borda
     const checkboxQuerBorda = bordaInfo.querySelector('#quer-borda');
     if (checkboxQuerBorda) {
       checkboxQuerBorda.disabled = true;
       checkboxQuerBorda.checked = false;
     }
 
-    // Resetar inputs de borda
     const inputsBorda = bordaInfo.querySelectorAll('input[data-name*="Borda"]');
     inputsBorda.forEach(input => {
       input.disabled = true;
@@ -629,10 +827,8 @@ function resetarSistemaBordas(categoria = null) {
       input.value = 0;
     });
 
-    // Resetar sabores
     desabilitarSaboresBorda(secao);
     
-    // Resetar meio a meio
     const checkboxesMeio = secaoElement.querySelectorAll('.chk-meio-meio');
     checkboxesMeio.forEach(cb => {
       cb.disabled = true;
@@ -651,9 +847,6 @@ function resetarSistemaBordas(categoria = null) {
   });
 }
 
-/**
- * Obtém o tamanho da pizza selecionada
- */
 function getTamanhoPizzaSelecionada(categoria) {
   const secaoElement = document.querySelector(`.categoria.${categoria}`);
   if (!secaoElement) return null;
@@ -672,9 +865,6 @@ function getTamanhoPizzaSelecionada(categoria) {
 
 // ========== SISTEMA PARA AÇAÍ ==========
 
-/**
- * Processa seleção de açaí com limite de 2 acompanhamentos grátis
- */
 function processarAcai(input) {
   const quantidade = parseInt(input.value) || 0;
   const categoria = 'acai';
@@ -703,7 +893,6 @@ function processarAcai(input) {
       }
     }
     
-    // Habilitar adicionais (sem limite)
     habilitarAdicionaisAcai(categoria);
     mostrarBotaoAdicionar(categoria);
   } else if (estadoPedido.ativo && estadoPedido.produto === input.getAttribute('data-name')) {
@@ -712,9 +901,6 @@ function processarAcai(input) {
   }
 }
 
-/**
- * Habilita adicionais de açaí
- */
 function habilitarAdicionaisAcai(categoria) {
   const secaoElement = document.querySelector(`.categoria.${categoria}`);
   if (!secaoElement) return;
@@ -732,9 +918,6 @@ function habilitarAdicionaisAcai(categoria) {
   });
 }
 
-/**
- * Reseta sistema de açaí
- */
 function resetarAcai() {
   const secaoElement = document.querySelector('.categoria.acai');
   if (!secaoElement) return;
@@ -746,33 +929,8 @@ function resetarAcai() {
   });
 }
 
-// ========== SISTEMA PARA OUTRAS CATEGORIAS ==========
-
-/**
- * Processa itens simples (sem sequência especial)
- */
-function processarItemSimples(input, categoria) {
-  const quantidade = parseInt(input.value) || 0;
-  
-  if (quantidade > 0) {
-    mostrarBotaoAdicionar(categoria);
-  } else {
-    const secaoElement = document.querySelector(`.categoria.${categoria}`);
-    if (secaoElement) {
-      const inputs = secaoElement.querySelectorAll('input[type="number"]');
-      const algumPreenchido = Array.from(inputs).some(inp => parseInt(inp.value) > 0);
-      if (!algumPreenchido) {
-        esconderBotaoAdicionar(categoria);
-      }
-    }
-  }
-}
-
 // ========== SISTEMA DE BOTÕES DE ADICIONAR ==========
 
-/**
- * Cria botão universal de adicionar ao carrinho para cada categoria
- */
 function criarBotaoAdicionarUniversal(categoria) {
   const secaoElement = document.querySelector(`.categoria.${categoria}`);
   if (!secaoElement) return;
@@ -801,7 +959,6 @@ function criarBotaoAdicionarUniversal(categoria) {
     
     botaoAdicionar.addEventListener('click', () => adicionarAoCarrinho(categoria));
     
-    // Adicionar ao final da lista UL
     const ul = secaoElement.querySelector('ul');
     if (ul) {
       ul.appendChild(botaoAdicionar);
@@ -811,17 +968,11 @@ function criarBotaoAdicionarUniversal(categoria) {
   }
 }
 
-/**
- * Mostra o botão de adicionar
- */
 function mostrarBotaoAdicionar(categoria) {
   const botao = document.querySelector(`.categoria.${categoria} .btn-adicionar-carrinho-universal`);
   if (botao) botao.style.display = 'block';
 }
 
-/**
- * Esconde o botão de adicionar
- */
 function esconderBotaoAdicionar(categoria) {
   const botao = document.querySelector(`.categoria.${categoria} .btn-adicionar-carrinho-universal`);
   if (botao) botao.style.display = 'none';
@@ -829,27 +980,23 @@ function esconderBotaoAdicionar(categoria) {
 
 // ========== ADICIONAR AO CARRINHO ==========
 
-/**
- * Função principal de adicionar ao carrinho
- */
 function adicionarAoCarrinho(categoria) {
   const secaoElement = document.querySelector(`.categoria.${categoria}`);
   if (!secaoElement) return;
 
   if (categoria === 'lanches') {
     adicionarLancheAoCarrinho(secaoElement, categoria);
+  } else if (categoria === 'hamburguer') {
+    adicionarHamburguerAoCarrinho(secaoElement, categoria);
+  } else if (['tabuas', 'torre-batata', 'porções', 'cervejas', 'bebidas', 'caipirinhas'].includes(categoria)) {
+    adicionarItemSimplesComReset(secaoElement, categoria);
   } else if (['pizzas-trad', 'pizzas-especiais', 'pizzas-doces'].includes(categoria)) {
     adicionarPizzaAoCarrinho(secaoElement, categoria);
   } else if (categoria === 'acai') {
     adicionarAcaiAoCarrinho(secaoElement, categoria);
-  } else {
-    adicionarItemSimples(secaoElement, categoria);
   }
 }
 
-/**
- * Adiciona lanche ao carrinho
- */
 function adicionarLancheAoCarrinho(secaoElement, categoria) {
   const inputsProdutos = secaoElement.querySelectorAll('li.com-input input[type="number"]');
   let itensAdicionados = 0;
@@ -860,7 +1007,6 @@ function adicionarLancheAoCarrinho(secaoElement, categoria) {
       const nomeProduto = input.getAttribute('data-name');
       let precoProduto = parseFloat(input.getAttribute('data-price')) || 0;
       
-      // Coletar ingredientes removidos
       const li = input.closest('li');
       const removerSelecionados = [];
       if (li) {
@@ -871,7 +1017,6 @@ function adicionarLancheAoCarrinho(secaoElement, categoria) {
         }
       }
       
-      // Coletar adicionais selecionados
       const h3Adicionais = Array.from(secaoElement.querySelectorAll('h3')).find(h3 => h3.textContent.trim() === 'Adicionais');
       const adicionaisSelecionados = [];
       
@@ -893,13 +1038,10 @@ function adicionarLancheAoCarrinho(secaoElement, categoria) {
       const nomesAdicionais = adicionaisSelecionados.map(adicional => adicional.nome);
       const precoFinal = precoProduto + valorAdicionais;
       
-      let nomeFinal = nomeProduto;
-      
-      // Adicionar ao carrinho
       for (let i = 0; i < quantidade; i++) {
         carrinho.push({
           id: Date.now() + Math.random(),
-          nome: nomeFinal,
+          nome: nomeProduto,
           preco: precoFinal,
           quantidade: 1,
           subtotal: precoFinal,
@@ -921,9 +1063,95 @@ function adicionarLancheAoCarrinho(secaoElement, categoria) {
   }
 }
 
-/**
- * Adiciona pizza ao carrinho
- */
+function adicionarHamburguerAoCarrinho(secaoElement, categoria) {
+  const inputsProdutos = secaoElement.querySelectorAll('li.com-input input[type="number"]');
+  let itensAdicionados = 0;
+  
+  inputsProdutos.forEach(input => {
+    const quantidade = parseInt(input.value) || 0;
+    if (quantidade > 0) {
+      const nomeProduto = input.getAttribute('data-name');
+      const precoProduto = parseFloat(input.getAttribute('data-price')) || 0;
+      
+      const li = input.closest('li');
+      const removerSelecionados = [];
+      if (li) {
+        const divRemover = li.querySelector('.remover-ingredientes');
+        if (divRemover) {
+          const checkboxesRemover = divRemover.querySelectorAll('input[type="checkbox"]:checked');
+          checkboxesRemover.forEach(cb => removerSelecionados.push(cb.value));
+        }
+      }
+      
+      for (let i = 0; i < quantidade; i++) {
+        carrinho.push({
+          id: Date.now() + Math.random(),
+          nome: nomeProduto,
+          preco: precoProduto,
+          quantidade: 1,
+          subtotal: precoProduto,
+          categoria: categoria,
+          removerIngredientes: removerSelecionados.length > 0 ? removerSelecionados.join(', ') : null
+        });
+      }
+      
+      itensAdicionados += quantidade;
+    }
+  });
+  
+  if (itensAdicionados > 0) {
+    resetarEstadoPedido();
+    esconderBotaoAdicionar(categoria);
+    atualizarCarrinho();
+    mostrarMensagemInline(`${itensAdicionados} hambúrguer(es) adicionado(s) ao carrinho!`);
+  }
+}
+
+function adicionarItemSimplesComReset(secaoElement, categoria) {
+  const inputs = secaoElement.querySelectorAll('input[type="number"]');
+  let itensAdicionados = 0;
+  
+  inputs.forEach(input => {
+    const quantidade = parseInt(input.value) || 0;
+    if (quantidade > 0) {
+      const nome = input.getAttribute('data-name');
+      const preco = parseFloat(input.getAttribute('data-price'));
+      
+      if (nome && !isNaN(preco)) {
+        carrinho.push({
+          id: Date.now() + Math.random(),
+          nome: nome,
+          preco: preco,
+          quantidade: quantidade,
+          subtotal: preco * quantidade,
+          categoria: categoria
+        });
+        
+        itensAdicionados += quantidade;
+      }
+    }
+  });
+  
+  if (itensAdicionados > 0) {
+    resetarCategoriaSimples(categoria);
+    esconderBotaoAdicionar(categoria);
+    atualizarCarrinho();
+    
+    let mensagem = '';
+    switch(categoria) {
+      case 'tabuas': mensagem = `${itensAdicionados} tábua(s) adicionada(s) ao carrinho!`; break;
+      case 'torre-batata': mensagem = `${itensAdicionados} torre(s) de batata adicionada(s) ao carrinho!`; break;
+      case 'porcoes': mensagem = `${itensAdicionados} porção(ões) adicionada(s) ao carrinho!`; break;
+      case 'cervejas': mensagem = `${itensAdicionados} cerveja(s) adicionada(s) ao carrinho!`; break;
+      case 'bebidas': mensagem = `${itensAdicionados} bebida(s) adicionada(s) ao carrinho!`; break;
+      case 'caipirinhas': mensagem = `${itensAdicionados} caipirinha(s) adicionada(s) ao carrinho!`; break;
+      default: mensagem = `${itensAdicionados} item(ns) adicionado(s) ao carrinho!`;
+    }
+    
+    mostrarMensagemInline(mensagem);
+  }
+}
+
 function adicionarPizzaAoCarrinho(secaoElement, categoria) {
   const inputsPizza = secaoElement.querySelectorAll('li.com-input input[type="number"]:not([data-name*="Borda"])');
   let itensAdicionados = 0;
@@ -934,7 +1162,6 @@ function adicionarPizzaAoCarrinho(secaoElement, categoria) {
       const nomePizza = input.getAttribute('data-name');
       let precoPizza = parseFloat(input.getAttribute('data-price')) || 0;
       
-      // Verificar pizza meio a meio
       const li = input.closest('li');
       let meioSelecionado = null;
       let precoMeio = 0;
@@ -950,7 +1177,6 @@ function adicionarPizzaAoCarrinho(secaoElement, categoria) {
               if (saborSelecionado) {
                 meioSelecionado = saborSelecionado.value;
                 
-                // Buscar preço do segundo sabor
                 const tamanhoPizza = getTamanhoPizza(nomePizza);
                 const inputsOutrosSabores = secaoElement.querySelectorAll('li.com-input input[type="number"]:not([data-name*="Borda"])');
                 
@@ -962,7 +1188,6 @@ function adicionarPizzaAoCarrinho(secaoElement, categoria) {
                   }
                 }
                 
-                // Usar o maior preço entre os dois sabores
                 if (precoMeio > precoPizza) {
                   precoPizza = precoMeio;
                 }
@@ -972,7 +1197,6 @@ function adicionarPizzaAoCarrinho(secaoElement, categoria) {
         }
       }
       
-      // Verificar borda
       let valorBorda = 0;
       let nomeBorda = null;
       
@@ -997,13 +1221,11 @@ function adicionarPizzaAoCarrinho(secaoElement, categoria) {
       }
       
       const precoFinal = precoPizza + valorBorda;
-      let nomeFinal = nomePizza;
       
-      // Adicionar ao carrinho
       for (let i = 0; i < quantidade; i++) {
         carrinho.push({
           id: Date.now() + Math.random(),
-          nome: nomeFinal,
+          nome: nomePizza,
           preco: precoFinal,
           quantidade: 1,
           subtotal: precoFinal,
@@ -1025,9 +1247,6 @@ function adicionarPizzaAoCarrinho(secaoElement, categoria) {
   }
 }
 
-/**
- * Adiciona açaí ao carrinho
- */
 function adicionarAcaiAoCarrinho(secaoElement, categoria) {
   const inputsAcai = secaoElement.querySelectorAll('li.com-input input[type="number"]');
   let itensAdicionados = 0;
@@ -1038,7 +1257,6 @@ function adicionarAcaiAoCarrinho(secaoElement, categoria) {
       const nomeAcai = input.getAttribute('data-name');
       let precoAcai = parseFloat(input.getAttribute('data-price')) || 0;
       
-      // Coletar acompanhamentos grátis (até 2)
       const li = input.closest('li');
       const acompanhamentosGratis = [];
       
@@ -1050,7 +1268,6 @@ function adicionarAcaiAoCarrinho(secaoElement, categoria) {
         }
       }
       
-      // Coletar adicionais pagos
       const adicionaisPagos = [];
       const todosH3 = secaoElement.querySelectorAll('h3');
       
@@ -1084,7 +1301,6 @@ function adicionarAcaiAoCarrinho(secaoElement, categoria) {
         detalhesAdicionais = adicionaisPagos.map(a => a.nome).join(', ');
       }
       
-      // Adicionar ao carrinho
       for (let i = 0; i < quantidade; i++) {
         carrinho.push({
           id: Date.now() + Math.random(),
@@ -1110,49 +1326,8 @@ function adicionarAcaiAoCarrinho(secaoElement, categoria) {
   }
 }
 
-/**
- * Adiciona item simples ao carrinho
- */
-function adicionarItemSimples(secaoElement, categoria) {
-  const inputs = secaoElement.querySelectorAll('input[type="number"]');
-  let itensAdicionados = 0;
-  
-  inputs.forEach(input => {
-    const quantidade = parseInt(input.value) || 0;
-    if (quantidade > 0) {
-      const nome = input.getAttribute('data-name');
-      const preco = parseFloat(input.getAttribute('data-price'));
-      
-      if (nome && !isNaN(preco)) {
-        for (let i = 0; i < quantidade; i++) {
-          carrinho.push({
-            id: Date.now() + Math.random(),
-            nome: nome,
-            preco: preco,
-            quantidade: 1,
-            subtotal: preco,
-            categoria: categoria
-          });
-        }
-        
-        itensAdicionados += quantidade;
-        input.value = 0;
-      }
-    }
-  });
-  
-  if (itensAdicionados > 0) {
-    esconderBotaoAdicionar(categoria);
-    atualizarCarrinho();
-    mostrarMensagemInline(`${itensAdicionados} item(ns) adicionado(s) ao carrinho!`);
-  }
-}
-
 // ========== SISTEMA DE ENTREGA ==========
 
-/**
- * Controla exibição do formulário de entrega
- */
 function configurarSistemaEntrega() {
   const radiosEntrega = document.querySelectorAll('input[name="entrega"]');
   const formularioEntrega = document.getElementById('formulario-entrega');
@@ -1168,7 +1343,6 @@ function configurarSistemaEntrega() {
     });
   });
   
-  // Garantir que o formulário esteja oculto inicialmente
   if (formularioEntrega) {
     formularioEntrega.style.display = 'none';
   }
@@ -1176,23 +1350,18 @@ function configurarSistemaEntrega() {
 
 // ========== GERAÇÃO DE MENSAGEM WHATSAPP ==========
 
-/**
- * Gera mensagem formatada para WhatsApp
- */
 function gerarMensagemPedido() {
   if (carrinho.length === 0) {
     alert('Seu carrinho está vazio! Adicione alguns itens antes de finalizar o pedido.');
     return '';
   }
   
-  // Verificar se forma de retirada foi selecionada
   const entregaSelecionada = document.querySelector('input[name="entrega"]:checked');
   if (!entregaSelecionada) {
     alert('Por favor, selecione uma opção de retirada antes de finalizar o pedido.');
     return '';
   }
   
-  // Verificar dados de entrega se necessário
   if (entregaSelecionada.value === 'Entrega') {
     const nome = document.getElementById('nome')?.value.trim();
     const telefone = document.getElementById('telefone')?.value.trim();
@@ -1214,7 +1383,6 @@ function gerarMensagemPedido() {
   carrinho.forEach(item => {
     let nomeItem = item.nome;
     
-    // Formatação especial para pizzas
     if (isPizza(item.nome) && !nomeItem.toLowerCase().includes('pizza')) {
       nomeItem = `Pizza ${nomeItem}`;
     }
@@ -1238,14 +1406,14 @@ function gerarMensagemPedido() {
     }
     
     if (item.removerIngredientes) {
-      mensagem += `Observacoes: Sem ${item.removerIngredientes}\n`;
+      mensagem += `Remover: ${item.removerIngredientes}\n`;
     }
     
     if (item.observacoes) {
       mensagem += `Observacoes: ${item.observacoes}\n`;
     }
     
-    mensagem += `Valor: R$ ${item.subtotal.toFixed(2)}\n\n`;
+    mensagem += `Total: R$ ${item.subtotal.toFixed(2)}\n\n`;
     
     totalGeral += item.subtotal;
   });
@@ -1253,7 +1421,6 @@ function gerarMensagemPedido() {
   mensagem += '------------------------------\n';
   mensagem += `Total: R$ ${totalGeral.toFixed(2)}\n\n`;
   
-  // Informações de retirada
   if (entregaSelecionada.value === 'Retirada') {
     mensagem += `Retirada: Retirar no balcao\n`;
   } else {
@@ -1285,9 +1452,6 @@ function gerarMensagemPedido() {
   return mensagem;
 }
 
-/**
- * Envia pedido para WhatsApp
- */
 function enviarPedido() {
   const mensagem = gerarMensagemPedido();
   
@@ -1298,12 +1462,10 @@ function enviarPedido() {
     
     window.open(urlWhatsApp, '_blank');
     
-    // Limpar carrinho após envio
     carrinho = [];
     atualizarCarrinho();
     fecharCarrinho();
     
-    // Resetar formulário de entrega
     const formularioEntrega = document.getElementById('formulario-entrega');
     if (formularioEntrega) {
       formularioEntrega.querySelectorAll('input, textarea').forEach(campo => {
@@ -1312,7 +1474,6 @@ function enviarPedido() {
       formularioEntrega.style.display = 'none';
     }
     
-    // Resetar seleção de entrega
     const radioRetirada = document.querySelector('input[name="entrega"][value="Retirada"]');
     if (radioRetirada) radioRetirada.checked = true;
     
@@ -1322,12 +1483,9 @@ function enviarPedido() {
 
 // ========== INICIALIZAÇÃO DO SISTEMA ==========
 
-/**
- * Inicializa todos os sistemas do cardápio
- */
 function inicializarSistema() {
   const categorias = [
-    'lanches', 'hamburguer', 'tabuas', 'torre-batata', 'porções',
+    'lanches', 'hamburguer', 'tabuas', 'torre-batata', 'porções', // CORRIGIDO
     'pizzas-trad', 'pizzas-especiais', 'pizzas-doces', 
     'cervejas', 'bebidas', 'caipirinhas', 'acai'
   ];
@@ -1336,39 +1494,60 @@ function inicializarSistema() {
     criarBotaoAdicionarUniversal(categoria);
     
     const secaoElement = document.querySelector(`.categoria.${categoria}`);
-    if (!secaoElement) return;
+    if (!secaoElement) {
+      console.warn(`⚠️ Categoria não encontrada: ${categoria}`);
+      return;
+    }
     
-    const inputs = secaoElement.querySelectorAll('li.com-input input[type="number"]:not([data-name*="Borda"])');
+    const inputs = secaoElement.querySelectorAll('input[type="number"]:not([data-name*="Borda"])');
+    
+    if (inputs.length === 0) {
+      console.warn(`⚠️ Nenhum input encontrado na categoria: ${categoria}`);
+    }
     
     inputs.forEach(input => {
+      // Remove qualquer listener inline antigo
+      input.removeAttribute('oninput');
+      input.removeAttribute('onchange');
+      
       input.addEventListener('input', function() {
         if (categoria === 'lanches') {
           processarLanche(this);
+        } else if (categoria === 'hamburguer') {
+          processarHamburguer(this);
+        } else if (categoria === 'tabuas') {
+          processarTabuas(this);
+        } else if (categoria === 'torre-batata') {
+          processarTorreBatata(this);
+        } else if (categoria === 'porções') { // CORRIGIDO
+          processarPorcoes(this);
+        } else if (categoria === 'cervejas') {
+          processarCervejas(this);
+        } else if (categoria === 'bebidas') {
+          processarBebidas(this);
+        } else if (categoria === 'caipirinhas') {
+          processarCaipirinhas(this);
         } else if (['pizzas-trad', 'pizzas-especiais', 'pizzas-doces'].includes(categoria)) {
           processarPizza(this, categoria);
         } else if (categoria === 'acai') {
           processarAcai(this);
-        } else {
-          processarItemSimples(this, categoria);
         }
       });
     });
   });
   
-  // Estado inicial
   resetarAdicionaisLanche();
   resetarSistemaBordas();
   resetarAcai();
+  resetarHamburguer();
   
-  // Configurar sistema de entrega
   configurarSistemaEntrega();
+  
+  console.log('✅ Sistema inicializado - Listeners configurados para todas as categorias');
 }
 
 // ========== ESTILOS CSS DINÂMICOS ==========
 
-/**
- * Adiciona estilos CSS para animações e componentes
- */
 function adicionarEstilos() {
   const style = document.createElement('style');
   style.textContent = `
@@ -1412,6 +1591,23 @@ function adicionarEstilos() {
       cursor: not-allowed;
     }
     
+    .remover-ingredientes input[type="checkbox"]:not([disabled]) {
+      pointer-events: auto !important;
+      cursor: pointer !important;
+      opacity: 1 !important;
+    }
+    
+    .remover-ingredientes label {
+      cursor: pointer !important;
+      user-select: none;
+    }
+    
+    input[type="number"]:not([disabled]) {
+      pointer-events: auto !important;
+      cursor: text !important;
+      opacity: 1 !important;
+    }
+    
     #tipo-entrega {
       margin-top: 15px;
       padding-top: 15px;
@@ -1425,7 +1621,6 @@ function adicionarEstilos() {
       cursor: pointer;
     }
     
-    /* Ajustes para o formulário de entrega */
     .carrinho-header {
       flex-shrink: 0;
       max-height: 60vh;
@@ -1490,7 +1685,6 @@ function adicionarEstilos() {
       font-family: inherit !important;
     }
     
-    /* Garantir que o carrinho-header tenha scroll quando necessário */
     .carrinho-header::-webkit-scrollbar {
       width: 6px;
     }
@@ -1514,25 +1708,19 @@ function adicionarEstilos() {
 // ========== INICIALIZAÇÃO PRINCIPAL ==========
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Ocultar todas as seções inicialmente
   const allSections = document.querySelectorAll('.categoria');
   allSections.forEach(section => {
     section.style.display = 'none';
   });
   
-  // Ocultar carrinho flutuante inicialmente
   const carrinhoFlutuante = document.getElementById('carrinho-flutuante');
   if (carrinhoFlutuante) {
     carrinhoFlutuante.style.display = 'none';
   }
   
-  // Adicionar estilos CSS
   adicionarEstilos();
-  
-  // Inicializar o sistema
   inicializarSistema();
   
-  // Listener para tecla ESC
   document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
       fecharCarrinho();
@@ -1543,8 +1731,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
   
-  // Atualizar carrinho inicial
   atualizarCarrinho();
   
   console.log('✅ Sistema do Cardápio Digital Cardoso Caldo de Cana inicializado com sucesso!');
+  console.log('🔧 Categorias corrigidas: Tábuas, Torre de Batata, Porções, Cervejas, Bebidas e Caipirinhas');
+  console.log('✨ Todas as categorias agora permitem apenas 1 pedido por vez e resetam corretamente!');
+  console.log('');
+  console.log('📊 VERIFICAÇÃO DE CATEGORIAS:');
+  console.log('Lanches:', document.querySelector('.categoria.lanches') ? '✅' : '❌');
+  console.log('Hambúrguer:', document.querySelector('.categoria.hamburguer') ? '✅' : '❌');
+  console.log('Tábuas:', document.querySelector('.categoria.tabuas') ? '✅' : '❌');
+  console.log('Torre Batata:', document.querySelector('.categoria.torre-batata') ? '✅' : '❌');
+  console.log('Porções:', document.querySelector('.categoria.porções') ? '✅' : '❌'); // CORRIGIDO
+  console.log('Cervejas:', document.querySelector('.categoria.cervejas') ? '✅' : '❌');
+  console.log('Bebidas:', document.querySelector('.categoria.bebidas') ? '✅' : '❌');
+  console.log('Caipirinhas:', document.querySelector('.categoria.caipirinhas') ? '✅' : '❌');
+  console.log('Açaí:', document.querySelector('.categoria.acai') ? '✅' : '❌');
 });
