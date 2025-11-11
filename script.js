@@ -1,1765 +1,1290 @@
-// ========================================
-// CARDÁPIO DIGITAL - CARDOSO CALDO DE CANA
-// Sistema completo de gerenciamento de pedidos
-// ========================================
+import { MENU_DATA, PIZZA_DATA, WHATSAPP_NUMBER } from './product.js';
 
-// ========== VARIÁVEIS GLOBAIS ==========
-let carrinho = [];
-let totalCarrinho = 0;
-
-// Estado centralizado do pedido atual
-let estadoPedido = {
-  ativo: false,
-  categoria: null,
-  produto: null,
-  dadosTemporarios: {}
+// ========== CONFIGURAÇÃO ==========
+const CONFIG = {
+  storageKey: 'cardoso_cart_v1',
+  whatsappNumber: WHATSAPP_NUMBER,
+  maxPizzaFlavors: 2,
+  maxFreeAcaiOptions: 2,
+  storageQuotaLimit: 4.5 * 1024 * 1024 // 4.5MB (segurança antes do limite de 5MB)
 };
 
-// ========== FUNÇÕES DE NAVEGAÇÃO ==========
+// ========== UTILITÁRIOS ==========
+const utils = {
+  // Formata preço para exibição
+  formatPrice(price) {
+    if (typeof price !== 'number' || isNaN(price)) return '0,00';
+    return price.toFixed(2).replace('.', ',');
+  },
 
-function openCategory(categoryName) {
-  if (estadoPedido.ativo) {
-    mostrarMensagemInline('Finalize o pedido atual antes de mudar de categoria');
-    return;
+  // Gera ID único para item do carrinho
+  generateUniqueId() {
+    return `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  },
+
+  // Normaliza string para comparação
+  normalize(str) {
+    if (!str) return '';
+    return str.toLowerCase().trim().replace(/\s+/g, '-');
+  },
+
+  // Gera data-item-id padronizado
+  generateItemId(category, productId, size = null) {
+    const normalized = `${this.normalize(category)}__${this.normalize(productId)}`;
+    return size ? `${normalized}__${this.normalize(size)}` : normalized;
+  },
+
+  // Mostra toast de notificação
+  showToast(message, duration = 3000) {
+    // Remove toasts anteriores
+    document.querySelectorAll('.toast').forEach(t => t.remove());
+    
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.textContent = message;
+    toast.setAttribute('role', 'alert');
+    toast.setAttribute('aria-live', 'polite');
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+      toast.remove();
+    }, duration);
+  },
+
+  // Atualiza mensagem de acessibilidade
+  announceToScreenReader(message) {
+    const liveRegion = document.getElementById('cart-live');
+    if (liveRegion) {
+      liveRegion.textContent = message;
+      setTimeout(() => {
+        liveRegion.textContent = '';
+      }, 1000);
+    }
+  },
+
+  // Valida campos do formulário
+  validateFormFields(fields) {
+    const emptyFields = [];
+    
+    fields.forEach(field => {
+      const element = document.getElementById(field.id);
+      if (element && field.required && !element.value.trim()) {
+        emptyFields.push(field.name);
+        element.classList.add('field-error');
+        element.focus();
+      } else if (element) {
+        element.classList.remove('field-error');
+      }
+    });
+    
+    return emptyFields;
+  },
+
+  // Verifica se localStorage tem espaço
+  checkStorageQuota() {
+    try {
+      const testKey = '_quota_test_';
+      const testData = new Array(1000).join('a');
+      localStorage.setItem(testKey, testData);
+      localStorage.removeItem(testKey);
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
+};
 
-  const allSections = document.querySelectorAll('.categoria');
-  allSections.forEach(section => {
-    section.style.display = 'none';
-  });
+// ========== GERENCIADOR DE CATEGORIAS ==========
+const categoryManager = {
+  currentCategory: null,
 
-  const targetSection = document.querySelector(`.categoria.${categoryName}`);
-  if (targetSection) {
-    targetSection.style.display = 'block';
-  }
-}
+  // Renderiza todas as categorias
+  renderCategories() {
+    console.log('🎨 Renderizando categorias...');
+    const container = document.getElementById('categories-container');
+    
+    // Renderiza categorias normais
+    Object.entries(MENU_DATA).forEach(([categoryId, categoryData]) => {
+      const categoryEl = this.createCategoryElement(categoryId, categoryData, false);
+      container.appendChild(categoryEl);
+    });
 
-// ========== SISTEMA DE CARRINHO FLUTUANTE ==========
+    // Renderiza categorias de pizza
+    Object.entries(PIZZA_DATA).forEach(([categoryId, categoryData]) => {
+      const categoryEl = this.createCategoryElement(categoryId, categoryData, true);
+      container.appendChild(categoryEl);
+    });
 
-function abrirCarrinho() {
-  const carrinhoPanel = document.getElementById('carrinho-painel');
-  const overlay = document.getElementById('overlay');
+    console.log('✅ Categorias renderizadas');
+  },
 
-  if (carrinhoPanel) carrinhoPanel.classList.add('ativo');
-  if (overlay) overlay.classList.add('ativo');
+  // Cria elemento de categoria
+  createCategoryElement(categoryId, categoryData, isPizza) {
+    const categoryDiv = document.createElement('div');
+    categoryDiv.className = 'category';
+    categoryDiv.id = `category-${categoryId}`;
+    categoryDiv.setAttribute('data-category', categoryId);
 
-  document.body.style.overflow = 'hidden';
-  atualizarListaCarrinhoPanel();
-}
+    // Imagem da categoria
+    const img = document.createElement('img');
+    img.src = categoryData.image;
+    img.alt = categoryData.name;
+    img.className = 'category-img';
+    categoryDiv.appendChild(img);
 
-function fecharCarrinho() {
-  const carrinhoPanel = document.getElementById('carrinho-painel');
-  const overlay = document.getElementById('overlay');
+    // Lista de produtos
+    const list = document.createElement('ul');
+    list.className = 'category-list';
 
-  if (carrinhoPanel) carrinhoPanel.classList.remove('ativo');
-  if (overlay) overlay.classList.remove('ativo');
+    if (isPizza) {
+      this.renderPizzaCategory(list, categoryId, categoryData);
+    } else {
+      this.renderNormalCategory(list, categoryId, categoryData);
+    }
 
-  document.body.style.overflow = 'auto';
-}
+    categoryDiv.appendChild(list);
+    return categoryDiv;
+  },
 
-function atualizarListaCarrinhoPanel() {
-  const listaCarrinho = document.getElementById('lista-carrinho');
-  const totalSidebar = document.getElementById('total-sidebar');
+  // Renderiza categoria normal
+  renderNormalCategory(list, categoryId, categoryData) {
+    categoryData.items.forEach(item => {
+      const li = this.createProductItem(categoryId, item, categoryData);
+      list.appendChild(li);
+    });
+  },
 
-  if (!listaCarrinho) return;
-
-  listaCarrinho.innerHTML = '';
-
-  if (carrinho.length === 0) {
-    listaCarrinho.innerHTML = `
-      <div class="carrinho-vazio">
-        <div class="carrinho-vazio-icone">🛒</div>
-        <p>Seu carrinho está vazio</p>
-        <small>Adicione produtos para continuar</small>
+  // Renderiza categoria de pizza
+  renderPizzaCategory(list, categoryId, categoryData) {
+    const li = document.createElement('li');
+    li.className = 'category-item';
+    
+    const pizzaBaseId = utils.generateItemId(categoryId, 'pizza');
+    
+    li.innerHTML = `
+      <div class="item-header">
+        <div class="item-name">${categoryData.name}</div>
+        <div class="item-description">Escolha o tamanho e até 2 sabores</div>
+      </div>
+      <div class="item-controls">
+        <div class="size-selector">
+          <span class="size-label">Tamanho:</span>
+          <select class="size-select" data-pizza-category="${categoryId}" aria-label="Selecione o tamanho da pizza">
+            <option value="">Selecione</option>
+            <option value="P" data-price="${categoryData.basePrice.P}">P - R$ ${utils.formatPrice(categoryData.basePrice.P)}</option>
+            <option value="M" data-price="${categoryData.basePrice.M}">M - R$ ${utils.formatPrice(categoryData.basePrice.M)}</option>
+            <option value="G" data-price="${categoryData.basePrice.G}">G - R$ ${utils.formatPrice(categoryData.basePrice.G)}</option>
+          </select>
+        </div>
+      </div>
+      <div class="options-group pizza-flavors" style="display:none;">
+        <div class="options-title">Sabores (escolha até 2):</div>
+        ${categoryData.flavors.map((flavor, idx) => `
+          <label class="option-item" for="flavor-${categoryId}-${idx}">
+            <input type="checkbox" 
+                   id="flavor-${categoryId}-${idx}"
+                   class="option-checkbox pizza-flavor-checkbox" 
+                   data-flavor="${flavor}" 
+                   disabled
+                   aria-label="Sabor ${flavor}">
+            <span class="option-label">${flavor}</span>
+          </label>
+        `).join('')}
+      </div>
+      <div class="options-group pizza-border" style="display:none;">
+        <div class="options-title">Borda recheada (opcional):</div>
+        <select class="border-select" data-category="${categoryId}" disabled aria-label="Selecione a borda">
+          <option value="">Sem borda</option>
+          ${categoryData.borderFlavors.map(border => `
+            <option value="${border}">${border}</option>
+          `).join('')}
+        </select>
+      </div>
+      <div class="item-controls">
+        <div class="quantidade">
+          <button class="menos" data-item-id="${pizzaBaseId}" data-is-pizza="true" data-pizza-category="${categoryId}" disabled aria-label="Diminuir quantidade">-</button>
+          <span class="valor" data-item-id="${pizzaBaseId}" role="status" aria-live="polite">0</span>
+          <button class="mais" data-item-id="${pizzaBaseId}" data-is-pizza="true" data-pizza-category="${categoryId}" disabled aria-label="Aumentar quantidade">+</button>
+        </div>
       </div>
     `;
-  } else {
-    carrinho.forEach((item, index) => {
-      const itemElement = document.createElement('li');
-      itemElement.className = 'item-carrinho';
+    list.appendChild(li);
+  },
 
-      let nomeExibicao = item.nome;
+  // Cria item de produto
+  createProductItem(categoryId, item, categoryData) {
+    const li = document.createElement('li');
+    li.className = 'category-item';
 
-      if (isPizza(item.nome) && !nomeExibicao.toLowerCase().includes('pizza')) {
-        nomeExibicao = `Pizza ${nomeExibicao}`;
-      }
+    const hasSizes = item.sizes && item.sizes.length > 0;
+    const itemId = hasSizes ? null : utils.generateItemId(categoryId, item.id);
+    const isAcai = categoryId === 'acai';
 
-      let detalhesHTML = '';
-      if (item.meio) detalhesHTML += `<div class="item-meio" style="font-size: 0.9em; color: #666; margin-top: 2px;">Meio: ${item.meio}</div>`;
-      if (item.borda) detalhesHTML += `<div class="item-borda" style="font-size: 0.9em; color: #666; margin-top: 2px;">Borda: ${item.borda}</div>`;
-      if (item.removerIngredientes) detalhesHTML += `<div class="item-remover" style="font-size: 0.9em; color: #666; margin-top: 2px;">Sem: ${item.removerIngredientes}</div>`;
-      if (item.adicionais) detalhesHTML += `<div class="item-adicionais" style="font-size: 0.9em; color: #666; margin-top: 2px;">+ ${item.adicionais}</div>`;
-      if (item.acompanhamentos) detalhesHTML += `<div class="item-acompanhamentos" style="font-size: 0.9em; color: #666; margin-top: 2px;">Acompanhamentos: ${item.acompanhamentos}</div>`;
-      if (item.observacoes) detalhesHTML += `<div class="item-obs" style="font-size: 0.9em; color: #666; margin-top: 2px;">Obs: ${item.observacoes}</div>`;
+    let html = `
+      <div class="item-header">
+        <div class="item-name">${item.name}</div>
+        ${item.description ? `<div class="item-description">${item.description}</div>` : ''}
+      </div>
+      <div class="item-controls">
+    `;
 
-      itemElement.innerHTML = `
-        <div class="item-info">
-          <div class="item-detalhes">
-            <div class="item-nome">${nomeExibicao}</div>
-            ${detalhesHTML}
-            <div class="item-preco">R$ ${item.subtotal.toFixed(2).replace('.', ',')}</div>
-          </div>
+    // Se tem tamanhos
+    if (hasSizes) {
+      html += `<div class="size-selector">`;
+      item.sizes.forEach((sizeObj, idx) => {
+        const sizeItemId = utils.generateItemId(categoryId, item.id, sizeObj.size);
+        html += `
+          <label class="size-option" for="size-${categoryId}-${item.id}-${idx}">
+            <input type="radio" 
+                   id="size-${categoryId}-${item.id}-${idx}"
+                   name="size-${categoryId}-${item.id}" 
+                   value="${sizeObj.size}" 
+                   data-price="${sizeObj.price}"
+                   data-item-id="${sizeItemId}"
+                   aria-label="Tamanho ${sizeObj.size} - R$ ${utils.formatPrice(sizeObj.price)}">
+            <span>${sizeObj.size} - R$ ${utils.formatPrice(sizeObj.price)}</span>
+          </label>
+        `;
+      });
+      html += `</div>`;
+    } else {
+      html += `<div class="item-price">R$ ${utils.formatPrice(item.price)}</div>`;
+    }
+
+    // Controles de quantidade com botões
+    html += `
+        <div class="quantidade">
+          <button class="menos" ${itemId ? `data-item-id="${itemId}"` : 'disabled'} aria-label="Diminuir quantidade">-</button>
+          <span class="valor" ${itemId ? `data-item-id="${itemId}"` : ''} role="status" aria-live="polite">0</span>
+          <button class="mais" ${itemId ? `data-item-id="${itemId}"` : 'disabled'} aria-label="Aumentar quantidade">+</button>
         </div>
-        <div class="item-quantidade">
-          <button class="btn-quantidade" onclick="alterarQuantidadeCarrinho(${index}, -1)">−</button>
-          <span class="quantidade-numero">${item.quantidade}</span>
-          <button class="btn-quantidade" onclick="alterarQuantidadeCarrinho(${index}, 1)">+</button>
+      </div>
+    `;
+
+    // Opções de remoção (usa classe remove-option)
+    if (item.removable && item.removable.length > 0) {
+      html += `
+        <div class="options-group">
+          <div class="options-title">Remover ingredientes:</div>
+          ${item.removable.map((ing, idx) => `
+            <label class="option-item" for="remove-${categoryId}-${item.id}-${idx}">
+              <input type="checkbox" 
+                     id="remove-${categoryId}-${item.id}-${idx}"
+                     class="option-checkbox remove-option" 
+                     value="${ing}" 
+                     disabled
+                     aria-label="Remover ${ing}">
+              <span class="option-label">${ing}</span>
+            </label>
+          `).join('')}
         </div>
       `;
+    }
 
-      listaCarrinho.appendChild(itemElement);
+    // Opções grátis do açaí (usa classe acai-included)
+    if (item.freeItems && item.freeItems.length > 0) {
+      html += `
+        <div class="options-group">
+          <div class="options-title">Incluso (escolha ${item.freeOptions}):</div>
+          ${item.freeItems.map((free, idx) => `
+            <label class="option-item" for="acai-${categoryId}-${item.id}-${idx}">
+              <input type="checkbox" 
+                     id="acai-${categoryId}-${item.id}-${idx}"
+                     class="option-checkbox acai-included" 
+                     value="${free}" 
+                     data-max="${item.freeOptions}"
+                     disabled
+                     aria-label="Incluir ${free}">
+              <span class="option-label">${free}</span>
+            </label>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    // Extras pagos
+    if (categoryData.extras && categoryData.extras.length > 0) {
+      html += `
+        <div class="options-group">
+          <div class="options-title">Adicionais:</div>
+          ${categoryData.extras.map((extra, idx) => `
+            <label class="option-item" for="extra-${categoryId}-${item.id}-${idx}">
+              <input type="checkbox" 
+                     id="extra-${categoryId}-${item.id}-${idx}"
+                     class="option-checkbox extra-item" 
+                     value="${extra.name}" 
+                     data-price="${extra.price}" 
+                     disabled
+                     aria-label="${extra.name} - mais R$ ${utils.formatPrice(extra.price)}">
+              <span class="option-label">${extra.name} (+R$ ${utils.formatPrice(extra.price)})</span>
+            </label>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    // Frutas do açaí
+    if (categoryData.fruits && categoryData.fruits.length > 0) {
+      html += `
+        <div class="options-group">
+          <div class="options-title">Frutas:</div>
+          ${categoryData.fruits.map((fruit, idx) => `
+            <label class="option-item" for="fruit-${categoryId}-${item.id}-${idx}">
+              <input type="checkbox" 
+                     id="fruit-${categoryId}-${item.id}-${idx}"
+                     class="option-checkbox extra-item" 
+                     value="${fruit.name}" 
+                     data-price="${fruit.price}" 
+                     disabled
+                     aria-label="${fruit.name} - mais R$ ${utils.formatPrice(fruit.price)}">
+              <span class="option-label">${fruit.name} (+R$ ${utils.formatPrice(fruit.price)})</span>
+            </label>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    li.innerHTML = html;
+    return li;
+  },
+
+  // Mostra uma categoria específica
+  showCategory(categoryId) {
+    console.log('📂 Mostrando categoria:', categoryId);
+    
+    // Esconde todas
+    document.querySelectorAll('.category').forEach(cat => {
+      cat.classList.remove('active');
     });
+
+    // Remove active dos botões
+    document.querySelectorAll('.menu-btn').forEach(btn => {
+      btn.classList.remove('active-category');
+    });
+
+    // Mostra a selecionada
+    const category = document.getElementById(`category-${categoryId}`);
+    if (category) {
+      category.classList.add('active');
+      this.currentCategory = categoryId;
+      
+      // Marca botão como ativo
+      const activeBtn = document.querySelector(`.menu-btn[data-category="${categoryId}"]`);
+      if (activeBtn) {
+        activeBtn.classList.add('active-category');
+      }
+      
+      console.log('✅ Categoria ativa:', categoryId);
+    }
   }
+};
 
-  if (totalSidebar) {
-    const valorTotal = carrinho.reduce((total, item) => total + item.subtotal, 0);
-    totalSidebar.textContent = valorTotal.toFixed(2).replace('.', ',');
-  }
-}
+// ========== GERENCIADOR DE PEDIDOS ==========
+const orderManager = {
+  currentOrder: null,
+  activeItemId: null,
 
-function alterarQuantidadeCarrinho(index, mudanca) {
-  if (carrinho[index]) {
-    const novaQuantidade = carrinho[index].quantidade + mudanca;
-
-    if (novaQuantidade <= 0) {
-      carrinho.splice(index, 1);
-    } else {
-      carrinho[index].quantidade = novaQuantidade;
-      carrinho[index].subtotal = carrinho[index].preco * novaQuantidade;
+  // Inicia um novo pedido
+  startOrder(itemId, categoryId) {
+    console.log('🛒 Iniciando pedido:', itemId);
+    
+    if (this.currentOrder && this.currentOrder.itemId !== itemId) {
+      utils.showToast('⚠️ Finalize o pedido atual antes de iniciar outro');
+      this.resetQuantity(itemId);
+      return false;
     }
 
-    atualizarCarrinho();
-    atualizarListaCarrinhoPanel();
-  }
-}
+    this.currentOrder = {
+      itemId: itemId,
+      categoryId: categoryId
+    };
+    this.activeItemId = itemId;
 
-function atualizarCarrinho() {
-  const itensCount = document.getElementById('itens-count');
-  const totalCount = document.getElementById('total-count');
+    // Habilita checkboxes e mostra botão
+    this.enableExtras(itemId);
+    document.getElementById('btn-add-fixed').classList.add('active');
+    
+    console.log('✅ Pedido iniciado, extras habilitados');
+    return true;
+  },
 
-  const totalItens = carrinho.reduce((total, item) => total + item.quantidade, 0);
-  const valorTotal = carrinho.reduce((total, item) => total + item.subtotal, 0);
+  // Cancela pedido atual
+  cancelOrder() {
+    if (!this.currentOrder) return;
+    
+    console.log('❌ Cancelando pedido');
+    
+    const itemId = this.currentOrder.itemId;
+    this.resetQuantity(itemId);
+    
+    this.disableExtras(itemId);
+    this.currentOrder = null;
+    this.activeItemId = null;
+    
+    document.getElementById('btn-add-fixed').classList.remove('active');
+  },
 
-  if (itensCount) itensCount.textContent = totalItens;
-  if (totalCount) totalCount.textContent = valorTotal.toFixed(2).replace('.', ',');
-
-  const carrinhoFlutuante = document.getElementById('carrinho-flutuante');
-  if (carrinhoFlutuante) {
-    carrinhoFlutuante.style.display = totalItens > 0 ? 'block' : 'none';
-  }
-
-  totalCarrinho = valorTotal;
-}
-
-// ========== FUNÇÕES AUXILIARES ==========
-
-function isPizza(nome) {
-  const pizzasTracionais = [
-    'Quatro Queijos', 'Bacon', 'Calabresa', 'Brócolis', 'Frango com Catupiry',
-    'Mista', 'Pasqualina', 'Portuguesa', 'Marguerita', 'Lombo Defumado',
-    'Alho e Óleo', 'Tomate Seco', 'Peperoni', 'Baiana', 'Agridoce'
-  ];
-
-  const pizzasEspeciais = [
-    'Frango Especial', 'Brócolis Especial', 'Calabresa Especial', 'Palmito',
-    'Strogonoff de Carne', 'Americana', 'Alcatra com Doritos', 'Coração Acebolado',
-    'Camarão ao Molho', 'Camarão Especial'
-  ];
-
-  const pizzasDoces = [
-    'Chocolate Preto com Morango', 'Chocolate Branco com Morango', 'Charge', 'Confete',
-    'Brigadeiro Especial', 'Prestígio', 'Paçoquita', 'Banana com Chocolate',
-    'Banana com Canela', 'Abacaxi', 'Banana Nevada'
-  ];
-
-  const todasPizzas = [...pizzasTracionais, ...pizzasEspeciais, ...pizzasDoces];
-
-  return nome.toLowerCase().startsWith('pizza') ||
-    todasPizzas.some(pizza => nome.trim() === pizza.trim());
-}
-
-function getTamanhoPizza(nome) {
-  if (nome.includes(' P')) return 'P';
-  if (nome.includes(' M')) return 'M';
-  if (nome.includes(' G')) return 'G';
-  return null;
-}
-
-function obterPrecoBorda(tamanho) {
-  const precosBorda = { 'P': 8, 'M': 10, 'G': 12 };
-  return precosBorda[tamanho] || 0;
-}
-
-function mostrarMensagemInline(mensagem) {
-  const mensagemExistente = document.querySelector('.mensagem-inline');
-  if (mensagemExistente) mensagemExistente.remove();
-
-  const divMensagem = document.createElement('div');
-  divMensagem.className = 'mensagem-inline';
-  divMensagem.style.cssText = `
-    position: fixed;
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: #25D366;
-    color: white;
-    padding: 12px 24px;
-    border-radius: 25px;
-    font-weight: 600;
-    z-index: 9999;
-    box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
-    animation: slideDown 0.3s ease;
-  `;
-  divMensagem.textContent = mensagem;
-
-  document.body.appendChild(divMensagem);
-
-  setTimeout(() => {
-    if (divMensagem && divMensagem.parentNode) {
-      divMensagem.remove();
+  // Reseta quantidade para zero
+  resetQuantity(itemId) {
+    const valorSpan = document.querySelector(`.valor[data-item-id="${itemId}"]`);
+    if (valorSpan) {
+      valorSpan.textContent = '0';
     }
-  }, 3000);
-}
+  },
 
-// ========== CONTROLE DE ESTADO DO PEDIDO ==========
+  // Obtém quantidade atual
+  getQuantity(itemId) {
+    const valorSpan = document.querySelector(`.valor[data-item-id="${itemId}"]`);
+    return valorSpan ? parseInt(valorSpan.textContent) || 0 : 0;
+  },
 
-function iniciarPedido(input, categoria) {
-  if (estadoPedido.ativo && estadoPedido.produto !== input.getAttribute('data-name')) {
-    input.value = 0;
-    mostrarMensagemInline('Finalize o pedido atual antes de iniciar outro');
-    return false;
-  }
-
-  estadoPedido.ativo = true;
-  estadoPedido.categoria = categoria;
-  estadoPedido.produto = input.getAttribute('data-name');
-  estadoPedido.dadosTemporarios = {};
-
-  desabilitarOutrosInputs(categoria, input);
-  desabilitarOutrasCategorias(categoria);
-
-  return true;
-}
-
-function desabilitarOutrosInputs(categoria, inputAtivo) {
-  const secaoElement = document.querySelector(`.categoria.${categoria}`);
-  if (!secaoElement) return;
-
-  const todosInputs = secaoElement.querySelectorAll('input[type="number"]:not([data-name*="Borda"])');
-  todosInputs.forEach(input => {
-    if (input !== inputAtivo) {
-      input.disabled = true;
-      input.value = 0;
+  // Define quantidade
+  setQuantity(itemId, value) {
+    const valorSpan = document.querySelector(`.valor[data-item-id="${itemId}"]`);
+    if (valorSpan) {
+      valorSpan.textContent = Math.max(0, value);
     }
-  });
-}
+  },
 
-function desabilitarOutrasCategorias(categoriaAtiva) {
-  const botoesCategoria = document.querySelectorAll('button[onclick*="openCategory"]');
-  botoesCategoria.forEach(botao => {
-    const categoria = botao.onclick?.toString().match(/openCategory\('([^']+)'\)/)?.[1];
-    if (categoria && categoria !== categoriaAtiva) {
-      botao.disabled = true;
-      botao.style.opacity = '0.5';
-    }
-  });
-}
+  // Habilita checkboxes de extras
+  enableExtras(itemId) {
+    const buttons = document.querySelectorAll(`button[data-item-id="${itemId}"]`);
+    if (buttons.length === 0) return;
 
-function resetarEstadoPedido() {
-  estadoPedido.ativo = false;
-  estadoPedido.categoria = null;
-  estadoPedido.produto = null;
-  estadoPedido.dadosTemporarios = {};
+    const categoryItem = buttons[0].closest('.category-item');
+    if (!categoryItem) return;
 
-  const todosElementos = document.querySelectorAll('input[disabled], button[disabled]');
-  todosElementos.forEach(elemento => {
-    elemento.disabled = false;
-    elemento.style.opacity = '1';
-  });
-
-  const inputsNumeros = document.querySelectorAll('input[type="number"]');
-  inputsNumeros.forEach(input => {
-    if (!input.closest('#carrinho-painel')) {
-      input.value = 0;
-    }
-  });
-
-  const checkboxes = document.querySelectorAll('input[type="checkbox"]');
-  checkboxes.forEach(checkbox => {
-    if (!checkbox.closest('#carrinho-painel') && !checkbox.closest('#tipo-entrega')) {
-      checkbox.checked = false;
-    }
-  });
-
-  resetarAdicionaisLanche();
-  resetarSistemaBordas();
-  resetarAcai();
-  resetarHamburguer();
-}
-
-// ========== SISTEMA PARA LANCHES ==========
-
-function processarLanche(input) {
-  const quantidade = parseInt(input.value) || 0;
-  const categoria = 'lanches';
-
-  if (quantidade > 0) {
-    if (!iniciarPedido(input, categoria)) return;
-
-    habilitarRemoverIngredientesLanche(input);
-    habilitarAdicionaisLanche(categoria);
-    mostrarBotaoAdicionar(categoria);
-  } else if (estadoPedido.ativo && estadoPedido.produto === input.getAttribute('data-name')) {
-    resetarEstadoPedido();
-    esconderBotaoAdicionar(categoria);
-  }
-}
-
-function habilitarRemoverIngredientesLanche(input) {
-  const li = input.closest('li');
-  if (!li) return;
-
-  const divRemover = li.querySelector('.remover-ingredientes');
-  if (divRemover) {
-    const checkboxes = divRemover.querySelectorAll('input[type="checkbox"]');
-    checkboxes.forEach(cb => cb.disabled = false);
-  }
-}
-
-function habilitarAdicionaisLanche(categoria) {
-  const secaoElement = document.querySelector(`.categoria.${categoria}`);
-  if (!secaoElement) return;
-
-  const h3Adicionais = Array.from(secaoElement.querySelectorAll('h3')).find(h3 => h3.textContent.trim() === 'Adicionais');
-  if (!h3Adicionais) return;
-
-  let elemento = h3Adicionais.nextElementSibling;
-  while (elemento && elemento.tagName === 'LI') {
-    const checkbox = elemento.querySelector('input[type="checkbox"]');
-    if (checkbox) checkbox.disabled = false;
-    elemento = elemento.nextElementSibling;
-  }
-}
-
-function resetarAdicionaisLanche() {
-  const secaoElement = document.querySelector('.categoria.lanches');
-  if (!secaoElement) return;
-
-  const checkboxes = secaoElement.querySelectorAll('input[type="checkbox"]');
-  checkboxes.forEach(checkbox => {
-    checkbox.disabled = true;
-    checkbox.checked = false;
-  });
-}
-
-// ========== SISTEMA PARA HAMBÚRGUER ==========
-
-function processarHamburguer(input) {
-  const quantidade = parseInt(input.value) || 0;
-  const categoria = 'hamburguer';
-
-  if (quantidade > 0) {
-    if (!iniciarPedido(input, categoria)) return;
-
-    habilitarRemoverIngredientesHamburguer(input);
-    mostrarBotaoAdicionar(categoria);
-  } else if (estadoPedido.ativo && estadoPedido.produto === input.getAttribute('data-name')) {
-    resetarEstadoPedido();
-    esconderBotaoAdicionar(categoria);
-  }
-}
-
-function habilitarRemoverIngredientesHamburguer(input) {
-  const li = input.closest('li');
-  if (!li) return;
-
-  const divRemover = li.querySelector('.remover-ingredientes');
-  if (divRemover) {
-    const checkboxes = divRemover.querySelectorAll('input[type="checkbox"]');
+    const checkboxes = categoryItem.querySelectorAll('.option-checkbox');
+    const labels = categoryItem.querySelectorAll('.option-label');
+    
     checkboxes.forEach(cb => {
       cb.disabled = false;
-      cb.style.pointerEvents = 'auto';
-      cb.style.opacity = '1';
     });
-  }
-}
-
-function resetarHamburguer() {
-  const secaoElement = document.querySelector('.categoria.hamburguer');
-  if (!secaoElement) return;
-
-  const checkboxes = secaoElement.querySelectorAll('input[type="checkbox"]');
-  checkboxes.forEach(checkbox => {
-    checkbox.disabled = true;
-    checkbox.checked = false;
-    checkbox.style.pointerEvents = 'none';
-  });
-}
-
-// ========== SISTEMA PARA TÁBUAS - CORRIGIDO ==========
-
-function processarTabuas(input) {
-  const quantidade = parseInt(input.value) || 0;
-  const categoria = 'tabuas';
-
-  if (quantidade > 0) {
-    if (!estadoPedido.ativo) {
-      estadoPedido.ativo = true;
-      estadoPedido.categoria = categoria;
-      estadoPedido.produto = input.getAttribute('data-name');
-      desabilitarOutrasCategorias(categoria);
-
-      const secaoElement = document.querySelector(`.categoria.${categoria}`);
-      if (secaoElement) {
-        const todosInputs = secaoElement.querySelectorAll('input[type="number"]');
-        todosInputs.forEach(inp => {
-          if (inp !== input) {
-            inp.disabled = true;
-            inp.value = 0;
-          }
-        });
-      }
-    } else if (estadoPedido.produto !== input.getAttribute('data-name')) {
-      input.value = 0;
-      mostrarMensagemInline('Finalize o pedido atual antes de iniciar outro');
-      return;
-    }
-
-    mostrarBotaoAdicionar(categoria);
-  } else if (estadoPedido.ativo && estadoPedido.produto === input.getAttribute('data-name')) {
-    resetarCategoriaSimples(categoria);
-    esconderBotaoAdicionar(categoria);
-  }
-}
-
-// ========== SISTEMA PARA TORRE DE BATATA - CORRIGIDO ==========
-
-function processarTorreBatata(input) {
-  const quantidade = parseInt(input.value) || 0;
-  const categoria = 'torre-batata';
-
-  if (quantidade > 0) {
-    if (!estadoPedido.ativo) {
-      estadoPedido.ativo = true;
-      estadoPedido.categoria = categoria;
-      estadoPedido.produto = input.getAttribute('data-name');
-      desabilitarOutrasCategorias(categoria);
-
-      const secaoElement = document.querySelector(`.categoria.${categoria}`);
-      if (secaoElement) {
-        const todosInputs = secaoElement.querySelectorAll('input[type="number"]');
-        todosInputs.forEach(inp => {
-          if (inp !== input) {
-            inp.disabled = true;
-            inp.value = 0;
-          }
-        });
-      }
-    } else if (estadoPedido.produto !== input.getAttribute('data-name')) {
-      input.value = 0;
-      mostrarMensagemInline('Finalize o pedido atual antes de iniciar outro');
-      return;
-    }
-
-    mostrarBotaoAdicionar(categoria);
-  } else if (estadoPedido.ativo && estadoPedido.produto === input.getAttribute('data-name')) {
-    resetarCategoriaSimples(categoria);
-    esconderBotaoAdicionar(categoria);
-  }
-}
-
-// ========== SISTEMA PARA PORÇÕES - VERSÃO FINAL ==========
-
-function processarPorcoes(input) {
-  const quantidade = parseInt(input.value) || 0;
-  const categoria = 'porções';
-
-  if (quantidade > 0) {
-    if (!estadoPedido.ativo) {
-      estadoPedido.ativo = true;
-      estadoPedido.categoria = categoria;
-      estadoPedido.produto = input.getAttribute('data-name');
-      desabilitarOutrasCategorias(categoria);
-
-      const secaoElement = document.querySelector(`.categoria.${categoria}`);
-      if (secaoElement) {
-        const todosInputs = secaoElement.querySelectorAll('input[type="number"]');
-        todosInputs.forEach(inp => {
-          if (inp !== input) {
-            inp.disabled = true;
-            inp.value = 0;
-          }
-        });
-      }
-    } else if (estadoPedido.produto !== input.getAttribute('data-name')) {
-      input.value = 0;
-      mostrarMensagemInline('Finalize o pedido atual antes de iniciar outro');
-      return;
-    }
-
-    mostrarBotaoAdicionar(categoria);
-  } else if (estadoPedido.ativo && estadoPedido.produto === input.getAttribute('data-name')) {
-    resetarCategoriaSimples(categoria);
-    esconderBotaoAdicionar(categoria);
-  }
-}
-
-// ========== SISTEMA PARA CERVEJAS - CORRIGIDO ==========
-
-function processarCervejas(input) {
-  const quantidade = parseInt(input.value) || 0;
-  const categoria = 'cervejas';
-
-  if (quantidade > 0) {
-    if (!estadoPedido.ativo) {
-      estadoPedido.ativo = true;
-      estadoPedido.categoria = categoria;
-      estadoPedido.produto = input.getAttribute('data-name');
-      desabilitarOutrasCategorias(categoria);
-
-      const secaoElement = document.querySelector(`.categoria.${categoria}`);
-      if (secaoElement) {
-        const todosInputs = secaoElement.querySelectorAll('input[type="number"]');
-        todosInputs.forEach(inp => {
-          if (inp !== input) {
-            inp.disabled = true;
-            inp.value = 0;
-          }
-        });
-      }
-    } else if (estadoPedido.produto !== input.getAttribute('data-name')) {
-      input.value = 0;
-      mostrarMensagemInline('Finalize o pedido atual antes de iniciar outro');
-      return;
-    }
-
-    mostrarBotaoAdicionar(categoria);
-  } else if (estadoPedido.ativo && estadoPedido.produto === input.getAttribute('data-name')) {
-    resetarCategoriaSimples(categoria);
-    esconderBotaoAdicionar(categoria);
-  }
-}
-
-// ========== SISTEMA PARA BEBIDAS - CORRIGIDO ==========
-
-function processarBebidas(input) {
-  const quantidade = parseInt(input.value) || 0;
-  const categoria = 'bebidas';
-
-  if (quantidade > 0) {
-    if (!estadoPedido.ativo) {
-      estadoPedido.ativo = true;
-      estadoPedido.categoria = categoria;
-      estadoPedido.produto = input.getAttribute('data-name');
-      desabilitarOutrasCategorias(categoria);
-
-      const secaoElement = document.querySelector(`.categoria.${categoria}`);
-      if (secaoElement) {
-        const todosInputs = secaoElement.querySelectorAll('input[type="number"]');
-        todosInputs.forEach(inp => {
-          if (inp !== input) {
-            inp.disabled = true;
-            inp.value = 0;
-          }
-        });
-      }
-    } else if (estadoPedido.produto !== input.getAttribute('data-name')) {
-      input.value = 0;
-      mostrarMensagemInline('Finalize o pedido atual antes de iniciar outro');
-      return;
-    }
-
-    mostrarBotaoAdicionar(categoria);
-  } else if (estadoPedido.ativo && estadoPedido.produto === input.getAttribute('data-name')) {
-    resetarCategoriaSimples(categoria);
-    esconderBotaoAdicionar(categoria);
-  }
-}
-
-// ========== SISTEMA PARA CAIPIRINHAS - CORRIGIDO ==========
-
-function processarCaipirinhas(input) {
-  const quantidade = parseInt(input.value) || 0;
-  const categoria = 'caipirinhas';
-
-  if (quantidade > 0) {
-    if (!estadoPedido.ativo) {
-      estadoPedido.ativo = true;
-      estadoPedido.categoria = categoria;
-      estadoPedido.produto = input.getAttribute('data-name');
-      desabilitarOutrasCategorias(categoria);
-
-      const secaoElement = document.querySelector(`.categoria.${categoria}`);
-      if (secaoElement) {
-        const todosInputs = secaoElement.querySelectorAll('input[type="number"]');
-        todosInputs.forEach(inp => {
-          if (inp !== input) {
-            inp.disabled = true;
-            inp.value = 0;
-          }
-        });
-      }
-    } else if (estadoPedido.produto !== input.getAttribute('data-name')) {
-      input.value = 0;
-      mostrarMensagemInline('Finalize o pedido atual antes de iniciar outro');
-      return;
-    }
-
-    mostrarBotaoAdicionar(categoria);
-  } else if (estadoPedido.ativo && estadoPedido.produto === input.getAttribute('data-name')) {
-    resetarCategoriaSimples(categoria);
-    esconderBotaoAdicionar(categoria);
-  }
-}
-
-// ========== FUNÇÃO DE RESET PARA CATEGORIAS SIMPLES ==========
-
-function resetarCategoriaSimples(categoria) {
-  estadoPedido.ativo = false;
-  estadoPedido.categoria = null;
-  estadoPedido.produto = null;
-
-  const secaoElement = document.querySelector(`.categoria.${categoria}`);
-  if (secaoElement) {
-    const todosInputs = secaoElement.querySelectorAll('input[type="number"]');
-    todosInputs.forEach(inp => {
-      inp.disabled = false;
-      inp.value = 0;
-    });
-  }
-
-  const todosElementos = document.querySelectorAll('button[disabled]');
-  todosElementos.forEach(elemento => {
-    elemento.disabled = false;
-    elemento.style.opacity = '1';
-  });
-}
-
-// ========== SISTEMA PARA PIZZAS ==========
-
-function processarPizza(input, categoria) {
-  const quantidade = parseInt(input.value) || 0;
-
-  if (quantidade > 0) {
-    if (!iniciarPedido(input, categoria)) return;
-
-    if (quantidade > 1) input.value = 1;
-
-    habilitarCheckboxMeioMeio(input);
-    habilitarCheckboxQuerBorda(categoria);
-    mostrarBotaoAdicionar(categoria);
-  } else if (estadoPedido.ativo && estadoPedido.produto === input.getAttribute('data-name')) {
-    resetarEstadoPedido();
-    esconderBotaoAdicionar(categoria);
-  }
-}
-
-function habilitarCheckboxMeioMeio(input) {
-  const li = input.closest('li');
-  if (!li) return;
-
-  const divMeioMeio = li.querySelector('.pizza-meio-meio');
-  if (!divMeioMeio) return;
-
-  const checkboxMeio = divMeioMeio.querySelector('.chk-meio-meio');
-  if (checkboxMeio) {
-    checkboxMeio.disabled = false;
-
-    checkboxMeio.onchange = function () {
-      const saboresDiv = divMeioMeio.querySelector('.sabores-meio-meio');
-      if (this.checked) {
-        saboresDiv.style.display = 'block';
-
-        const checkboxesSabores = saboresDiv.querySelectorAll('input[type="checkbox"]');
-        checkboxesSabores.forEach(cb => {
-          cb.disabled = false;
-          cb.onchange = function () {
-            if (this.checked) {
-              checkboxesSabores.forEach(outro => {
-                if (outro !== this) outro.checked = false;
-              });
-            }
-          };
-        });
-      } else {
-        saboresDiv.style.display = 'none';
-        const checkboxesSabores = saboresDiv.querySelectorAll('input[type="checkbox"]');
-        checkboxesSabores.forEach(cb => {
-          cb.disabled = true;
-          cb.checked = false;
-        });
-      }
-    };
-  }
-}
-
-function habilitarCheckboxQuerBorda(categoria) {
-  const secaoElement = document.querySelector(`.categoria.${categoria}`);
-  if (!secaoElement) return;
-
-  const bordaInfo = secaoElement.querySelector('.borda-info');
-  if (!bordaInfo) return;
-
-  const checkboxQuerBorda = bordaInfo.querySelector('#quer-borda');
-  if (checkboxQuerBorda) {
-    checkboxQuerBorda.disabled = false;
-
-    checkboxQuerBorda.onchange = function () {
-      if (this.checked) {
-        habilitarTamanhosBorda(categoria);
-      } else {
-        const inputsBorda = bordaInfo.querySelectorAll('input[data-name*="Borda"]');
-        inputsBorda.forEach(input => {
-          input.disabled = true;
-          input.value = 0;
-        });
-        desabilitarSaboresBorda(categoria);
-      }
-    };
-  }
-}
-
-function habilitarTamanhosBorda(categoria) {
-  const secaoElement = document.querySelector(`.categoria.${categoria}`);
-  if (!secaoElement) return;
-
-  const tamanhoPizza = getTamanhoPizzaSelecionada(categoria);
-  if (!tamanhoPizza) return;
-
-  const bordaInfo = secaoElement.querySelector('.borda-info');
-  if (!bordaInfo) return;
-
-  const inputsBorda = bordaInfo.querySelectorAll('input[data-name*="Borda"]');
-  inputsBorda.forEach(input => {
-    const nomeBorda = input.getAttribute('data-name');
-    if (nomeBorda.includes(`Borda ${tamanhoPizza}`)) {
-      input.disabled = false;
-      input.style.opacity = '1';
-
-      input.oninput = function () {
-        const valor = parseInt(this.value) || 0;
-        if (valor > 0) {
-          if (valor > 1) this.value = 1;
-
-          inputsBorda.forEach(outro => {
-            if (outro !== this && outro.getAttribute('data-name').includes('Borda')) {
-              outro.value = 0;
-              outro.disabled = true;
-            }
-          });
-
-          habilitarSaboresBorda(categoria);
-        } else {
-          desabilitarSaboresBorda(categoria);
-        }
-      };
-    } else {
-      input.disabled = true;
-      input.style.opacity = '0.5';
-      input.value = 0;
-    }
-  });
-}
-
-function habilitarSaboresBorda(categoria) {
-  const secaoElement = document.querySelector(`.categoria.${categoria}`);
-  if (!secaoElement) return;
-
-  const bordaInfo = secaoElement.querySelector('.borda-info');
-  if (!bordaInfo) return;
-
-  const sabores = bordaInfo.querySelectorAll('.sabor-borda input[type="checkbox"]');
-  sabores.forEach(sabor => {
-    sabor.disabled = false;
-    sabor.style.opacity = '1';
-
-    sabor.onchange = function () {
-      if (this.checked) {
-        sabores.forEach(outro => {
-          if (outro !== this) outro.checked = false;
-        });
-      }
-    };
-  });
-}
-
-function desabilitarSaboresBorda(categoria) {
-  const secaoElement = document.querySelector(`.categoria.${categoria}`);
-  if (!secaoElement) return;
-
-  const bordaInfo = secaoElement.querySelector('.borda-info');
-  if (!bordaInfo) return;
-
-  const sabores = bordaInfo.querySelectorAll('.sabor-borda input[type="checkbox"]');
-  sabores.forEach(sabor => {
-    sabor.disabled = true;
-    sabor.style.opacity = '0.5';
-    sabor.checked = false;
-  });
-}
-
-function resetarSistemaBordas(categoria = null) {
-  const secoes = categoria ? [categoria] : ['pizzas-trad', 'pizzas-especiais', 'pizzas-doces'];
-
-  secoes.forEach(secao => {
-    const secaoElement = document.querySelector(`.categoria.${secao}`);
-    if (!secaoElement) return;
-
-    const bordaInfo = secaoElement.querySelector('.borda-info');
-    if (!bordaInfo) return;
-
-    const checkboxQuerBorda = bordaInfo.querySelector('#quer-borda');
-    if (checkboxQuerBorda) {
-      checkboxQuerBorda.disabled = true;
-      checkboxQuerBorda.checked = false;
-    }
-
-    const inputsBorda = bordaInfo.querySelectorAll('input[data-name*="Borda"]');
-    inputsBorda.forEach(input => {
-      input.disabled = true;
-      input.style.opacity = '0.5';
-      input.value = 0;
+    
+    labels.forEach(label => {
+      label.style.pointerEvents = 'all';
+      label.style.cursor = 'pointer';
     });
 
-    desabilitarSaboresBorda(secao);
+    // Habilita selects de pizza se existir
+    const sizeSelect = categoryItem.querySelector('.size-select');
+    const borderSelect = categoryItem.querySelector('.border-select');
+    if (sizeSelect) sizeSelect.disabled = false;
+    if (borderSelect) borderSelect.disabled = false;
 
-    const checkboxesMeio = secaoElement.querySelectorAll('.chk-meio-meio');
-    checkboxesMeio.forEach(cb => {
+    console.log('✅ Checkboxes habilitados para:', itemId);
+  },
+
+  // Desabilita checkboxes de extras
+  disableExtras(itemId) {
+    const buttons = document.querySelectorAll(`button[data-item-id="${itemId}"]`);
+    if (buttons.length === 0) return;
+
+    const categoryItem = buttons[0].closest('.category-item');
+    if (!categoryItem) return;
+
+    const checkboxes = categoryItem.querySelectorAll('.option-checkbox');
+    const labels = categoryItem.querySelectorAll('.option-label');
+    
+    checkboxes.forEach(cb => {
       cb.disabled = true;
       cb.checked = false;
     });
+    
+    labels.forEach(label => {
+      label.style.pointerEvents = 'none';
+    });
 
-    const saboresMeio = secaoElement.querySelectorAll('.sabores-meio-meio');
-    saboresMeio.forEach(div => {
-      div.style.display = 'none';
-      const cbs = div.querySelectorAll('input[type="checkbox"]');
-      cbs.forEach(cb => {
-        cb.disabled = true;
-        cb.checked = false;
+    // Desabilita selects de pizza
+    const sizeSelect = categoryItem.querySelector('.size-select');
+    const borderSelect = categoryItem.querySelector('.border-select');
+    if (sizeSelect) {
+      sizeSelect.disabled = true;
+      sizeSelect.value = '';
+    }
+    if (borderSelect) {
+      borderSelect.disabled = true;
+      borderSelect.value = '';
+    }
+
+    // Esconde opções de pizza
+    const flavorsDiv = categoryItem.querySelector('.pizza-flavors');
+    const borderDiv = categoryItem.querySelector('.pizza-border');
+    if (flavorsDiv) flavorsDiv.style.display = 'none';
+    if (borderDiv) borderDiv.style.display = 'none';
+  },
+
+  // Coleta dados do pedido atual
+  collectOrderData() {
+    if (!this.currentOrder) return null;
+
+    const itemId = this.currentOrder.itemId;
+    const buttons = document.querySelectorAll(`button[data-item-id="${itemId}"]`);
+    if (buttons.length === 0) return null;
+
+    const categoryItem = buttons[0].closest('.category-item');
+    const quantity = this.getQuantity(itemId);
+
+    if (quantity === 0) {
+      utils.showToast('⚠️ Quantidade deve ser maior que zero');
+      return null;
+    }
+
+    // Verifica se é pizza
+    const isPizza = buttons[0].dataset.isPizza === 'true';
+    
+    if (isPizza) {
+      return this.collectPizzaOrderData(itemId, categoryItem, quantity);
+    }
+
+    // Busca o produto normal
+    const product = this.findProduct(this.currentOrder.itemId, this.currentOrder.categoryId);
+    if (!product) {
+      console.error('❌ Produto não encontrado:', this.currentOrder.itemId);
+      utils.showToast('Erro: Produto não encontrado');
+      return null;
+    }
+
+    console.log('✅ Produto encontrado:', product);
+
+    // Coleta extras pagos
+    const extras = [];
+    categoryItem.querySelectorAll('.extra-item:checked').forEach(cb => {
+      extras.push({
+        name: cb.value,
+        price: parseFloat(cb.dataset.price) || 0
       });
     });
-  });
-}
 
-function getTamanhoPizzaSelecionada(categoria) {
-  const secaoElement = document.querySelector(`.categoria.${categoria}`);
-  if (!secaoElement) return null;
-
-  const inputs = secaoElement.querySelectorAll('input[type="number"]:not([data-name*="Borda"])');
-
-  for (let input of inputs) {
-    const quantidade = parseInt(input.value) || 0;
-    if (quantidade > 0) {
-      return getTamanhoPizza(input.getAttribute('data-name'));
-    }
-  }
-
-  return null;
-}
-
-// ========== SISTEMA PARA AÇAÍ ==========
-
-function processarAcai(input) {
-  const quantidade = parseInt(input.value) || 0;
-  const categoria = 'acai';
-
-  if (quantidade > 0) {
-    if (!iniciarPedido(input, categoria)) return;
-
-    const li = input.closest('li');
-    if (li) {
-      const divGratis = li.querySelector('.gratis-acompanhamentos');
-      if (divGratis) {
-        const checkboxesGratis = divGratis.querySelectorAll('input[type="checkbox"]');
-        checkboxesGratis.forEach(cb => {
-          cb.disabled = false;
-          cb.onchange = function () {
-            const selecionados = Array.from(checkboxesGratis).filter(c => c.checked);
-            if (selecionados.length >= 2) {
-              checkboxesGratis.forEach(c => {
-                if (!c.checked) c.disabled = true;
-              });
-            } else {
-              checkboxesGratis.forEach(c => c.disabled = false);
-            }
-          };
-        });
-      }
-    }
-
-    habilitarAdicionaisAcai(categoria);
-    mostrarBotaoAdicionar(categoria);
-  } else if (estadoPedido.ativo && estadoPedido.produto === input.getAttribute('data-name')) {
-    resetarEstadoPedido();
-    esconderBotaoAdicionar(categoria);
-  }
-}
-
-function habilitarAdicionaisAcai(categoria) {
-  const secaoElement = document.querySelector(`.categoria.${categoria}`);
-  if (!secaoElement) return;
-
-  const todosH3 = secaoElement.querySelectorAll('h3');
-  todosH3.forEach(h3 => {
-    if (h3.textContent.trim() === 'Adicionais' || h3.textContent.trim() === 'Adicionais Frutas') {
-      let elemento = h3.nextElementSibling;
-      while (elemento && elemento.tagName === 'LI') {
-        const checkbox = elemento.querySelector('input[type="checkbox"]');
-        if (checkbox) checkbox.disabled = false;
-        elemento = elemento.nextElementSibling;
-      }
-    }
-  });
-}
-
-function resetarAcai() {
-  const secaoElement = document.querySelector('.categoria.acai');
-  if (!secaoElement) return;
-
-  const checkboxes = secaoElement.querySelectorAll('input[type="checkbox"]');
-  checkboxes.forEach(checkbox => {
-    checkbox.disabled = true;
-    checkbox.checked = false;
-  });
-}
-
-// ========== SISTEMA DE BOTÕES DE ADICIONAR ==========
-
-function criarBotaoAdicionarUniversal(categoria) {
-  // Função mantida por compatibilidade, mas não cria mais botões internos
-  // O botão fixo é único e criado no HTML
-}
-
-function mostrarBotaoAdicionar(categoria) {
-  console.log('Mostrando botão para categoria:', categoria); // DEBUG
-
-  const btnFixo = document.getElementById('btn-adicionar-fixo-universal');
-  if (btnFixo) {
-    btnFixo.style.display = 'flex';
-    btnFixo.setAttribute('data-categoria-ativa', categoria);
-    console.log('Botão fixo mostrado com sucesso'); // DEBUG
-  } else {
-    console.error('Botão fixo não encontrado no HTML!'); // DEBUG
-  }
-}
-
-function esconderBotaoAdicionar(categoria) {
-  console.log('Escondendo botão'); // DEBUG
-
-  const btnFixo = document.getElementById('btn-adicionar-fixo-universal');
-  if (btnFixo) {
-    btnFixo.style.display = 'none';
-    btnFixo.removeAttribute('data-categoria-ativa');
-  }
-}
-
-function adicionarAoCarrinhoViaBotaoFixo() {
-  console.log('Botão fixo clicado'); // DEBUG
-
-  const btnFixo = document.getElementById('btn-adicionar-fixo-universal');
-  const categoria = btnFixo?.getAttribute('data-categoria-ativa');
-
-  console.log('Categoria ativa:', categoria); // DEBUG
-
-  if (categoria) {
-    adicionarAoCarrinho(categoria);
-  } else {
-    console.error('Nenhuma categoria ativa!');
-  }
-}
-
-// ========== ADICIONAR AO CARRINHO ==========
-
-function adicionarAoCarrinho(categoria) {
-  const secaoElement = document.querySelector(`.categoria.${categoria}`);
-  if (!secaoElement) return;
-
-  if (categoria === 'lanches') {
-    adicionarLancheAoCarrinho(secaoElement, categoria);
-  } else if (categoria === 'hamburguer') {
-    adicionarHamburguerAoCarrinho(secaoElement, categoria);
-  } else if (['tabuas', 'torre-batata', 'porções', 'cervejas', 'bebidas', 'caipirinhas'].includes(categoria)) {
-    adicionarItemSimplesComReset(secaoElement, categoria);
-  } else if (['pizzas-trad', 'pizzas-especiais', 'pizzas-doces'].includes(categoria)) {
-    adicionarPizzaAoCarrinho(secaoElement, categoria);
-  } else if (categoria === 'acai') {
-    adicionarAcaiAoCarrinho(secaoElement, categoria);
-  }
-}
-
-function adicionarLancheAoCarrinho(secaoElement, categoria) {
-  const inputsProdutos = secaoElement.querySelectorAll('li.com-input input[type="number"]');
-  let itensAdicionados = 0;
-
-  inputsProdutos.forEach(input => {
-    const quantidade = parseInt(input.value) || 0;
-    if (quantidade > 0) {
-      const nomeProduto = input.getAttribute('data-name');
-      let precoProduto = parseFloat(input.getAttribute('data-price')) || 0;
-
-      const li = input.closest('li');
-      const removerSelecionados = [];
-      if (li) {
-        const divRemover = li.querySelector('.remover-ingredientes');
-        if (divRemover) {
-          const checkboxesRemover = divRemover.querySelectorAll('input[type="checkbox"]:checked');
-          checkboxesRemover.forEach(cb => removerSelecionados.push(cb.value));
-        }
-      }
-
-      const h3Adicionais = Array.from(secaoElement.querySelectorAll('h3')).find(h3 => h3.textContent.trim() === 'Adicionais');
-      const adicionaisSelecionados = [];
-
-      if (h3Adicionais) {
-        let elemento = h3Adicionais.nextElementSibling;
-        while (elemento && elemento.tagName === 'LI') {
-          const checkbox = elemento.querySelector('input[type="checkbox"]:checked');
-          if (checkbox) {
-            adicionaisSelecionados.push({
-              nome: checkbox.getAttribute('data-name') || 'Adicional',
-              preco: parseFloat(checkbox.getAttribute('data-price')) || 0
-            });
-          }
-          elemento = elemento.nextElementSibling;
-        }
-      }
-
-      const valorAdicionais = adicionaisSelecionados.reduce((total, adicional) => total + adicional.preco, 0);
-      const nomesAdicionais = adicionaisSelecionados.map(adicional => adicional.nome);
-      const precoFinal = precoProduto + valorAdicionais;
-
-      for (let i = 0; i < quantidade; i++) {
-        carrinho.push({
-          id: Date.now() + Math.random(),
-          nome: nomeProduto,
-          preco: precoFinal,
-          quantidade: 1,
-          subtotal: precoFinal,
-          categoria: categoria,
-          removerIngredientes: removerSelecionados.length > 0 ? removerSelecionados.join(', ') : null,
-          adicionais: nomesAdicionais.length > 0 ? nomesAdicionais.join(', ') : null
-        });
-      }
-
-      itensAdicionados += quantidade;
-    }
-  });
-
-  if (itensAdicionados > 0) {
-    resetarEstadoPedido();
-    esconderBotaoAdicionar(categoria);
-    atualizarCarrinho();
-    mostrarMensagemInline(`${itensAdicionados} lanche(s) adicionado(s) ao carrinho!`);
-  }
-}
-
-function adicionarHamburguerAoCarrinho(secaoElement, categoria) {
-  const inputsProdutos = secaoElement.querySelectorAll('li.com-input input[type="number"]');
-  let itensAdicionados = 0;
-
-  inputsProdutos.forEach(input => {
-    const quantidade = parseInt(input.value) || 0;
-    if (quantidade > 0) {
-      const nomeProduto = input.getAttribute('data-name');
-      const precoProduto = parseFloat(input.getAttribute('data-price')) || 0;
-
-      const li = input.closest('li');
-      const removerSelecionados = [];
-      if (li) {
-        const divRemover = li.querySelector('.remover-ingredientes');
-        if (divRemover) {
-          const checkboxesRemover = divRemover.querySelectorAll('input[type="checkbox"]:checked');
-          checkboxesRemover.forEach(cb => removerSelecionados.push(cb.value));
-        }
-      }
-
-      for (let i = 0; i < quantidade; i++) {
-        carrinho.push({
-          id: Date.now() + Math.random(),
-          nome: nomeProduto,
-          preco: precoProduto,
-          quantidade: 1,
-          subtotal: precoProduto,
-          categoria: categoria,
-          removerIngredientes: removerSelecionados.length > 0 ? removerSelecionados.join(', ') : null
-        });
-      }
-
-      itensAdicionados += quantidade;
-    }
-  });
-
-  if (itensAdicionados > 0) {
-    resetarEstadoPedido();
-    esconderBotaoAdicionar(categoria);
-    atualizarCarrinho();
-    mostrarMensagemInline(`${itensAdicionados} hambúrguer(es) adicionado(s) ao carrinho!`);
-  }
-}
-
-function adicionarItemSimplesComReset(secaoElement, categoria) {
-  const inputs = secaoElement.querySelectorAll('input[type="number"]');
-  let itensAdicionados = 0;
-
-  inputs.forEach(input => {
-    const quantidade = parseInt(input.value) || 0;
-    if (quantidade > 0) {
-      const nome = input.getAttribute('data-name');
-      const preco = parseFloat(input.getAttribute('data-price'));
-
-      if (nome && !isNaN(preco)) {
-        carrinho.push({
-          id: Date.now() + Math.random(),
-          nome: nome,
-          preco: preco,
-          quantidade: quantidade,
-          subtotal: preco * quantidade,
-          categoria: categoria
-        });
-
-        itensAdicionados += quantidade;
-      }
-    }
-  });
-
-  if (itensAdicionados > 0) {
-    resetarCategoriaSimples(categoria);
-    esconderBotaoAdicionar(categoria);
-    atualizarCarrinho();
-
-    let mensagem = '';
-    switch (categoria) {
-      case 'tabuas': mensagem = `${itensAdicionados} tábua(s) adicionada(s) ao carrinho!`; break;
-      case 'torre-batata': mensagem = `${itensAdicionados} torre(s) de batata adicionada(s) ao carrinho!`; break;
-      case 'porções': mensagem = `${itensAdicionados} porção(ões) adicionada(s) ao carrinho!`; break;
-      case 'cervejas': mensagem = `${itensAdicionados} cerveja(s) adicionada(s) ao carrinho!`; break;
-      case 'bebidas': mensagem = `${itensAdicionados} bebida(s) adicionada(s) ao carrinho!`; break;
-      case 'caipirinhas': mensagem = `${itensAdicionados} caipirinha(s) adicionada(s) ao carrinho!`; break;
-      default: mensagem = `${itensAdicionados} item(ns) adicionado(s) ao carrinho!`;
-    }
-
-    mostrarMensagemInline(mensagem);
-  }
-}
-
-function adicionarPizzaAoCarrinho(secaoElement, categoria) {
-  const inputsPizza = secaoElement.querySelectorAll('li.com-input input[type="number"]:not([data-name*="Borda"])');
-  let itensAdicionados = 0;
-
-  inputsPizza.forEach(input => {
-    const quantidade = parseInt(input.value) || 0;
-    if (quantidade > 0) {
-      const nomePizza = input.getAttribute('data-name');
-      let precoPizza = parseFloat(input.getAttribute('data-price')) || 0;
-
-      const li = input.closest('li');
-      let meioSelecionado = null;
-      let precoMeio = 0;
-
-      if (li) {
-        const divMeioMeio = li.querySelector('.pizza-meio-meio');
-        if (divMeioMeio) {
-          const checkboxMeio = divMeioMeio.querySelector('.chk-meio-meio');
-          if (checkboxMeio && checkboxMeio.checked) {
-            const saboresDiv = divMeioMeio.querySelector('.sabores-meio-meio');
-            if (saboresDiv) {
-              const saborSelecionado = saboresDiv.querySelector('input[type="checkbox"]:checked');
-              if (saborSelecionado) {
-                meioSelecionado = saborSelecionado.value;
-
-                const tamanhoPizza = getTamanhoPizza(nomePizza);
-                const inputsOutrosSabores = secaoElement.querySelectorAll('li.com-input input[type="number"]:not([data-name*="Borda"])');
-
-                for (let outroInput of inputsOutrosSabores) {
-                  const outroNome = outroInput.getAttribute('data-name');
-                  if (outroNome.includes(meioSelecionado) && outroNome.includes(tamanhoPizza)) {
-                    precoMeio = parseFloat(outroInput.getAttribute('data-price')) || 0;
-                    break;
-                  }
-                }
-
-                if (precoMeio > precoPizza) {
-                  precoPizza = precoMeio;
-                }
-              }
-            }
-          }
-        }
-      }
-
-      let valorBorda = 0;
-      let nomeBorda = null;
-
-      const bordaInfo = secaoElement.querySelector('.borda-info');
-      if (bordaInfo) {
-        const checkboxQuerBorda = bordaInfo.querySelector('#quer-borda');
-        if (checkboxQuerBorda && checkboxQuerBorda.checked) {
-          const inputsBorda = bordaInfo.querySelectorAll('input[data-name*="Borda"]');
-          const bordaSelecionada = Array.from(inputsBorda).find(inp => parseInt(inp.value) > 0);
-
-          if (bordaSelecionada) {
-            const saboresSelecionados = bordaInfo.querySelectorAll('.sabor-borda input[type="checkbox"]:checked');
-            const saborSelecionado = Array.from(saboresSelecionados).find(cb => cb.checked);
-
-            if (saborSelecionado) {
-              const tamanhoPizza = getTamanhoPizza(nomePizza);
-              valorBorda = obterPrecoBorda(tamanhoPizza);
-              nomeBorda = saborSelecionado.value;
-            }
-          }
-        }
-      }
-
-      const precoFinal = precoPizza + valorBorda;
-
-      for (let i = 0; i < quantidade; i++) {
-        carrinho.push({
-          id: Date.now() + Math.random(),
-          nome: nomePizza,
-          preco: precoFinal,
-          quantidade: 1,
-          subtotal: precoFinal,
-          categoria: categoria,
-          meio: meioSelecionado,
-          borda: nomeBorda
-        });
-      }
-
-      itensAdicionados += quantidade;
-    }
-  });
-
-  if (itensAdicionados > 0) {
-    resetarEstadoPedido();
-    esconderBotaoAdicionar(categoria);
-    atualizarCarrinho();
-    mostrarMensagemInline(`${itensAdicionados} pizza(s) adicionada(s) ao carrinho!`);
-  }
-}
-
-function adicionarAcaiAoCarrinho(secaoElement, categoria) {
-  const inputsAcai = secaoElement.querySelectorAll('li.com-input input[type="number"]');
-  let itensAdicionados = 0;
-
-  inputsAcai.forEach(input => {
-    const quantidade = parseInt(input.value) || 0;
-    if (quantidade > 0) {
-      const nomeAcai = input.getAttribute('data-name');
-      let precoAcai = parseFloat(input.getAttribute('data-price')) || 0;
-
-      const li = input.closest('li');
-      const acompanhamentosGratis = [];
-
-      if (li) {
-        const divGratis = li.querySelector('.gratis-acompanhamentos');
-        if (divGratis) {
-          const checkboxesGratis = divGratis.querySelectorAll('input[type="checkbox"]:checked');
-          checkboxesGratis.forEach(cb => acompanhamentosGratis.push(cb.value));
-        }
-      }
-
-      const adicionaisPagos = [];
-      const todosH3 = secaoElement.querySelectorAll('h3');
-
-      todosH3.forEach(h3 => {
-        if (h3.textContent.trim() === 'Adicionais' || h3.textContent.trim() === 'Adicionais Frutas') {
-          let elemento = h3.nextElementSibling;
-          while (elemento && elemento.tagName === 'LI') {
-            const checkbox = elemento.querySelector('input[type="checkbox"]:checked');
-            if (checkbox) {
-              adicionaisPagos.push({
-                nome: checkbox.getAttribute('data-name') || 'Adicional',
-                preco: parseFloat(checkbox.getAttribute('data-price')) || 0
-              });
-            }
-            elemento = elemento.nextElementSibling;
-          }
-        }
+    // Coleta removidos (usa classe remove-option)
+    const removed = [];
+    categoryItem.querySelectorAll('.remove-option:checked').forEach(cb => {
+      removed.push(cb.value);
+    });
+
+    // Coleta opções grátis do açaí (usa classe acai-included)
+    categoryItem.querySelectorAll('.acai-included:checked').forEach(cb => {
+      extras.push({
+        name: cb.value,
+        price: 0  // Grátis
       });
+    });
 
-      const valorAdicionais = adicionaisPagos.reduce((total, adicional) => total + adicional.preco, 0);
-      const precoFinal = precoAcai + valorAdicionais;
+    const unitPrice = product.price || 0;
+    const extrasPrice = extras.reduce((sum, e) => sum + e.price, 0);
 
-      let detalhesAdicionais = '';
-      let detalhesAcompanhamentos = '';
+    const orderData = {
+      cartItemId: utils.generateUniqueId(),
+      sourceId: this.currentOrder.itemId,
+      name: product.name,
+      unitPrice: unitPrice + extrasPrice,
+      quantity: quantity,
+      subtotal: (unitPrice + extrasPrice) * quantity,
+      category: this.currentOrder.categoryId,
+      size: product.size || null,
+      extras: extras,
+      removed: removed,
+      flavors: [],
+      border: null
+    };
 
-      if (acompanhamentosGratis.length > 0) {
-        detalhesAcompanhamentos = acompanhamentosGratis.join(', ');
-      }
+    console.log('📦 Dados do pedido coletados:', orderData);
+    return orderData;
+  },
 
-      if (adicionaisPagos.length > 0) {
-        detalhesAdicionais = adicionaisPagos.map(a => a.nome).join(', ');
-      }
+  // Coleta dados de pedido de pizza
+  collectPizzaOrderData(itemId, categoryItem, quantity) {
+    const buttons = document.querySelectorAll(`button[data-item-id="${itemId}"]`);
+    const pizzaCategory = buttons[0].dataset.pizzaCategory;
+    console.log('🍕 Coletando dados de pizza:', pizzaCategory);
 
-      for (let i = 0; i < quantidade; i++) {
-        carrinho.push({
-          id: Date.now() + Math.random(),
-          nome: nomeAcai,
-          preco: precoFinal,
-          quantidade: 1,
-          subtotal: precoFinal,
-          categoria: categoria,
-          acompanhamentos: detalhesAcompanhamentos || null,
-          adicionais: detalhesAdicionais || null
-        });
-      }
-
-      itensAdicionados += quantidade;
+    // Verifica tamanho selecionado
+    const sizeSelect = categoryItem.querySelector('.size-select');
+    const size = sizeSelect.value;
+    
+    if (!size) {
+      utils.showToast('⚠️ Selecione um tamanho para a pizza');
+      sizeSelect.focus();
+      sizeSelect.classList.add('field-error');
+      return null;
     }
-  });
+    sizeSelect.classList.remove('field-error');
 
-  if (itensAdicionados > 0) {
-    resetarEstadoPedido();
-    esconderBotaoAdicionar(categoria);
-    atualizarCarrinho();
-    mostrarMensagemInline(`${itensAdicionados} açaí(s) adicionado(s) ao carrinho!`);
+    // Pega preço base
+    const selectedOption = sizeSelect.querySelector(`option[value="${size}"]`);
+    const basePrice = parseFloat(selectedOption.dataset.price) || 0;
+
+    // Coleta sabores
+    const flavors = [];
+    categoryItem.querySelectorAll('.pizza-flavor-checkbox:checked').forEach(cb => {
+      flavors.push(cb.dataset.flavor);
+    });
+
+    console.log('🍕 Sabores coletados:', flavors);
+
+    if (flavors.length === 0) {
+      utils.showToast('⚠️ Selecione pelo menos 1 sabor');
+      return null;
+    }
+
+    // Coleta borda
+    const borderSelect = categoryItem.querySelector('.border-select');
+    const border = borderSelect.value || null;
+    
+    // Calcula preço da borda
+    let borderPrice = 0;
+    if (border && PIZZA_DATA[pizzaCategory]) {
+      borderPrice = PIZZA_DATA[pizzaCategory].borderPrice[size] || 0;
+    }
+
+    const totalPrice = basePrice + borderPrice;
+    const pizzaName = PIZZA_DATA[pizzaCategory].name;
+
+    const orderData = {
+      cartItemId: utils.generateUniqueId(),
+      sourceId: `${pizzaCategory}__pizza__${size}`,
+      name: `${pizzaName} (${size})`,
+      unitPrice: totalPrice,
+      quantity: quantity,
+      subtotal: totalPrice * quantity,
+      category: pizzaCategory,
+      size: size,
+      extras: [],
+      removed: [],
+      flavors: flavors,
+      border: border
+    };
+
+    console.log('📦 Dados da pizza coletados:', orderData);
+    return orderData;
+  },
+
+  // Busca produto por ID
+  findProduct(itemId, categoryId) {
+    console.log('🔍 Buscando produto:', itemId, 'na categoria:', categoryId);
+
+    // Busca em MENU_DATA
+    if (MENU_DATA[categoryId]) {
+      const category = MENU_DATA[categoryId];
+      
+      for (const item of category.items) {
+        // Tenta match exato
+        const exactId = utils.generateItemId(categoryId, item.id);
+        if (exactId === itemId) {
+          console.log('✅ Match exato encontrado');
+          return { name: item.name, price: item.price || 0 };
+        }
+
+        // Se tem tamanhos, tenta match com tamanho
+        if (item.sizes) {
+          for (const sizeObj of item.sizes) {
+            const sizeId = utils.generateItemId(categoryId, item.id, sizeObj.size);
+            if (sizeId === itemId) {
+              console.log('✅ Match com tamanho encontrado');
+              return {
+                name: `${item.name} (${sizeObj.size})`,
+                price: sizeObj.price || 0,
+                size: sizeObj.size
+              };
+            }
+          }
+        }
+      }
+    }
+
+    // Fallback: busca por prefixo
+    console.log('⚠️ Match exato não encontrado, tentando fallback...');
+    const normalized = itemId.split('__');
+    if (normalized.length >= 2) {
+      const catPrefix = normalized[0];
+      const prodId = normalized[1];
+
+      if (MENU_DATA[catPrefix]) {
+        const item = MENU_DATA[catPrefix].items.find(i => 
+          utils.normalize(i.id) === prodId
+        );
+        if (item) {
+          console.log('✅ Produto encontrado por fallback');
+          return { name: item.name, price: item.price || 0 };
+        }
+      }
+    }
+
+    console.error('❌ Produto não encontrado após todas tentativas');
+    return null;
   }
-}
+};
 
-// ========== SISTEMA DE ENTREGA ==========
+// ========== GERENCIADOR DO CARRINHO ==========
+const cartManager = {
+  items: [],
 
-function configurarSistemaEntrega() {
-  const radiosEntrega = document.querySelectorAll('input[name="entrega"]');
-  const formularioEntrega = document.getElementById('formulario-entrega');
+  // Adiciona item ao carrinho
+  addItem(item) {
+    console.log('➕ Adicionando ao carrinho:', item);
 
-  radiosEntrega.forEach(radio => {
-    radio.addEventListener('change', function () {
-      if (this.value === 'Entrega' && formularioEntrega) {
-        formularioEntrega.style.display = 'block';
-        formularioEntrega.style.animation = 'slideDown 0.3s ease';
-      } else if (formularioEntrega) {
-        formularioEntrega.style.display = 'none';
+    // Verifica se item idêntico já existe
+    const existingIndex = this.items.findIndex(i => 
+      i.sourceId === item.sourceId &&
+      JSON.stringify(i.extras) === JSON.stringify(item.extras) &&
+      JSON.stringify(i.removed) === JSON.stringify(item.removed) &&
+      JSON.stringify(i.flavors) === JSON.stringify(item.flavors) &&
+      i.border === item.border
+    );
+
+    if (existingIndex !== -1) {
+      // Soma quantidade
+      this.items[existingIndex].quantity += item.quantity;
+      this.items[existingIndex].subtotal += item.subtotal;
+      console.log('✅ Quantidade atualizada no item existente');
+      utils.showToast('✅ Quantidade atualizada no carrinho!');
+    } else {
+      // Adiciona novo
+      this.items.push(item);
+      console.log('✅ Novo item adicionado');
+      utils.showToast('✅ Item adicionado ao carrinho!');
+    }
+
+    this.save();
+    this.updateUI();
+    
+    utils.announceToScreenReader(`${item.name} adicionado ao carrinho`);
+  },
+
+  // Remove item
+  removeItem(cartItemId) {
+    const index = this.items.findIndex(i => i.cartItemId === cartItemId);
+    if (index !== -1) {
+      const item = this.items[index];
+      this.items.splice(index, 1);
+      this.save();
+      this.updateUI();
+      utils.announceToScreenReader(`${item.name} removido do carrinho`);
+    }
+  },
+
+  // Altera quantidade
+  changeQuantity(cartItemId, delta) {
+    const item = this.items.find(i => i.cartItemId === cartItemId);
+    if (!item) return;
+
+    const newQty = item.quantity + delta;
+    if (newQty <= 0) {
+      this.removeItem(cartItemId);
+    } else {
+      item.quantity = newQty;
+      const extrasPrice = item.extras.reduce((sum, e) => sum + e.price, 0);
+      item.subtotal = item.unitPrice * newQty;
+      this.save();
+      this.updateUI();
+      utils.announceToScreenReader(`Quantidade de ${item.name} atualizada para ${newQty}`);
+    }
+  },
+
+  // Atualiza UI do carrinho
+  updateUI() {
+    const itemsContainer = document.getElementById('cart-items');
+    const cartCount = document.getElementById('cart-count');
+    const cartTotal = document.getElementById('cart-total');
+    const cartTotalSidebar = document.getElementById('cart-total-sidebar');
+    const cartFloat = document.getElementById('cart-float');
+
+    const totalItems = this.items.reduce((sum, item) => sum + item.quantity, 0);
+    const totalPrice = this.items.reduce((sum, item) => sum + item.subtotal, 0);
+
+    // Atualiza contadores
+    cartCount.textContent = totalItems;
+    cartTotal.textContent = utils.formatPrice(totalPrice);
+    cartTotalSidebar.textContent = utils.formatPrice(totalPrice);
+
+    // Mostra/esconde carrinho flutuante
+    if (totalItems > 0) {
+      cartFloat.classList.add('active');
+    } else {
+      cartFloat.classList.remove('active');
+    }
+
+    // Renderiza items
+    if (this.items.length === 0) {
+      itemsContainer.innerHTML = `
+        <div class="cart-empty">
+          <div class="cart-empty-icon">🛒</div>
+          <p>Seu carrinho está vazio</p>
+          <small>Adicione produtos para continuar</small>
+        </div>
+      `;
+    } else {
+      itemsContainer.innerHTML = this.items.map(item => `
+        <li class="cart-item">
+          <div class="item-info">
+            <div class="item-details">
+              <div class="item-name-cart">${item.name}</div>
+              ${item.flavors && item.flavors.length > 0 ? `
+                <div class="item-extras">Sabores: ${item.flavors.join(', ')}</div>
+              ` : ''}
+              ${item.border ? `
+                <div class="item-extras">Borda: ${item.border}</div>
+              ` : ''}
+              ${item.extras.length > 0 ? `
+                <div class="item-extras">${item.extras.map(e => e.price > 0 ? `+ ${e.name}` : e.name).join(', ')}</div>
+              ` : ''}
+              ${item.removed.length > 0 ? `
+                <div class="item-extras">Sem: ${item.removed.join(', ')}</div>
+              ` : ''}
+            </div>
+            <div class="item-price">R$ ${utils.formatPrice(item.subtotal)}</div>
+          </div>
+          <div class="item-quantity">
+            <button class="btn-quantity" data-action="decrease" data-id="${item.cartItemId}" aria-label="Diminuir quantidade de ${item.name}">−</button>
+            <span class="quantity-display">${item.quantity}</span>
+            <button class="btn-quantity" data-action="increase" data-id="${item.cartItemId}" aria-label="Aumentar quantidade de ${item.name}">+</button>
+          </div>
+        </li>
+      `).join('');
+    }
+
+    console.log('🔄 UI do carrinho atualizada');
+  },
+
+  // Salva no localStorage
+  save() {
+    try {
+      const dataStr = JSON.stringify(this.items);
+      
+      // Verifica se vai estourar a quota
+      if (dataStr.length > CONFIG.storageQuotaLimit) {
+        utils.showToast('⚠️ Carrinho muito grande! Finalize o pedido.', 5000);
+        console.warn('⚠️ localStorage próximo do limite');
+      }
+      
+      localStorage.setItem(CONFIG.storageKey, dataStr);
+      console.log('💾 Carrinho salvo');
+    } catch (e) {
+      console.error('❌ Erro ao salvar carrinho:', e);
+      
+      if (e.name === 'QuotaExceededError') {
+        utils.showToast('⚠️ Memória cheia! Finalize o pedido atual.', 5000);
+        // Tenta limpar carrinhos antigos
+        this.clearOldData();
+      } else {
+        utils.showToast('⚠️ Erro ao salvar. Tente novamente.');
+      }
+    }
+  },
+
+  // Limpa dados antigos do localStorage
+  clearOldData() {
+    try {
+      const keysToRemove = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith('cardoso_cart_') && key !== CONFIG.storageKey) {
+          keysToRemove.push(key);
+        }
+      }
+      keysToRemove.forEach(key => localStorage.removeItem(key));
+      console.log('🧹 Dados antigos removidos:', keysToRemove.length);
+    } catch (e) {
+      console.error('Erro ao limpar dados antigos:', e);
+    }
+  },
+
+  // Carrega do localStorage
+  load() {
+    try {
+      const data = localStorage.getItem(CONFIG.storageKey);
+      if (data) {
+        this.items = JSON.parse(data);
+        this.updateUI();
+        console.log('📂 Carrinho carregado:', this.items.length, 'items');
+      }
+    } catch (e) {
+      console.error('❌ Erro ao carregar carrinho:', e);
+      this.items = [];
+      utils.showToast('⚠️ Erro ao carregar carrinho salvo');
+    }
+  },
+
+  // Limpa carrinho
+  clear() {
+    this.items = [];
+    this.save();
+    this.updateUI();
+    console.log('🗑️ Carrinho limpo');
+  }
+};
+
+// ========== GERENCIADOR DE WHATSAPP ==========
+const whatsappManager = {
+  sendOrder() {
+    if (cartManager.items.length === 0) {
+      utils.showToast('⚠️ Carrinho vazio');
+      return;
+    }
+
+    const deliveryType = document.querySelector('input[name="delivery-type"]:checked').value;
+    
+    // Valida dados de entrega se necessário
+    if (deliveryType === 'delivery') {
+      const requiredFields = [
+        { id: 'customer-name', name: 'Nome', required: true },
+        { id: 'customer-phone', name: 'Telefone', required: true },
+        { id: 'customer-street', name: 'Rua', required: true },
+        { id: 'customer-number', name: 'Número', required: true },
+        { id: 'customer-district', name: 'Bairro', required: true }
+      ];
+
+      const emptyFields = utils.validateFormFields(requiredFields);
+      
+      if (emptyFields.length > 0) {
+        utils.showToast(`⚠️ Preencha: ${emptyFields.join(', ')}`, 4000);
+        return;
+      }
+    }
+
+    let message = '*Pedido - Cardoso Caldo de Cana*%0A%0A';
+
+    // Adiciona items
+    cartManager.items.forEach((item, index) => {
+      message += `${index + 1}. ${item.name}%0A`;
+      
+      // Sabores da pizza
+      if (item.flavors && item.flavors.length > 0) {
+        message += `   Sabor: ${item.flavors.join(', ')}%0A`;
+      }
+      
+      // Borda da pizza
+      if (item.border) {
+        message += `   Borda: ${item.border}%0A`;
+      }
+      
+      // Extras - separar grátis (COM:) dos pagos (Adicionais:)
+      if (item.extras.length > 0) {
+        const freeExtras = item.extras.filter(e => e.price === 0);
+        const paidExtras = item.extras.filter(e => e.price > 0);
+        
+        // Primeiro mostra os inclusos (grátis) como "COM:"
+        if (freeExtras.length > 0) {
+          message += `   Com: ${freeExtras.map(e => e.name).join(', ')}%0A`;
+        }
+        
+        // Depois mostra os pagos como "Adicionais:"
+        if (paidExtras.length > 0) {
+          message += `   Adicionais: ${paidExtras.map(e => e.name).join(', ')}%0A`;
+        }
+      }
+      
+      // Ingredientes removidos
+      if (item.removed.length > 0) {
+        message += `   Sem: ${item.removed.join(', ')}%0A`;
+      }
+      
+      // Linha de preço com quantidade
+      message += `   R$ ${utils.formatPrice(item.unitPrice)} | QTD: ${item.quantity} | Subtotal: R$ ${utils.formatPrice(item.subtotal)}%0A%0A`;
+    });
+
+    // Total
+    const total = cartManager.items.reduce((sum, item) => sum + item.subtotal, 0);
+    message += `*Total: R$ ${utils.formatPrice(total)}*%0A%0A`;
+
+    // Dados de entrega
+    if (deliveryType === 'delivery') {
+      const name = document.getElementById('customer-name').value.trim();
+      const phone = document.getElementById('customer-phone').value.trim();
+      const street = document.getElementById('customer-street').value.trim();
+      const number = document.getElementById('customer-number').value.trim();
+      const district = document.getElementById('customer-district').value.trim();
+      const complement = document.getElementById('customer-complement').value.trim();
+      const notes = document.getElementById('customer-notes').value.trim();
+
+      message += `* Dados para Entrega:*%0A`;
+      message += `Nome: ${encodeURIComponent(name)}%0A`;
+      message += `Telefone: ${encodeURIComponent(phone)}%0A`;
+      message += `Endereço: ${encodeURIComponent(street)}, ${encodeURIComponent(number)}%0A`;
+      message += `Bairro: ${encodeURIComponent(district)}%0A`;
+      if (complement) message += `Complemento: ${encodeURIComponent(complement)}%0A`;
+      if (notes) message += `Obs: ${encodeURIComponent(notes)}%0A`;
+    } else {
+      message += `*🏪 Retirada no balcão*`;
+    }
+
+    // Abre WhatsApp
+    const url = `https://wa.me/${CONFIG.whatsappNumber}?text=${message}`;
+    window.open(url, '_blank');
+
+    // Limpa carrinho e formulário
+    cartManager.clear();
+    uiManager.closeCart();
+    
+    // Limpa formulário
+    if (deliveryType === 'delivery') {
+      document.getElementById('delivery-form').reset();
+      document.querySelectorAll('.field-error').forEach(el => {
+        el.classList.remove('field-error');
+      });
+    }
+    
+    utils.showToast('✅ Pedido enviado! Aguarde o retorno.');
+  }
+};
+
+// ========== GERENCIADOR DE UI ==========
+const uiManager = {
+  init() {
+    this.setupCategoryButtons();
+    this.setupCartControls();
+    this.setupQuantityButtons();
+    this.setupDeliveryToggle();
+    this.setupAddToCartButton();
+    this.setupWhatsAppButton();
+    this.setupKeyboardShortcuts();
+  },
+
+  setupCategoryButtons() {
+    document.querySelectorAll('.menu-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const category = btn.dataset.category;
+        categoryManager.showCategory(category);
+        
+        // Scroll suave para o topo
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    });
+  },
+
+  setupCartControls() {
+    // Abre carrinho
+    document.getElementById('cart-float').addEventListener('click', () => {
+      this.openCart();
+    });
+
+    // Fecha carrinho
+    document.getElementById('btn-close-cart').addEventListener('click', () => {
+      this.closeCart();
+    });
+
+    // Overlay fecha carrinho
+    document.getElementById('overlay').addEventListener('click', () => {
+      this.closeCart();
+    });
+
+    // Botões de quantidade no carrinho
+    document.getElementById('cart-items').addEventListener('click', (e) => {
+      const btn = e.target.closest('.btn-quantity');
+      if (!btn) return;
+
+      const action = btn.dataset.action;
+      const id = btn.dataset.id;
+      const delta = action === 'increase' ? 1 : -1;
+      
+      cartManager.changeQuantity(id, delta);
+    });
+  },
+
+  setupQuantityButtons() {
+    // Botões de mais e menos
+    document.addEventListener('click', (e) => {
+      const btn = e.target;
+      
+      if (btn.classList.contains('mais') || btn.classList.contains('menos')) {
+        const itemId = btn.dataset.itemId;
+        if (!itemId) return;
+
+        const categoryEl = btn.closest('.category');
+        const categoryId = categoryEl ? categoryEl.dataset.category : null;
+
+        const currentQty = orderManager.getQuantity(itemId);
+        const delta = btn.classList.contains('mais') ? 1 : -1;
+        const newQty = Math.max(0, currentQty + delta);
+
+        orderManager.setQuantity(itemId, newQty);
+
+        // Se quantidade > 0, inicia pedido
+        if (newQty > 0 && !orderManager.currentOrder) {
+          orderManager.startOrder(itemId, categoryId);
+        } else if (newQty === 0 && orderManager.activeItemId === itemId) {
+          orderManager.cancelOrder();
+        }
       }
     });
-  });
 
-  if (formularioEntrega) {
-    formularioEntrega.style.display = 'none';
-  }
-}
-
-// ========== GERAÇÃO DE MENSAGEM WHATSAPP ==========
-
-function gerarMensagemPedido() {
-  if (carrinho.length === 0) {
-    alert('Seu carrinho está vazio! Adicione alguns itens antes de finalizar o pedido.');
-    return '';
-  }
-
-  const entregaSelecionada = document.querySelector('input[name="entrega"]:checked');
-  if (!entregaSelecionada) {
-    alert('Por favor, selecione uma opção de retirada antes de finalizar o pedido.');
-    return '';
-  }
-
-  if (entregaSelecionada.value === 'Entrega') {
-    const nome = document.getElementById('nome')?.value.trim();
-    const telefone = document.getElementById('telefone')?.value.trim();
-    const rua = document.getElementById('rua')?.value.trim();
-    const numero = document.getElementById('numero')?.value.trim();
-    const bairro = document.getElementById('bairro')?.value.trim();
-
-    if (!nome || !telefone || !rua || !numero || !bairro) {
-      alert('Por favor, preencha todos os campos obrigatórios de entrega.');
-      return '';
-    }
-  }
-
-  let mensagem = 'Pedido - Cardoso Caldo de Cana\n';
-  mensagem += '------------------------------\n\n';
-
-  let totalGeral = 0;
-
-  carrinho.forEach(item => {
-    let nomeItem = item.nome;
-
-    // Adicionar prefixo baseado na categoria
-    switch (item.categoria) {
-      case 'pizzas-trad':
-      case 'pizzas-especiais':
-      case 'pizzas-doces':
-        if (!nomeItem.toLowerCase().includes('pizza')) {
-          nomeItem = `Pizza ${nomeItem}`;
+    // Radio buttons de tamanho
+    document.addEventListener('change', (e) => {
+      if (e.target.type === 'radio' && e.target.name.startsWith('size-')) {
+        const categoryItem = e.target.closest('.category-item');
+        const buttons = categoryItem.querySelectorAll('.menos, .mais');
+        const valorSpan = categoryItem.querySelector('.valor');
+        const itemId = e.target.dataset.itemId;
+        
+        buttons.forEach(btn => {
+          btn.dataset.itemId = itemId;
+          btn.disabled = false;
+        });
+        
+        if (valorSpan) {
+          valorSpan.dataset.itemId = itemId;
         }
-        break;
-      case 'lanches':
-        if (!nomeItem.toLowerCase().includes('lanche') && !nomeItem.toLowerCase().startsWith('x ')) {
-          nomeItem = `Lanche ${nomeItem}`;
+      }
+    });
+
+    // Selects de pizza
+    document.addEventListener('change', (e) => {
+      if (e.target.classList.contains('size-select')) {
+        const categoryItem = e.target.closest('.category-item');
+        const flavorsDiv = categoryItem.querySelector('.pizza-flavors');
+        const borderDiv = categoryItem.querySelector('.pizza-border');
+        const buttons = categoryItem.querySelectorAll('.menos, .mais');
+        const valorSpan = categoryItem.querySelector('.valor');
+
+        if (e.target.value) {
+          // Atualiza o data-item-id com o tamanho selecionado
+          const pizzaCategory = e.target.dataset.pizzaCategory;
+          const size = e.target.value;
+          const itemId = utils.generateItemId(pizzaCategory, 'pizza', size);
+          
+          buttons.forEach(btn => {
+            btn.dataset.itemId = itemId;
+            btn.disabled = false;
+          });
+          
+          if (valorSpan) {
+            valorSpan.dataset.itemId = itemId;
+          }
+          
+          flavorsDiv.style.display = 'block';
+          borderDiv.style.display = 'block';
+
+          // Habilita checkboxes de sabor
+          categoryItem.querySelectorAll('.pizza-flavor-checkbox').forEach(cb => {
+            cb.disabled = false;
+          });
+
+          // Habilita select de borda
+          categoryItem.querySelector('.border-select').disabled = false;
+          
+          console.log('🍕 Pizza configurada:', pizzaCategory, size);
+        } else {
+          flavorsDiv.style.display = 'none';
+          borderDiv.style.display = 'none';
+          buttons.forEach(btn => btn.disabled = true);
+          if (buttons[0] && buttons[0].dataset.itemId) {
+            orderManager.setQuantity(buttons[0].dataset.itemId, 0);
+          }
         }
-        break;
-      case 'hamburguer':
-        if (!nomeItem.toLowerCase().includes('hamburguer')) {
-          nomeItem = `Hamburguer ${nomeItem}`;
+      }
+    });
+
+    // Limita sabores de pizza a 2
+    document.addEventListener('change', (e) => {
+      if (e.target.classList.contains('pizza-flavor-checkbox')) {
+        const categoryItem = e.target.closest('.category-item');
+        const checkboxes = categoryItem.querySelectorAll('.pizza-flavor-checkbox:checked');
+        
+        if (checkboxes.length > CONFIG.maxPizzaFlavors) {
+          e.target.checked = false;
+          utils.showToast(`⚠️ Máximo de ${CONFIG.maxPizzaFlavors} sabores`);
         }
-        break;
-      case 'tabuas':
-        if (!nomeItem.toLowerCase().includes('tábua')) {
-          nomeItem = `Tábua ${nomeItem}`;
+      }
+    });
+
+    // Limita opções grátis do açaí
+    document.addEventListener('change', (e) => {
+      if (e.target.classList.contains('acai-included')) {
+        const categoryItem = e.target.closest('.category-item');
+        const maxOptions = parseInt(e.target.dataset.max) || CONFIG.maxFreeAcaiOptions;
+        const checked = categoryItem.querySelectorAll('.acai-included:checked');
+        
+        if (checked.length > maxOptions) {
+          e.target.checked = false;
+          utils.showToast(`⚠️ Máximo de ${maxOptions} opções grátis`);
         }
-        break;
-      case 'torre-batata':
-        if (!nomeItem.toLowerCase().includes('torre')) {
-          nomeItem = `Torre-batata ${nomeItem}`;
-        }
-        break;
-      case 'porções':
-        if (!nomeItem.toLowerCase().includes('porção')) {
-          nomeItem = `Porção ${nomeItem}`;
-        }
-        break;
-      case 'cervejas':
-        // Cervejas geralmente já têm o nome completo
-        break;
-      case 'bebidas':
-        // Bebidas geralmente já têm o nome completo
-        break;
-      case 'caipirinhas':
-        if (!nomeItem.toLowerCase().includes('caipirinha')) {
-          nomeItem = `Caipirinha ${nomeItem}`;
-        }
-        break;
-      case 'acai':
-        if (!nomeItem.toLowerCase().includes('açaí') && !nomeItem.toLowerCase().includes('acai')) {
-          nomeItem = `Açaí ${nomeItem}`;
-        }
-        break;
-    }
+      }
+    });
+  },
 
-    mensagem += `Qtd: ${item.quantidade} --- ${nomeItem}\n`;
-
-    // ... resto do código continua igual
-
-    if (item.meio) {
-      mensagem += `Meio: ${item.meio}\n`;
-    }
-
-    if (item.borda) {
-      mensagem += `Borda: ${item.borda}\n`;
-    }
-
-    if (item.acompanhamentos) {
-      mensagem += `Acompanhamentos: ${item.acompanhamentos}\n`;
-    }
-
-    if (item.adicionais) {
-      mensagem += `Adicionais: ${item.adicionais}\n`;
-    }
-
-    if (item.removerIngredientes) {
-      mensagem += `Remover: ${item.removerIngredientes}\n`;
-    }
-
-    if (item.observacoes) {
-      mensagem += `Observacoes: ${item.observacoes}\n`;
-    }
-
-    mensagem += `Total: R$ ${item.subtotal.toFixed(2)}\n\n`;
-
-    totalGeral += item.subtotal;
-  });
-
-  mensagem += '------------------------------\n';
-  mensagem += `Total: R$ ${totalGeral.toFixed(2)}\n\n`;
-
-  if (entregaSelecionada.value === 'Retirada') {
-    mensagem += `Retirada: Retirar no balcao\n`;
-  } else {
-    mensagem += `Retirada: Entregar no Endereco\n\n`;
-
-    const nome = document.getElementById('nome')?.value.trim();
-    const telefone = document.getElementById('telefone')?.value.trim();
-    const rua = document.getElementById('rua')?.value.trim();
-    const numero = document.getElementById('numero')?.value.trim();
-    const bairro = document.getElementById('bairro')?.value.trim();
-    const complemento = document.getElementById('complemento')?.value.trim();
-    const observacoes = document.getElementById('observacoes')?.value.trim();
-
-    mensagem += `Dados para Entrega:\n`;
-    mensagem += `Nome: ${nome}\n`;
-    mensagem += `Telefone: ${telefone}\n`;
-    mensagem += `Endereco: ${rua}, ${numero}\n`;
-    mensagem += `Bairro: ${bairro}\n`;
-
-    if (complemento) {
-      mensagem += `Complemento: ${complemento}\n`;
-    }
-
-    if (observacoes) {
-      mensagem += `Observacoes: ${observacoes}\n`;
-    }
-  }
-
-  return mensagem;
-}
-
-function enviarPedido() {
-  const mensagem = gerarMensagemPedido();
-
-  if (mensagem) {
-    const numeroWhatsApp = '5548996430781';
-    const mensagemCodificada = encodeURIComponent(mensagem);
-    const urlWhatsApp = `https://wa.me/${numeroWhatsApp}?text=${mensagemCodificada}`;
-
-    window.open(urlWhatsApp, '_blank');
-
-    carrinho = [];
-    atualizarCarrinho();
-    fecharCarrinho();
-
-    const formularioEntrega = document.getElementById('formulario-entrega');
-    if (formularioEntrega) {
-      formularioEntrega.querySelectorAll('input, textarea').forEach(campo => {
-        campo.value = '';
-      });
-      formularioEntrega.style.display = 'none';
-    }
-
-    const radioRetirada = document.querySelector('input[name="entrega"][value="Retirada"]');
-    if (radioRetirada) radioRetirada.checked = true;
-
-    mostrarMensagemInline('Pedido enviado com sucesso!');
-  }
-}
-
-// ========== INICIALIZAÇÃO DO SISTEMA ==========
-
-function inicializarSistema() {
-  const categorias = [
-    'lanches', 'hamburguer', 'tabuas', 'torre-batata', 'porções',
-    'pizzas-trad', 'pizzas-especiais', 'pizzas-doces',
-    'cervejas', 'bebidas', 'caipirinhas', 'acai'
-  ];
-
-  categorias.forEach(categoria => {
-    criarBotaoAdicionarUniversal(categoria);
-
-    const secaoElement = document.querySelector(`.categoria.${categoria}`);
-    if (!secaoElement) return;
-
-    const inputs = secaoElement.querySelectorAll('input[type="number"]:not([data-name*="Borda"])');
-
-    inputs.forEach(input => {
-      input.removeAttribute('oninput');
-      input.removeAttribute('onchange');
-
-      input.addEventListener('input', function () {
-        if (categoria === 'lanches') {
-          processarLanche(this);
-        } else if (categoria === 'hamburguer') {
-          processarHamburguer(this);
-        } else if (categoria === 'tabuas') {
-          processarTabuas(this);
-        } else if (categoria === 'torre-batata') {
-          processarTorreBatata(this);
-        } else if (categoria === 'porções') {
-          processarPorcoes(this);
-        } else if (categoria === 'cervejas') {
-          processarCervejas(this);
-        } else if (categoria === 'bebidas') {
-          processarBebidas(this);
-        } else if (categoria === 'caipirinhas') {
-          processarCaipirinhas(this);
-        } else if (['pizzas-trad', 'pizzas-especiais', 'pizzas-doces'].includes(categoria)) {
-          processarPizza(this, categoria);
-        } else if (categoria === 'acai') {
-          processarAcai(this);
+  setupDeliveryToggle() {
+    document.querySelectorAll('input[name="delivery-type"]').forEach(radio => {
+      radio.addEventListener('change', () => {
+        const form = document.getElementById('delivery-form');
+        if (radio.value === 'delivery') {
+          form.style.display = 'block';
+        } else {
+          form.style.display = 'none';
+          // Limpa erros quando esconde
+          form.querySelectorAll('.field-error').forEach(el => {
+            el.classList.remove('field-error');
+          });
         }
       });
     });
-  });
+  },
 
-  resetarAdicionaisLanche();
-  resetarSistemaBordas();
-  resetarAcai();
-  resetarHamburguer();
-
-  configurarSistemaEntrega();
-}
-
-// ========== ESTILOS CSS DINÂMICOS ==========
-
-function adicionarEstilos() {
-  const style = document.createElement('style');
-  style.textContent = `
-    @keyframes slideDown {
-      from {
-        opacity: 0;
-        transform: translateX(-50%) translateY(-20px);
+  setupAddToCartButton() {
+    document.getElementById('btn-add-fixed').addEventListener('click', () => {
+      const orderData = orderManager.collectOrderData();
+      if (orderData) {
+        cartManager.addItem(orderData);
+        orderManager.cancelOrder();
+        this.openCart();
       }
-      to {
-        opacity: 1;
-        transform: translateX(-50%) translateY(0);
+    });
+  },
+
+  setupWhatsAppButton() {
+    document.getElementById('btn-whatsapp').addEventListener('click', () => {
+      whatsappManager.sendOrder();
+    });
+  },
+
+  setupKeyboardShortcuts() {
+    document.addEventListener('keydown', (e) => {
+      // ESC cancela pedido ou fecha carrinho
+      if (e.key === 'Escape') {
+        if (orderManager.currentOrder) {
+          orderManager.cancelOrder();
+        } else if (document.getElementById('cart-panel').classList.contains('active')) {
+          this.closeCart();
+        }
       }
-    }
-    
-    .mensagem-inline {
-      animation: slideDown 0.3s ease;
-    }
-    
-    .btn-adicionar-carrinho-universal:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(37, 211, 102, 0.3);
-    }
-    
-    .btn-adicionar-carrinho-universal:active {
-      transform: translateY(0);
-    }
-    
-    input[disabled]:not(#carrinho-painel input):not(#formulario-entrega input) {
-      opacity: 0.5 !important;
-      cursor: not-allowed !important;
-    }
-    
-    button[disabled] {
-      opacity: 0.5 !important;
-      cursor: not-allowed !important;
-    }
-    
-    .sabor-borda input[disabled] + label,
-    .sabores-meio-meio input[disabled] + label {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-    
-    .remover-ingredientes input[type="checkbox"]:not([disabled]) {
-      pointer-events: auto !important;
-      cursor: pointer !important;
-      opacity: 1 !important;
-    }
-    
-    .remover-ingredientes label {
-      cursor: pointer !important;
-      user-select: none;
-    }
-    
-    input[type="number"]:not([disabled]) {
-      pointer-events: auto !important;
-      cursor: text !important;
-      opacity: 1 !important;
-    }
-    
-    #tipo-entrega {
-      margin-top: 15px;
-      padding-top: 15px;
-      border-top: 1px solid rgba(255,255,255,0.2);
-    }
-    
-    #tipo-entrega label {
-      color: white;
-      font-size: 14px;
-      margin-bottom: 8px;
-      cursor: pointer;
-    }
-    
-    .carrinho-header {
-      flex-shrink: 0;
-      max-height: 60vh;
-      overflow-y: auto;
-      overflow-x: hidden;
-    }
-    
-    #formulario-entrega {
-      width: 100%;
-      box-sizing: border-box;
-      padding: 15px !important;
-      margin: 0 !important;
-      background-color: rgba(255, 255, 255, 0.05) !important;
-      border-radius: 8px !important;
-    }
-    
-    #formulario-entrega h3 {
-      color: white !important;
-      font-size: 16px !important;
-      margin: 0 0 15px 0 !important;
-      padding: 0 !important;
-      border: none !important;
-      text-shadow: none !important;
-      text-align: left !important;
-    }
-    
-    #formulario-entrega label {
-      display: block !important;
-      color: white !important;
-      font-size: 13px !important;
-      margin-bottom: 6px !important;
-      font-weight: 500 !important;
-      text-align: left !important;
-    }
-    
-    #formulario-entrega input[type="text"],
-    #formulario-entrega input[type="tel"],
-    #formulario-entrega textarea {
-      width: 100% !important;
-      max-width: 100% !important;
-      padding: 10px 12px !important;
-      margin-bottom: 14px !important;
-      font-size: 14px !important;
-      color: #1a1a1a !important;
-      background-color: #f8f9fa !important;
-      border: 1px solid #e0e0e0 !important;
-      border-radius: 6px !important;
-      box-sizing: border-box !important;
-      font-family: inherit !important;
-      height: auto !important;
-      text-align: left !important;
-    }
-    
-    #formulario-entrega input::placeholder,
-    #formulario-entrega textarea::placeholder {
-      color: #a0a0a0 !important;
-    }
-    
-    #formulario-entrega textarea {
-      resize: vertical !important;
-      min-height: 60px !important;
-      font-family: inherit !important;
-    }
-    
-    .carrinho-header::-webkit-scrollbar {
-      width: 6px;
-    }
-    
-    .carrinho-header::-webkit-scrollbar-track {
-      background: rgba(255, 255, 255, 0.1);
-    }
-    
-    .carrinho-header::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.3);
-      border-radius: 3px;
-    }
-    
-    .carrinho-header::-webkit-scrollbar-thumb:hover {
-      background: rgba(255, 255, 255, 0.5);
-    }
-  `;
-  document.head.appendChild(style);
-}
+    });
+  },
 
-// ========== INICIALIZAÇÃO PRINCIPAL ==========
+  openCart() {
+    document.getElementById('cart-panel').classList.add('active');
+    document.getElementById('overlay').classList.add('active');
+    document.body.style.overflow = 'hidden';
+  },
 
+  closeCart() {
+    document.getElementById('cart-panel').classList.remove('active');
+    document.getElementById('overlay').classList.remove('active');
+    document.body.style.overflow = '';
+  }
+};
+
+// ========== INICIALIZAÇÃO ==========
 document.addEventListener('DOMContentLoaded', () => {
-  const allSections = document.querySelectorAll('.categoria');
-  allSections.forEach(section => {
-    section.style.display = 'none';
-  });
-
-  const carrinhoFlutuante = document.getElementById('carrinho-flutuante');
-  if (carrinhoFlutuante) {
-    carrinhoFlutuante.style.display = 'none';
+  console.log('🚀 Iniciando Cardoso Caldo de Cana...');
+  
+  // Renderiza categorias
+  categoryManager.renderCategories();
+  
+  // Mostra primeira categoria automaticamente
+  categoryManager.showCategory('lanches');
+  console.log('✅ Categoria inicial (Lanches) exibida');
+  
+  // Carrega carrinho
+  cartManager.load();
+  
+  // Inicializa UI
+  uiManager.init();
+  
+  // Verifica espaço no localStorage
+  if (!utils.checkStorageQuota()) {
+    console.warn('⚠️ localStorage pode estar cheio');
   }
-
-  adicionarEstilos();
-  inicializarSistema();
-
-  document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape') {
-      fecharCarrinho();
-      if (estadoPedido.ativo) {
-        resetarEstadoPedido();
-        mostrarMensagemInline('Pedido cancelado');
-      }
-    }
-  });
-
-  atualizarCarrinho();
+  
+  console.log('✅ Sistema inicializado com sucesso!');
+  console.log('📊 Status: Pronto para uso');
 });
+    
