@@ -80,6 +80,7 @@ body {
 
 img {
     max-width: 100%;
+      height: auto;
     display: block;
 }
 
@@ -350,7 +351,7 @@ input, textarea, select {
 }
 
 .menu-btn.active-category {
-    background-color: var(--color-secondary);
+    background-color:#ffff;
     box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
     transform: scale(1.05);
 }
@@ -768,6 +769,44 @@ input, textarea, select {
 .form-group textarea {
     resize: vertical;
     min-height: 70px;
+}
+/* botão de confirmar endereço */
+.conf-endereco{
+  display: flex;
+  justify-content: center;
+  margin-top: auto;
+  font-weight: bold;
+  gap: 8px;
+}
+.conf-endereco button {
+  background: var(--color-secondary-dark) 100%;
+  padding: 12px 22px;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: bold;
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.25);
+  animation: pulse 1.6s infinite ease-in-out;
+  transition: transform 0.15s ease;
+}
+/* Mini efeito ao clicar */
+.conf-endereco button:active {
+  transform: scale(0.96);
+}
+/* ANIMAÇÃO PULSANDO */
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.04);
+    box-shadow: 0 6px 14px rgba(0,0,0,0.25);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 /* LISTA DE ITENS - ÁREA ROLÁVEL */
@@ -1757,9 +1796,5 @@ img {
 }
 
 /* Prevent layout shift */
-.category-img {
-  aspect-ratio: 16/9;
-  object-fit: cover;
-}
 
-/* End of Stylesheet */
+
