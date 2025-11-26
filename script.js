@@ -986,27 +986,41 @@ const whatsappManager = {
     // Total
     const total = cartManager.items.reduce((sum, item) => sum + item.subtotal, 0);
     message += `*Total: R$ ${utils.formatPrice(total)}*%0A%0A`;
-
-    // Dados de entrega
-    if (deliveryType === 'delivery') {
-      const name = document.getElementById('customer-name').value.trim();
-      const phone = document.getElementById('customer-phone').value.trim();
-      const street = document.getElementById('customer-street').value.trim();
-      const number = document.getElementById('customer-number').value.trim();
-      const district = document.getElementById('customer-district').value.trim();
-      const complement = document.getElementById('customer-complement').value.trim();
-      const notes = document.getElementById('customer-notes').value.trim();
-
-      message += `* Dados para Entrega:*%0A`;
-      message += `Nome: ${encodeURIComponent(name)}%0A`;
-      message += `Telefone: ${encodeURIComponent(phone)}%0A`;
-      message += `Endereço: ${encodeURIComponent(street)}, ${encodeURIComponent(number)}%0A`;
-      message += `Bairro: ${encodeURIComponent(district)}%0A`;
-      if (complement) message += `Complemento: ${encodeURIComponent(complement)}%0A`;
-      if (notes) message += `Obs: ${encodeURIComponent(notes)}%0A`;
-    } else {
-      message += `*🏪 Retirada no balcão*`;
+if (deliveryType === 'delivery') {
+  // Tenta carregar dados salvos
+  let deliveryData = null;
+  try {
+    const savedData = localStorage.getItem('cardoso_delivery_data');
+    if (savedData) {
+      deliveryData = JSON.parse(savedData);
     }
+  } catch (e) {
+    console.error('Erro ao carregar dados salvos:', e);
+  }
+
+  // Se não tiver dados salvos, coleta do formulário
+  if (!deliveryData) {
+    deliveryData = {
+      name: document.getElementById('customer-name').value.trim(),
+      phone: document.getElementById('customer-phone').value.trim(),
+      street: document.getElementById('customer-street').value.trim(),
+      number: document.getElementById('customer-number').value.trim(),
+      district: document.getElementById('customer-district').value.trim(),
+      complement: document.getElementById('customer-complement').value.trim(),
+      notes: document.getElementById('customer-notes').value.trim()
+    };
+  }
+
+  message += `*📍 Dados para Entrega:*%0A`;
+  message += `Nome: ${encodeURIComponent(deliveryData.name)}%0A`;
+  message += `Telefone: ${encodeURIComponent(deliveryData.phone)}%0A`;
+  message += `Endereço: ${encodeURIComponent(deliveryData.street)}, ${encodeURIComponent(deliveryData.number)}%0A`;
+  message += `Bairro: ${encodeURIComponent(deliveryData.district)}%0A`;
+  if (deliveryData.complement) message += `Complemento: ${encodeURIComponent(deliveryData.complement)}%0A`;
+  if (deliveryData.notes) message += `Obs: ${encodeURIComponent(deliveryData.notes)}%0A`;
+} else {
+  message += `*🏪 Retirada no balcão*`;
+}
 
     // Abre WhatsApp
     const url = `https://wa.me/${CONFIG.whatsappNumber}?text=${message}`;
@@ -1036,6 +1050,7 @@ const uiManager = {
     this.setupQuantityButtons();
     this.setupDeliveryToggle();
     this.setupAddToCartButton();
+    this.setupConfirmAddressButton();
     this.setupWhatsAppButton();
     this.setupKeyboardShortcuts();
   },
@@ -1218,6 +1233,66 @@ const uiManager = {
       });
     });
   },
+  setupConfirmAddressButton() {
+  const confirmBtn = document.querySelector('.conf-endereco button');
+  
+  if (confirmBtn) {
+    confirmBtn.addEventListener('click', (e) => {
+      e.preventDefault(); // Previne o submit do formulário
+      
+      // Valida os campos obrigatórios
+      const requiredFields = [
+        { id: 'customer-name', name: 'Nome', required: true },
+        { id: 'customer-phone', name: 'Telefone', required: true },
+        { id: 'customer-street', name: 'Rua', required: true },
+        { id: 'customer-number', name: 'Número', required: true },
+        { id: 'customer-district', name: 'Bairro', required: true }
+      ];
+
+      const emptyFields = utils.validateFormFields(requiredFields);
+      
+      if (emptyFields.length > 0) {
+        utils.showToast(`⚠️ Preencha os campos: ${emptyFields.join(', ')}`, 4000);
+        return;
+      }
+
+      // Coleta os dados
+      const deliveryData = {
+        name: document.getElementById('customer-name').value.trim(),
+        phone: document.getElementById('customer-phone').value.trim(),
+        street: document.getElementById('customer-street').value.trim(),
+        number: document.getElementById('customer-number').value.trim(),
+        district: document.getElementById('customer-district').value.trim(),
+        complement: document.getElementById('customer-complement').value.trim(),
+        notes: document.getElementById('customer-notes').value.trim(),
+        timestamp: new Date().toISOString()
+      };
+
+      // Salva no localStorage
+      try {
+        localStorage.setItem('cardoso_delivery_data', JSON.stringify(deliveryData));
+        console.log('📦 Dados de entrega salvos:', deliveryData);
+      } catch (e) {
+        console.error('❌ Erro ao salvar dados de entrega:', e);
+        utils.showToast('⚠️ Erro ao salvar dados. Tente novamente.');
+        return;
+      }
+
+      // Recolhe o formulário
+      const form = document.getElementById('delivery-form');
+      form.style.display = 'none';
+      
+      // Mostra mensagem de sucesso
+      utils.showToast('✅ Endereço confirmado e salvo!', 3000);
+      utils.announceToScreenReader('Endereço de entrega confirmado');
+      
+      // Remove erros visuais
+      form.querySelectorAll('.field-error').forEach(el => {
+        el.classList.remove('field-error');
+      });
+    });
+  }
+},
 
   setupAddToCartButton() {
     document.getElementById('btn-add-fixed').addEventListener('click', () => {
